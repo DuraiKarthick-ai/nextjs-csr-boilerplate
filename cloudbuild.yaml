@@ -9,4 +9,3 @@ steps:
 
 images:
   - 'gcr.io/$PROJECT_ID/nextjs-csr-boilerplate'
-``
