@@ -7,5 +7,5 @@ steps:
     entrypoint: npm
     args: ['run', 'build']
 
-images:
-  - 'gcr.io/$PROJECT_ID/nextjs-csr-boilerplate'
+options:
+  logging: CLOUD_LOGGING_ONLY
