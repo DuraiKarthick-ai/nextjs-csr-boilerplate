@@ -1,0 +1,12 @@
+steps:
+  - name: 'node:18'
+    entrypoint: npm
+    args: ['install']
+
+  - name: 'node:18'
+    entrypoint: npm
+    args: ['run', 'build']
+
+images:
+  - 'gcr.io/$PROJECT_ID/nextjs-csr-boilerplate'
+``
