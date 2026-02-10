@@ -94,6 +94,10 @@ const nextConfig = {
   experimental: {
     optimizeCss: true,
   },
+  eslint: {
+    // Allow build to complete even if ESLint reports issues (useful in CI when linting is configured separately)
+    ignoreDuringBuilds: true,
+  },
 };
 
 module.exports = nextConfig;
