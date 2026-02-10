@@ -10,7 +10,7 @@ import React, { createContext, useContext, useEffect, useState, useCallback } fr
 import { authService } from '@/services/auth.service';
 import { tokenStorage } from '@/lib/auth/tokenStorage';
 import { TOKEN_CONFIG } from '@/config/constants';
-import type { AuthState, AuthContextType, UserInfo } from '@/types/auth.types';
+import type { AuthState, AuthContextType } from '@/types/auth.types';
 import toast from 'react-hot-toast';
 
 // Create context

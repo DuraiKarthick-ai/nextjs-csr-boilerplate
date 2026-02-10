@@ -7,7 +7,6 @@
 import { apiRequest } from '@/lib/api/client';
 import { API_ENDPOINTS } from '@/config/constants';
 import type { UserProfile, UpdateUserRequest, UserSettings } from '@/types/user.types';
-import type { ApiResponse } from '@/types/api.types';
 
 class UserService {
   /**
