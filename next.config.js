@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Disable server-side rendering and static generation
-  output: 'export',
+  output: 'standalone',
   
   // Ensure all pages are client-side rendered
   reactStrictMode: true,
