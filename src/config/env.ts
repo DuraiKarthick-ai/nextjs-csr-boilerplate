@@ -58,16 +58,20 @@ function validateEnv(): EnvConfig {
     console.warn(`SKIP_ENV_VALIDATION=true: continuing despite missing envs:\n${missing.join('\n')}`);
   }
 
+  // If validation is skipped, provide safe defaults (empty strings) so code
+  // consuming env values doesn't crash with undefined.
+  const defaultsAllowed = process.env.SKIP_ENV_VALIDATION === 'true';
+
   return {
-    appUrl: required.NEXT_PUBLIC_APP_URL!,
-    apiBaseUrl: required.NEXT_PUBLIC_API_BASE_URL!,
+    appUrl: required.NEXT_PUBLIC_APP_URL || (defaultsAllowed ? '' : required.NEXT_PUBLIC_APP_URL!),
+    apiBaseUrl: required.NEXT_PUBLIC_API_BASE_URL || (defaultsAllowed ? '' : required.NEXT_PUBLIC_API_BASE_URL!),
     environment: (process.env.NEXT_PUBLIC_ENV as any) || 'development',
     ping: {
-      issuer: required.NEXT_PUBLIC_PING_ISSUER!,
-      clientId: required.NEXT_PUBLIC_PING_CLIENT_ID!,
-      redirectUri: required.NEXT_PUBLIC_PING_REDIRECT_URI!,
-      logoutUri: required.NEXT_PUBLIC_PING_LOGOUT_URI!,
-      scope: required.NEXT_PUBLIC_PING_SCOPE!,
+      issuer: required.NEXT_PUBLIC_PING_ISSUER || (defaultsAllowed ? '' : required.NEXT_PUBLIC_PING_ISSUER!),
+      clientId: required.NEXT_PUBLIC_PING_CLIENT_ID || (defaultsAllowed ? '' : required.NEXT_PUBLIC_PING_CLIENT_ID!),
+      redirectUri: required.NEXT_PUBLIC_PING_REDIRECT_URI || (defaultsAllowed ? '' : required.NEXT_PUBLIC_PING_REDIRECT_URI!),
+      logoutUri: required.NEXT_PUBLIC_PING_LOGOUT_URI || (defaultsAllowed ? '' : required.NEXT_PUBLIC_PING_LOGOUT_URI!),
+      scope: required.NEXT_PUBLIC_PING_SCOPE || (defaultsAllowed ? '' : required.NEXT_PUBLIC_PING_SCOPE!),
     },
   };
 }
