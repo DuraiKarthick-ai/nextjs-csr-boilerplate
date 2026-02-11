@@ -11,7 +11,7 @@ steps:
       args:
         - '-c'
         - |
-          docker build -t us-central1-docker.pkg.dev/project-949bf9a3-f980-4d1a-82b/frontend/frontend:v1 \
+          docker build -t asia-south1-docker.pkg.dev/project-949bf9a3-f980-4d1a-82b/frontend/frontend:v1 \
             --build-arg NEXT_PUBLIC_APP_URL="$NEXT_PUBLIC_APP_URL" \
             --build-arg NEXT_PUBLIC_API_BASE_URL="$NEXT_PUBLIC_API_BASE_URL" \
             --build-arg NEXT_PUBLIC_PING_ISSUER="$NEXT_PUBLIC_PING_ISSUER" \
