@@ -25,6 +25,8 @@ steps:
       - 'NEXT_PUBLIC_PING_LOGOUT_URI=${_NEXT_PUBLIC_PING_LOGOUT_URI}'
       - '--build-arg'
       - 'NEXT_PUBLIC_PING_SCOPE=${_NEXT_PUBLIC_PING_SCOPE}'
+  - '--build-arg'
+  - 'SKIP_ENV_VALIDATION=${_SKIP_ENV_VALIDATION}'
       - '.'
 
 images:
@@ -43,3 +45,4 @@ substitutions:
   _NEXT_PUBLIC_PING_REDIRECT_URI: ""
   _NEXT_PUBLIC_PING_LOGOUT_URI: ""
   _NEXT_PUBLIC_PING_SCOPE: ""
+  _SKIP_ENV_VALIDATION: "true"
