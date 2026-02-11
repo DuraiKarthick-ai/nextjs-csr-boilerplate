@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signs-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: signs-frontend
+  template:
+    metadata:
+      labels:
+        app: signs-frontend
+    spec:
+      containers:
+      - name: signs-frontend
+        image: us-central1-docker.pkg.dev/project-949bf9a3-f980-4d1a-82b/frontend/frontend:v1
+        ports:
+        - containerPort: 80
