@@ -45,7 +45,7 @@ function validateEnv(): EnvConfig {
   const isProd = process.env.NODE_ENV === 'production';
   if (missing.length > 0 && isProd) {
     throw new Error(
-      `Missing required environment variables:\n${missing.join('\n')}\n\nPlease check your .env.local file.`
+      `Missing required environment variables:\n${missing.join('\n')}\n\nPlease check your .env file.`
     );
   }
 

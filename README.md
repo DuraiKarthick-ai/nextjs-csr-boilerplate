@@ -55,7 +55,7 @@ pnpm install
 
 ### 2. Environment Configuration
 
-Create a `.env.local` file in the root directory:
+Create a `.env` file in the root directory:
 
 ```env
 # App Configuration
@@ -82,7 +82,7 @@ NEXT_PUBLIC_ENV=development
 3. **Enable PKCE** (Proof Key for Code Exchange)
 4. **Grant Types**: Authorization Code
 5. **Scopes**: openid, profile, email (add custom scopes as needed)
-6. **Copy Client ID** to your `.env.local`
+6. **Copy Client ID** to your `.env`
 
 ### 4. Run Development Server
 
@@ -136,7 +136,7 @@ nextjs-csr-boilerplate/
 │       ├── env.ts               # Environment validation
 │       └── constants.ts         # App constants
 ├── public/                       # Static files
-├── .env.local                    # Environment variables (create this)
+├── .env                          # Environment variables (create this)
 ├── .eslintrc.json               # ESLint configuration
 ├── .prettierrc                  # Prettier configuration
 ├── next.config.js               # Next.js configuration
@@ -299,7 +299,7 @@ npm run start
 
 ### Authentication Issues
 
-1. **Verify Ping configuration** matches `.env.local`
+1. **Verify Ping configuration** matches `.env`
 2. **Check redirect URIs** are exactly the same
 3. **Ensure PKCE is enabled** in Ping
 4. **Check browser console** for detailed errors
