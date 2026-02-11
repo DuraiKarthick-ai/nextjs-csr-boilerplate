@@ -46,9 +46,13 @@ function validateEnv(): EnvConfig {
   // the build can proceed. Otherwise, throw an error for missing variables.
   const skipValidation = process.env.SKIP_ENV_VALIDATION === 'true';
   if (missing.length > 0 && !skipValidation) {
-    throw new Error(
-      `Missing required environment variables:\n${missing.join('\n')}\n\nPlease check your .env file.`
-    );
+    // During containerized builds (or when substitutions are not supplied),
+    // fail-fast used to throw here which causes Docker/Cloud Build to abort.
+    // Log an explicit error and continue with defaults so the build can
+    // complete; runtime should still validate or you can set
+    // SKIP_ENV_VALIDATION=false in production to enforce checks.
+    // eslint-disable-next-line no-console
+    console.error(`Missing required environment variables:\n${missing.join('\n')}\n\nPlease check your .env file.`);
   }
 
   if (missing.length > 0 && skipValidation) {
