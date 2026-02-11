@@ -36,9 +36,9 @@ function validateEnv(): void {
   };
 
   // Check for missing variables
-  const missing = Object.entries(required)
-    .filter(([_, value]) => !value)
-    .map(([key]) => key);
+  // const missing = Object.entries(required)
+  //   .filter(([_, value]) => !value)
+  //   .map(([key]) => key);
 
   // In development, don't crash — provide safe placeholders so the app can run.
   // In production (NODE_ENV === 'production'), require all variables to be set.
