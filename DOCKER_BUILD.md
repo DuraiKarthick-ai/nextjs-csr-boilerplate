@@ -22,3 +22,9 @@ CI note
 
 Security note
 - NEXT_PUBLIC_* variables are embedded in the client bundle and are public; avoid placing secrets in NEXT_PUBLIC_* variables. For sensitive values, use server-only env vars and Kubernetes Secrets.
+
+Cloud Build / GCP note
+----------------------
+To run this repository using Cloud Build, the provided `cloudbuild.yaml` passes build-args from substitutions. When creating or editing your Cloud Build trigger, set the substitutions prefixed with an underscore (for example `_NEXT_PUBLIC_APP_URL`). Alternatively, configure the trigger to read values from Secret Manager and map them to the substitutions.
+
+Example: when creating a trigger in the Cloud Console, under "Substitution variables" add `_NEXT_PUBLIC_APP_URL` and others, then run the trigger. The build will pass these into the Dockerfile as build-args so Next.js can build successfully inside the container.

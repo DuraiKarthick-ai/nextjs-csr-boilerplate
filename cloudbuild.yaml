@@ -2,16 +2,44 @@ steps:
   - name: 'node:18'
     entrypoint: npm
     args: ['install']
-
-  - name: 'node:18'
-    entrypoint: npm
-    args: ['run', 'build']
-
+  # Build will run inside the Docker builder stage so build-time NEXT_PUBLIC_*
+  # values must be passed as build-args to docker. Use Cloud Build substitutions
+  # (e.g. _NEXT_PUBLIC_APP_URL) when triggering the build or configure your
+  # Cloud Build trigger to set these variables from Secret Manager.
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/project-949bf9a3-f980-4d1a-82b/frontend/frontend:v1', '.']
+    args:
+      - 'build'
+      - '-t'
+      - 'us-central1-docker.pkg.dev/project-949bf9a3-f980-4d1a-82b/frontend/frontend:v1'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_APP_URL=${_NEXT_PUBLIC_APP_URL}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_API_BASE_URL=${_NEXT_PUBLIC_API_BASE_URL}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_PING_ISSUER=${_NEXT_PUBLIC_PING_ISSUER}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_PING_CLIENT_ID=${_NEXT_PUBLIC_PING_CLIENT_ID}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_PING_REDIRECT_URI=${_NEXT_PUBLIC_PING_REDIRECT_URI}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_PING_LOGOUT_URI=${_NEXT_PUBLIC_PING_LOGOUT_URI}'
+      - '--build-arg'
+      - 'NEXT_PUBLIC_PING_SCOPE=${_NEXT_PUBLIC_PING_SCOPE}'
+      - '.'
 
 images:
   - 'us-central1-docker.pkg.dev/project-949bf9a3-f980-4d1a-82b/frontend/frontend:v1'
 
 options:
   logging: CLOUD_LOGGING_ONLY
+
+substitutions:
+  # Example defaults (override at trigger time). Remove or replace with safe defaults
+  # or configure your Cloud Build trigger to inject secrets instead of hardcoding.
+  _NEXT_PUBLIC_APP_URL: ""
+  _NEXT_PUBLIC_API_BASE_URL: ""
+  _NEXT_PUBLIC_PING_ISSUER: ""
+  _NEXT_PUBLIC_PING_CLIENT_ID: ""
+  _NEXT_PUBLIC_PING_REDIRECT_URI: ""
+  _NEXT_PUBLIC_PING_LOGOUT_URI: ""
+  _NEXT_PUBLIC_PING_SCOPE: ""
