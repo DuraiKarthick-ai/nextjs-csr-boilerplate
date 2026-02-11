@@ -24,7 +24,7 @@ export interface EnvConfig {
  * Validate and parse environment variables
  * Throws error if required variables are missing
  */
-function validateEnv(): EnvConfig {
+function validateEnv(): void {
   const required = {
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
     NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
