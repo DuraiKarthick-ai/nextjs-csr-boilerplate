@@ -20,10 +20,10 @@ npm install
 1. Copy the example environment file:
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
-2. Update `.env.local` with your Ping OAuth credentials:
+2. Update `.env` with your Ping OAuth credentials:
 
 ```env
 NEXT_PUBLIC_PING_ISSUER=https://auth.pingone.com/YOUR-ENV-ID/as
@@ -45,13 +45,13 @@ In your Ping console:
 5. **Add Logout URI**: `http://localhost:3000`
 6. **Set Scopes**: `openid`, `profile`, `email`
 7. **Grant Types**: Authorization Code
-8. **Copy Client ID** to your `.env.local`
+8. **Copy Client ID** to your `.env`
 
 ## Step 4: API Configuration (Optional)
 
 If you have a backend API:
 
-1. Update `NEXT_PUBLIC_API_BASE_URL` in `.env.local`
+1. Update `NEXT_PUBLIC_API_BASE_URL` in `.env`
 2. Ensure your API accepts Bearer tokens in Authorization header
 3. Update API endpoints in `src/config/constants.ts`
 

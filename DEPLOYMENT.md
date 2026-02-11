@@ -14,7 +14,7 @@ pnpm install
 
 ### 2. Configure Environment
 
-Create `.env.local`:
+Create `.env`:
 
 ```env
 # App
@@ -293,7 +293,7 @@ export const logger = {
 ## Security Recommendations
 
 1. **Enable HTTPS** - Always use HTTPS in production
-2. **Environment Variables** - Never commit `.env.local` to git
+2. **Environment Variables** - Never commit `.env` to git
 3. **API Keys** - Rotate keys regularly
 4. **CORS** - Configure API CORS properly
 5. **CSP Headers** - Configure Content Security Policy

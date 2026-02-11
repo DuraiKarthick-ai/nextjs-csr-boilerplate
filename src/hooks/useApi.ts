@@ -7,7 +7,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { userService } from '@/services/user.service';
 import { QUERY_KEYS } from '@/config/constants';
-import type { UserProfile, UpdateUserRequest, UserSettings } from '@/types/user.types';
+import type { UpdateUserRequest, UserSettings } from '@/types/user.types';
 import toast from 'react-hot-toast';
 
 /**

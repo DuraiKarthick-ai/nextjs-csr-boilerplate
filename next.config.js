@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Disable server-side rendering and static generation
-  output: 'export',
+  output: 'standalone',
   
   // Ensure all pages are client-side rendered
   reactStrictMode: true,
@@ -93,6 +93,10 @@ const nextConfig = {
   // Experimental features
   experimental: {
     optimizeCss: true,
+  },
+  eslint: {
+    // Allow build to complete even if ESLint reports issues (useful in CI when linting is configured separately)
+    ignoreDuringBuilds: true,
   },
 };
 

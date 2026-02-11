@@ -14,7 +14,7 @@ import {
 } from '@/lib/auth/oauth';
 import { tokenStorage } from '@/lib/auth/tokenStorage';
 import { extractUserInfo } from '@/lib/auth/jwt';
-import type { TokenResponse, UserInfo } from '@/types/auth.types';
+import type { UserInfo } from '@/types/auth.types';
 
 class AuthService {
   /**

@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: signs-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: signs-frontend
+  template:
+    metadata:
+      labels:
+        app: signs-frontend
+    spec:
+      containers:
+      - name: signs-frontend
+        image: asia-south1-docker.pkg.dev/project-949bf9a3-f980-4d1a-82b/frontend/frontend:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: OIDC_CLIENT_ID
+          value: "5c246b05-ddfa-45f2-a8e5-61623873c1c2"
+        - name: OIDC_ISSUER
+          value: "https://loginnp.costco.com"
+        - name: NEXTAUTH_URL
+          value: "https://localhost:3001/"

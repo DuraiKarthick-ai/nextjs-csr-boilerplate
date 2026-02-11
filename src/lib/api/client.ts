@@ -48,12 +48,15 @@ const processQueue = (error: any = null, token: string | null = null) => {
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    // Allow callers to opt-out of attaching auth by passing { withAuth: false } in request config
+    const skipAuth = (config as any)?.withAuth === false;
+
     const token = tokenStorage.getAccessToken();
-    
-    if (token && config.headers) {
+
+    if (!skipAuth && token && config.headers) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    
+
     return config;
   },
   (error) => {
@@ -71,6 +74,12 @@ apiClient.interceptors.response.use(
   },
   async (error: AxiosError<ApiError>) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    // If the request explicitly opted out of auth, don't trigger the global
+    // refresh/redirect logic. Let the caller handle the 401/response.
+    if ((originalRequest as any)?.withAuth === false) {
+      return Promise.reject(error);
+    }
 
     // Handle 401 Unauthorized
     if (error.response?.status === HTTP_STATUS.UNAUTHORIZED && !originalRequest._retry) {
