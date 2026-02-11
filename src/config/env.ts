@@ -66,6 +66,6 @@ function validateEnv(): void {
 // Export validated configuration
 export const env = validateEnv();
 
-// Helper to check if running in development
-export const isDevelopment = env.environment === 'development';
-export const isProduction = env.environment === 'production';
+// // Helper to check if running in development
+// export const isDevelopment = env.environment === 'development';
+// export const isProduction = env.environment === 'production';
