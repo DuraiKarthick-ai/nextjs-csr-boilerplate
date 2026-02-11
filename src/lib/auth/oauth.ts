@@ -35,8 +35,16 @@ export function buildAuthorizationUrl(): string {
     nonce,
   };
 
+  // Validate issuer
+  const issuer = (env.ping.issuer || '').trim();
+  if (!issuer || (!issuer.startsWith('http://') && !issuer.startsWith('https://'))) {
+    throw new Error(
+      'Invalid or missing Ping issuer (NEXT_PUBLIC_PING_ISSUER). Please set a valid https://... issuer URL.'
+    );
+  }
+
   // Build URL
-  const authUrl = new URL(`${env.ping.issuer}/authorize`);
+  const authUrl = new URL(`${issuer.replace(/\/+$/, '')}/authorize`);
   Object.entries(params).forEach(([key, value]) => {
     authUrl.searchParams.append(key, value);
   });
@@ -73,7 +81,12 @@ export async function exchangeCodeForTokens(
   };
 
   // Exchange code for tokens
-  const response = await fetch(`${env.ping.issuer}/token`, {
+  const issuer = (env.ping.issuer || '').trim();
+  if (!issuer || (!issuer.startsWith('http://') && !issuer.startsWith('https://'))) {
+    throw new Error('Invalid or missing Ping issuer (NEXT_PUBLIC_PING_ISSUER).');
+  }
+
+  const response = await fetch(`${issuer.replace(/\/+$/, '')}/token`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -105,7 +118,12 @@ export async function refreshTokens(refreshToken: string): Promise<TokenResponse
     client_id: env.ping.clientId,
   };
 
-  const response = await fetch(`${env.ping.issuer}/token`, {
+  const issuer2 = (env.ping.issuer || '').trim();
+  if (!issuer2 || (!issuer2.startsWith('http://') && !issuer2.startsWith('https://'))) {
+    throw new Error('Invalid or missing Ping issuer (NEXT_PUBLIC_PING_ISSUER).');
+  }
+
+  const response = await fetch(`${issuer2.replace(/\/+$/, '')}/token`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded',
@@ -126,7 +144,12 @@ export async function refreshTokens(refreshToken: string): Promise<TokenResponse
  */
 export async function revokeToken(token: string, tokenTypeHint: 'access_token' | 'refresh_token' = 'access_token'): Promise<void> {
   try {
-    await fetch(`${env.ping.issuer}/revoke`, {
+    const issuer3 = (env.ping.issuer || '').trim();
+    if (!issuer3 || (!issuer3.startsWith('http://') && !issuer3.startsWith('https://'))) {
+      throw new Error('Invalid or missing Ping issuer (NEXT_PUBLIC_PING_ISSUER).');
+    }
+
+    await fetch(`${issuer3.replace(/\/+$/, '')}/revoke`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -147,8 +170,13 @@ export async function revokeToken(token: string, tokenTypeHint: 'access_token' |
  * Build logout URL
  */
 export function buildLogoutUrl(idToken?: string): string {
-  const logoutUrl = new URL(`${env.ping.issuer}/logout`);
-  
+  const issuer4 = (env.ping.issuer || '').trim();
+  if (!issuer4 || (!issuer4.startsWith('http://') && !issuer4.startsWith('https://'))) {
+    throw new Error('Invalid or missing Ping issuer (NEXT_PUBLIC_PING_ISSUER).');
+  }
+
+  const logoutUrl = new URL(`${issuer4.replace(/\/+$/, '')}/logout`);
+
   logoutUrl.searchParams.append('client_id', env.ping.clientId);
   logoutUrl.searchParams.append('post_logout_redirect_uri', env.ping.logoutUri);
   
@@ -163,7 +191,12 @@ export function buildLogoutUrl(idToken?: string): string {
  * Get user info from Ping
  */
 export async function getUserInfo(accessToken: string): Promise<any> {
-  const response = await fetch(`${env.ping.issuer}/userinfo`, {
+  const issuer5 = (env.ping.issuer || '').trim();
+  if (!issuer5 || (!issuer5.startsWith('http://') && !issuer5.startsWith('https://'))) {
+    throw new Error('Invalid or missing Ping issuer (NEXT_PUBLIC_PING_ISSUER).');
+  }
+
+  const response = await fetch(`${issuer5.replace(/\/+$/, '')}/userinfo`, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
