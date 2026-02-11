@@ -42,12 +42,12 @@ function validateEnv(): void {
 
   // In development, don't crash — provide safe placeholders so the app can run.
   // In production (NODE_ENV === 'production'), require all variables to be set.
-  const isProd = process.env.NODE_ENV === 'production';
-  if (false) {
-    throw new Error(
-      `Missing required environment variables:\n${missing.join('\n')}\n\nPlease check your .env file.`
-    );
-  }
+  // const isProd = process.env.NODE_ENV === 'production';
+  // if (false) {
+  //   throw new Error(
+  //     `Missing required environment variables:\n${missing.join('\n')}\n\nPlease check your .env file.`
+  //   );
+  // }
 
   // return {
   //   appUrl: required.NEXT_PUBLIC_APP_URL!,
