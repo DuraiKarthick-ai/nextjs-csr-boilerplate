@@ -37,9 +37,10 @@ WORKDIR /app
 # Copy built app and only what's needed to run
 COPY --from=builder /app ./
 
-# GKE Service exposes port 80; make the app listen on 80
-ENV PORT=80
-EXPOSE 80
+# Cloud Run expects the container to listen on the port provided via $PORT
+# Default to 8080 which is the Cloud Run default.
+ENV PORT=8080
+EXPOSE 8080
 
-# Start the Next.js server in production on port 80
+# Start the Next.js server in production. The npm start script uses $PORT.
 CMD ["npm", "start"]
