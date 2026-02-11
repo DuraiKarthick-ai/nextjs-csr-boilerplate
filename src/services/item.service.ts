@@ -12,7 +12,7 @@ export interface ReceiveChangeRequest {
 }
 
 export interface ReceiveChangeResponse {
-  // Keep flexible since external API shape may vary
+  // Keep flexible since external API shape may var
   [key: string]: any;
 }
 
