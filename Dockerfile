@@ -2,6 +2,8 @@
 FROM node:18-alpine AS builder
 WORKDIR /app
 
+
+
 # Accept build-time env values (these must be provided during docker build)
 ARG NEXT_PUBLIC_APP_URL
 ARG NEXT_PUBLIC_API_BASE_URL
