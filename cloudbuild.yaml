@@ -18,11 +18,14 @@ steps:
     args:
       - 'set'
       - 'image'
-      - 'deployment/my-deployment'
-      - 'my-container=us-central1-docker.pkg.dev/ust-gcp-costco-replatform-poc/signs-spa-repo/frontend:$SHORT_SHA'
+      - 'deployment/signs-spa-deployment'
+      - 'signs-spa-container=us-central1-docker.pkg.dev/ust-gcp-costco-replatform-poc/signs-spa-repo/frontend:$SHORT_SHA'
     env:
       - 'CLOUDSDK_COMPUTE_REGION=us-central1'
-      - 'CLOUDSDK_CONTAINER_CLUSTER=my-cluster-name'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=signs-spa-cluster'
 
 images:
   - 'us-central1-docker.pkg.dev/ust-gcp-costco-replatform-poc/signs-spa-repo/frontend:$SHORT_SHA'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
