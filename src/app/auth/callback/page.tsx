@@ -1,14 +1,14 @@
 // src/app/auth/callback/page.tsx
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { LoadingPage } from '@/components/common/Loading';
 import { ErrorDisplay } from '@/components/common/ErrorBoundary';
 import { ROUTES } from '@/config/constants';
 
-export default function CallbackPage() {
+function CallbackContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { handleCallback } = useAuth();
@@ -64,6 +64,13 @@ export default function CallbackPage() {
       </div>
     );
   }
-
   return <LoadingPage text="Completing login..." />;
+}
+
+export default function CallbackPage() {
+  return (
+    <Suspense fallback={<LoadingPage text="Loading..." />}>
+      <CallbackContent />
+    </Suspense>
+  );
 }

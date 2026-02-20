@@ -102,7 +102,7 @@ const nextConfig = {
   
   // Experimental features
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false,
   },
 };
 
