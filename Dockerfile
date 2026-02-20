@@ -1,52 +1,33 @@
-# Stage 1: Dependencies
-FROM node:20-alpine AS deps
-RUN apk add --no-cache libc6-compat
+# Stage 1: Build
+FROM node:20-alpine AS builder
 WORKDIR /app
 
 # Copy package files
 COPY package.json package-lock.json* ./
-RUN npm ci --only=production
 
-# Stage 2: Builder
-FROM node:20-alpine AS builder
-WORKDIR /app
+# Install all dependencies (including devDependencies for build)
+RUN npm ci
 
-# Copy dependencies from deps stage
-COPY --from=deps /app/node_modules ./node_modules
+# Copy source files
 COPY . .
 
-# Set environment variables for build
+# Build the application (static export for CSR)
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
-
-# Build the application (static export for CSR)
 RUN npm run build
 
-# Stage 3: Runner
-FROM nginx:alpine AS runner
+# Stage 2: Runner
+FROM node:20-alpine AS runner
+WORKDIR /app
 
-WORKDIR /usr/share/nginx/html
+# Install serve package to serve static files
+RUN npm install -g serve
 
-# Remove default nginx static assets
-RUN rm -rf ./*
-
-# Copy the exported static files from builder stage
-COPY --from=builder /app/out .
-
-# Copy custom nginx configuration
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Add labels
-LABEL maintainer="your-email@example.com"
-LABEL version="1.0"
-LABEL description="Next.js CSR Boilerplate"
+# Copy the exported static files from builder
+COPY --from=builder /app/out ./out
 
 # Expose port
-EXPOSE 80
+EXPOSE 3000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD wget --quiet --tries=1 --spider http://localhost:80/ || exit 1
-
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Serve the static files
+CMD ["serve", "-s", "out", "-l", "3000"]

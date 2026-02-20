@@ -20,13 +20,12 @@ spec:
       labels:
         app: nextjs-csr-app
         version: v1
-    spec:
-      containers:
+    spec:      containers:
       - name: nextjs-csr-app
         image: us-central1-docker.pkg.dev/ust-gcp-costco-replatform-poc/signs-spa-repo/ui-frontend:latest
         imagePullPolicy: Always
         ports:
-        - containerPort: 80
+        - containerPort: 3000
           protocol: TCP
         env:
         - name: NODE_ENV
@@ -46,16 +45,16 @@ spec:
             cpu: "200m"
         livenessProbe:
           httpGet:
-            path: /health
-            port: 80
+            path: /
+            port: 3000
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
         readinessProbe:
           httpGet:
-            path: /health
-            port: 80
+            path: /
+            port: 3000
           initialDelaySeconds: 10
           periodSeconds: 5
           timeoutSeconds: 3
