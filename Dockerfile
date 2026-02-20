@@ -1,10 +1,6 @@
 # ---------- Stage 1: Build ----------
 FROM node:20-alpine AS builder
-WORKDIR /app
-
-# Prevent ESLint from blocking the build
-ENV NEXT_DISABLE_ESLINT=1
-
+WORKDIR /app 
 # Copy only npm files
 COPY package.json package-lock.json ./
 
@@ -15,7 +11,7 @@ RUN npm ci
 COPY . .
 
 # Build Next.js app
-RUN npm run build
+RUN npx next build --no-lint 
 
 # ---------- Stage 2: Runtime ----------
 FROM node:20-alpine AS runner
