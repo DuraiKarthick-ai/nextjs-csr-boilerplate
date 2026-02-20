@@ -1,28 +1,26 @@
-# ---------- Stage 1: Build ----------
+# Stage 1: Build
 FROM node:20-alpine AS builder
-WORKDIR /app 
-# Copy only npm files
-COPY package.json package-lock.json ./
+WORKDIR /app
 
-# Install deps (npm only)
-RUN npm ci
+# Copy package files
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 
-# Copy source
+# Copy all source files
 COPY . .
 
 # Build Next.js app
-RUN npx next build --no-lint 
+RUN yarn build
 
-# ---------- Stage 2: Runtime ----------
+# Stage 2: Production
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV=development
+ENV NODE_ENV=production
 
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
+# Copy built files from builder
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
-CMD ["npm", "run", "start"]
+CMD ["node", "server.js"]
