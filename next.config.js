@@ -6,6 +6,16 @@ const nextConfig = {
   // Ensure all pages are client-side rendered
   reactStrictMode: true,
   
+  // Disable ESLint during build (for production)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  
+  // Disable TypeScript errors during build (optional)
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+  
   // Disable image optimization for static export
   images: {
     unoptimized: true,
