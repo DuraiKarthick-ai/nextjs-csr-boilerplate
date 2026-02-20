@@ -28,6 +28,7 @@ export const ROUTES = {
   HOME: '/',
   LOGIN: '/auth/login',
   CALLBACK: '/auth/callback',
+  RECEIVE_CHANGE: '/item/receive-change',
   DASHBOARD: '/dashboard',
   UNAUTHORIZED: '/unauthorized',
 } as const;

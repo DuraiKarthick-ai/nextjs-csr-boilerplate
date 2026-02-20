@@ -23,7 +23,20 @@ export default function LoginPage() {
   }, [isAuthenticated, isLoading, router]);
 
   const handleLogin = () => {
-    login();
+    // If you want users to land on Receive-Change after login, store that as the return URL
+    try {
+      sessionStorage.setItem('returnUrl', ROUTES.RECEIVE_CHANGE);
+    } catch (e) {
+      // ignore storage errors
+    }
+
+    // Debug: ensure handler runs
+    // eslint-disable-next-line no-console
+    console.log('Login button clicked - initiating login flow');
+
+    // call the auth login
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    (async () => { await login(); })();
   };
 
   if (isLoading) {

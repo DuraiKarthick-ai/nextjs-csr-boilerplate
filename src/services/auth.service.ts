@@ -14,15 +14,39 @@ import {
 } from '@/lib/auth/oauth';
 import { tokenStorage } from '@/lib/auth/tokenStorage';
 import { extractUserInfo } from '@/lib/auth/jwt';
-import type { TokenResponse, UserInfo } from '@/types/auth.types';
+import type { UserInfo } from '@/types/auth.types';
 
 class AuthService {
   /**
    * Initiate login flow
    * Redirects to Ping authorization page
    */
-  login(): void {
+  async login(): Promise<void> {
+    // Ensure discovery is ready so the first request uses provider endpoints
+    try {
+      // Dynamically import the oauth helpers to avoid circular imports at module load time
+      // eslint-disable-next-line @typescript-eslint/no-var-requires, @typescript-eslint/no-require-imports
+      const { ensureDiscoveryReady } = require('@/lib/auth/oauth');
+      // Wait (short) for discovery to be fetched
+      // eslint-disable-next-line @typescript-eslint/no-floating-promises
+      await ensureDiscoveryReady();
+    } catch (err) {
+      // ignore discovery errors — fallbacks will be used
+    }
+
     const authUrl = buildAuthorizationUrl();
+    // Helpful debug: print the URL so you can test it directly in a browser
+    // eslint-disable-next-line no-console
+    console.log('Auth URL:', authUrl);
+
+    // Open in a new tab so dev console and logs remain visible for debugging
+    try {
+      window.open(authUrl, '_blank');
+    } catch (e) {
+      // ignore
+    }
+
+    // Also navigate current window (normal flow)
     window.location.href = authUrl;
   }
 
