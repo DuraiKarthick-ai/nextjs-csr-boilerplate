@@ -44,19 +44,42 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}
-
-      - name: Get GKE credentials
+          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}      - name: Get GKE credentials
         run: |
           gcloud container clusters get-credentials $CLUSTER_NAME \
             --region $CLUSTER_LOCATION \
             --project $PROJECT_ID
 
-      - name: Deploy to GKE
+      - name: Create namespace if not exists
         run: |
-          kubectl set image deployment/nextjs-csr-app nextjs-csr-app=$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }} \
+          kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/configmap.yaml -n $NAMESPACE || echo "ConfigMap not found, skipping"
+          kubectl apply -f k8s/deployment.yaml -n $NAMESPACE
+          kubectl apply -f k8s/service.yaml -n $NAMESPACE
+
+      - name: Update deployment image
+        run: |
+          kubectl set image deployment/nextjs-csr-app \
+            nextjs-csr-app=$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }} \
             -n $NAMESPACE
-          kubectl rollout status deployment/nextjs-csr-app -n $NAMESPACE
-          # Verify deployment
-          kubectl get services -o wide -n $NAMESPACE
+
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/nextjs-csr-app -n $NAMESPACE --timeout=5m
+
+      - name: Verify deployment
+        run: |
+          echo "=== Deployment Status ==="
+          kubectl get deployment nextjs-csr-app -n $NAMESPACE
+          echo ""
+          echo "=== Pods Status ==="
           kubectl get pods -l app=nextjs-csr-app -n $NAMESPACE
+          echo ""
+          echo "=== Service Status ==="
+          kubectl get svc nextjs-csr-app-service -n $NAMESPACE
+          echo ""
+          echo "=== Get External IP ==="
+          kubectl get svc nextjs-csr-app-service -n $NAMESPACE -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
