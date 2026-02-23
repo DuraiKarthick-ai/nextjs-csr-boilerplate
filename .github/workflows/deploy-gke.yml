@@ -41,7 +41,9 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}      - name: Get GKE credentials
+          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }} .
+
+      - name: Get GKE credentials
         run: |
           gcloud container clusters get-credentials $CLUSTER_NAME \
             --region $CLUSTER_LOCATION \
