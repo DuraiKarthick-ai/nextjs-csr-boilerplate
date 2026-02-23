@@ -12,7 +12,7 @@ env:
   REPOSITORY: signs-spa-repo
   IMAGE_NAME: ui-frontend
   CLUSTER_NAME: spa-cluster
-  CLUSTER_ZONE: us-central1-a
+  CLUSTER_LOCATION: us-central1
   NAMESPACE: spa-signs-remote-app
 
 jobs:
@@ -41,12 +41,10 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}
-
-      - name: Get GKE credentials
+          docker push $REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }}      - name: Get GKE credentials
         run: |
           gcloud container clusters get-credentials $CLUSTER_NAME \
-            --zone $CLUSTER_ZONE \
+            --region $CLUSTER_LOCATION \
             --project $PROJECT_ID
 
       - name: Deploy to GKE
