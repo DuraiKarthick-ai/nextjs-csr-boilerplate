@@ -11,8 +11,7 @@ spec:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 0
-  selector:
+      maxUnavailable: 0  selector:
     matchLabels:
       app: nextjs-csr-app
   template:
@@ -20,7 +19,8 @@ spec:
       labels:
         app: nextjs-csr-app
         version: v1
-    spec:      containers:
+    spec:
+      containers:
       - name: nextjs-csr-app
         image: us-central1-docker.pkg.dev/ust-gcp-costco-replatform-poc/signs-spa-repo/ui-frontend:latest
         imagePullPolicy: Always
