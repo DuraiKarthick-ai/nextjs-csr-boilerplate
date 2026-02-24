@@ -15,12 +15,13 @@ spec:
   selector:
     matchLabels:
       app: nextjs-csr-app
-  template:
-    metadata:
+  template:    metadata:
       labels:
         app: nextjs-csr-app
         version: v1
-    spec:
+  spec:
+      imagePullSecrets:
+      - name: gcr-json-key
       containers:
       - name: nextjs-csr-app
         image: us-central1-docker.pkg.dev/ust-gcp-costco-replatform-poc/signs-spa-repo/ui-frontend:latest

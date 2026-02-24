@@ -50,17 +50,25 @@ jobs:
         run: |
           gcloud container clusters get-credentials $CLUSTER_NAME \
             --region $CLUSTER_LOCATION \
-            --project $PROJECT_ID
-
-      - name: Create namespace if not exists
+            --project $PROJECT_ID      - name: Create namespace if not exists
         run: |
           kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
+
+      - name: Create Image Pull Secret
+        run: |
+          kubectl create secret docker-registry gcr-json-key \
+            --docker-server=$REGION-docker.pkg.dev \
+            --docker-username=_json_key \
+            --docker-password="$(cat $GOOGLE_GHA_CREDS_PATH)" \
+            --docker-email=gke-spa-sa@ust-gcp-costco-replatform-poc.iam.gserviceaccount.com \
+            -n $NAMESPACE \
+            --dry-run=client -o yaml | kubectl apply -f -
 
       - name: Apply Kubernetes manifests
         run: |
          
           kubectl apply -f k8s/deployment.yaml -n $NAMESPACE
-          kubectl apply -f k8s/service.yaml -n $NAMESPACE      
+          kubectl apply -f k8s/service.yaml -n $NAMESPACE
       
       - name: Update deployment image
         run: |
