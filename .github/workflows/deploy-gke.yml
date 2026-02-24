@@ -50,7 +50,9 @@ jobs:
         run: |
           gcloud container clusters get-credentials $CLUSTER_NAME \
             --region $CLUSTER_LOCATION \
-            --project $PROJECT_ID      - name: Create namespace if not exists
+            --project $PROJECT_ID      
+            
+      - name: Create namespace if not exists
         run: |
           kubectl create namespace $NAMESPACE --dry-run=client -o yaml | kubectl apply -f -
 
