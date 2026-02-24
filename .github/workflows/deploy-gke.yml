@@ -60,17 +60,26 @@ jobs:
         run: |
          
           kubectl apply -f k8s/deployment.yaml -n $NAMESPACE
-          kubectl apply -f k8s/service.yaml -n $NAMESPACE
-
-      - name: Update deployment image
+          kubectl apply -f k8s/service.yaml -n $NAMESPACE      - name: Update deployment image
         run: |
           kubectl set image deployment/nextjs-csr-app \
             nextjs-csr-app=$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }} \
             -n $NAMESPACE
 
+      - name: Check pod status
+        run: |
+          echo "=== Checking pod status after image update ==="
+          kubectl get pods -n $NAMESPACE -l app=nextjs-csr-app
+          echo ""
+          echo "=== Describing pods ==="
+          kubectl describe pods -n $NAMESPACE -l app=nextjs-csr-app || true
+          echo ""
+          echo "=== Pod logs (if available) ==="
+          kubectl logs -n $NAMESPACE -l app=nextjs-csr-app --tail=50 --all-containers=true || true
+
       - name: Wait for rollout
         run: |
-          kubectl rollout status deployment/nextjs-csr-app -n $NAMESPACE --timeout=5m
+          kubectl rollout status deployment/nextjs-csr-app -n $NAMESPACE --timeout=10m
 
       - name: Verify deployment
         run: |
