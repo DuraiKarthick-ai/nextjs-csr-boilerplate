@@ -51,7 +51,8 @@ spec:
           initialDelaySeconds: 30
           periodSeconds: 10
           timeoutSeconds: 5
-          failureThreshold: 3        readinessProbe:
+          failureThreshold: 3        
+        readinessProbe:
           httpGet:
             path: /
             port: 3000
