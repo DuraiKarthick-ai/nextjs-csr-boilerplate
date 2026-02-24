@@ -77,7 +77,9 @@ jobs:
           kubectl describe pods -n $NAMESPACE -l app=nextjs-csr-app || true
           echo ""
           echo "=== Pod logs (if available) ==="
-          kubectl logs -n $NAMESPACE -l app=nextjs-csr-app --tail=50 --all-containers=true || true      - name: Wait for rollout
+          kubectl logs -n $NAMESPACE -l app=nextjs-csr-app --tail=50 --all-containers=true || true      
+          
+      - name: Wait for rollout
         continue-on-error: true
         run: |
           kubectl rollout status deployment/nextjs-csr-app -n $NAMESPACE --timeout=10m
