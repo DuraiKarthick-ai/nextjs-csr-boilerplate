@@ -6,13 +6,13 @@ metadata:
     app: nextjs-csr-app
     version: v1
 spec:
-  replicas: 3  
+  replicas: 3
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
-      maxUnavailable: 0  
-    selector:
+      maxUnavailable: 0
+  selector:
     matchLabels:
       app: nextjs-csr-app
   template:
