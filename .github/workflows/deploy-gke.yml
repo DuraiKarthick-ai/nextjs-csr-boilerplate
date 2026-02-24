@@ -77,11 +77,29 @@ jobs:
           kubectl describe pods -n $NAMESPACE -l app=nextjs-csr-app || true
           echo ""
           echo "=== Pod logs (if available) ==="
-          kubectl logs -n $NAMESPACE -l app=nextjs-csr-app --tail=50 --all-containers=true || true
-
-      - name: Wait for rollout
+          kubectl logs -n $NAMESPACE -l app=nextjs-csr-app --tail=50 --all-containers=true || true      - name: Wait for rollout
+        continue-on-error: true
         run: |
           kubectl rollout status deployment/nextjs-csr-app -n $NAMESPACE --timeout=10m
+
+      - name: Debug failed deployment
+        if: failure() || success()
+        run: |
+          echo "=== Final Pod Status ==="
+          kubectl get pods -n $NAMESPACE -l app=nextjs-csr-app -o wide
+          echo ""
+          echo "=== Pod Events ==="
+          kubectl get events -n $NAMESPACE --sort-by='.lastTimestamp' | grep nextjs-csr-app || true
+          echo ""
+          echo "=== Failed Pod Logs ==="
+          for pod in $(kubectl get pods -n $NAMESPACE -l app=nextjs-csr-app -o jsonpath='{.items[*].metadata.name}'); do
+            echo "--- Logs for $pod ---"
+            kubectl logs -n $NAMESPACE $pod --tail=100 || true
+            echo ""
+            echo "--- Describe $pod ---"
+            kubectl describe pod -n $NAMESPACE $pod || true
+            echo ""
+          done
 
       - name: Verify deployment
         run: |
