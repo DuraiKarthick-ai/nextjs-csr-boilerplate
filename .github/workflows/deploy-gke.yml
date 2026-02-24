@@ -60,7 +60,9 @@ jobs:
         run: |
          
           kubectl apply -f k8s/deployment.yaml -n $NAMESPACE
-          kubectl apply -f k8s/service.yaml -n $NAMESPACE      - name: Update deployment image
+          kubectl apply -f k8s/service.yaml -n $NAMESPACE      
+      
+      - name: Update deployment image
         run: |
           kubectl set image deployment/nextjs-csr-app \
             nextjs-csr-app=$REGION-docker.pkg.dev/$PROJECT_ID/$REPOSITORY/$IMAGE_NAME:${{ github.sha }} \
