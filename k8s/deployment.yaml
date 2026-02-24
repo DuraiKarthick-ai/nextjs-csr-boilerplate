@@ -15,7 +15,8 @@ spec:
   selector:
     matchLabels:
       app: nextjs-csr-app
-  template:    metadata:
+  template:    
+  metadata:
       labels:
         app: nextjs-csr-app
         version: v1
