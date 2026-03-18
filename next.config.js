@@ -56,11 +56,6 @@ const nextConfig = {
 
     return config;
   },
-  
-  // Experimental features
-  experimental: {
-    optimizeCss: false,
-  },
 };
 
 module.exports = nextConfig;
