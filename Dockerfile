@@ -23,6 +23,10 @@ COPY . .
 # Temporarily rename .eslintrc.json to skip ESLint during build
 RUN mv .eslintrc.json .eslintrc.json.bak || true
 
+# Required for Next build in Docker
+RUN npm install next webpack --no-save
+ENV NEXT_PRIVATE_LOCAL_WEBPACK=true
+
 # Set environment variables from build args
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
