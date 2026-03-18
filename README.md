@@ -1,210 +1,74 @@
-# Next.js 14 CSR Boilerplate with Ping Authentication
+# Signs MFE Application
 
-A production-ready Next.js 14 boilerplate with client-side rendering, Ping OAuth 2.0 authentication, and comprehensive API integration.
+This is the "Signs" micro-frontend (MFE) application. It is designed to be consumed by the main `portal-app` and exposes a single page component for displaying sign products.
 
-## Features
+## Overview
 
-- ✅ **Client-Side Rendering Only** - No SSR/SSG
-- 🔐 **Ping Authentication** - OAuth 2.0 with PKCE flow
-- 🔄 **Automatic Token Refresh** - Seamless token management
-- 🛡️ **Protected Routes** - Route guards with redirect logic
-- 📡 **API Integration** - Axios with interceptors and auto token injection
-- 🎯 **State Management** - Zustand + Context API
-- 📊 **Data Fetching** - TanStack Query with caching
-- 🎨 **Modern UI** - Shadcn/ui + Tailwind CSS
-- 🔔 **Toast Notifications** - React Hot Toast
-- 🚨 **Error Boundaries** - Comprehensive error handling
-- 📝 **TypeScript** - Strict mode enabled
-- 🧪 **Code Quality** - ESLint + Prettier configured
+- **Framework:** [Next.js](https://nextjs.org/) 14
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Module Federation:** [@module-federation/nextjs-mf](https://www.npmjs.com/package/@module-federation/nextjs-mf)
+- **Port:** `3001`
 
-## Tech Stack
+This application is responsible for fetching and displaying a list of "Sign" products from a backend API. It includes both client-side and server-side logic for data fetching and exposes its main component to be used in other applications.
 
-- **Framework**: Next.js 14 (App Router, CSR only)
-- **Language**: TypeScript (strict mode)
-- **Styling**: Tailwind CSS + Shadcn/ui
-- **State Management**: Zustand + Context API
-- **Data Fetching**: TanStack Query (React Query)
-- **HTTP Client**: Axios
-- **Authentication**: Ping OAuth 2.0 with PKCE
-- **Notifications**: React Hot Toast
-- **Icons**: Lucide React
-- **Code Quality**: ESLint + Prettier
+## Key Features
 
-## Prerequisites
+### Module Federation
 
-- Node.js 18.x or higher
-- npm or yarn or pnpm
-- Ping account with OAuth 2.0 configuration
+The `signs-app` is configured as a **remote** in the Module Federation setup.
+
+- **Name:** `signs`
+- **Exposes:**
+  - `./ProductsPage`: The main React component located at `src/components/products/ProductsPage.tsx`.
+- **Consumes:**
+  - `portal/AuthContext`: Consumes the authentication context from the `portal-app` to get access to the user's session and tokens.
+
+### API Proxy
+
+To handle CORS issues when calling the backend API from the browser, this application uses a Next.js API route as a proxy.
+
+- **Proxy Route:** `GET /api/items`
+- **Backend Endpoint:** `http://34.149.59.244/api/v1/signs/items`
+
+Client-side code should call the `/api/items` endpoint. The Next.js server will then make a server-to-server request to the real backend, bypassing browser CORS restrictions.
+
+### Environment Variables
+
+The application can be configured using the following environment variables. See `.env.example` for a template.
+
+- `SIGNS_API_BASE_URL`: The base URL of the backend API (e.g., `http://34.149.59.244`).
+- `NEXT_PUBLIC_PORTAL_REMOTE_URL_DEV`: The development URL of the portal host application (e.g., `http://localhost:3000`).
+- `NEXT_PUBLIC_PORTAL_REMOTE_URL_PROD`: The production URL of the portal host application.
+- `NEXT_PUBLIC_SIGNS_APP_URL`: The public URL of this signs-app. This is crucial for the client-side `apiClient` to correctly target the API proxy when running in a deployed environment.
 
 ## Getting Started
 
-### 1. Clone and Install
+### Prerequisites
 
-```bash
-# Clone the repository
-git clone <your-repo-url>
-cd nextjs-csr-boilerplate
+- [Node.js](https://nodejs.org/en/) (v18 or later recommended)
+- [npm](https://www.npmjs.com/)
 
-# Install dependencies
-npm install
-# or
-yarn install
-# or
-pnpm install
-```
+### Installation
 
-### 2. Environment Configuration
+1.  Clone the repository.
+2.  Navigate to the `signs-app` directory:
+    ```bash
+    cd signs-app
+    ```
+3.  Install the dependencies:
+    ```bash
+    npm install
+    ```
 
-Create a `.env.local` file in the root directory:
+### Running in Development
 
-```env
-# App Configuration
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-NEXT_PUBLIC_API_BASE_URL=https://api.example.com
-
-# Ping OAuth Configuration
-NEXT_PUBLIC_PING_ISSUER=https://auth.pingone.com/your-environment-id/as
-NEXT_PUBLIC_PING_CLIENT_ID=your-client-id
-NEXT_PUBLIC_PING_REDIRECT_URI=http://localhost:3000/auth/callback
-NEXT_PUBLIC_PING_LOGOUT_URI=http://localhost:3000
-NEXT_PUBLIC_PING_SCOPE=openid profile email
-
-# Optional: Additional Configuration
-NEXT_PUBLIC_ENV=development
-```
-
-### 3. Ping OAuth Setup
-
-1. **Create OAuth 2.0 Application** in PingOne/PingFederate
-2. **Set Redirect URIs**:
-   - Callback: `http://localhost:3000/auth/callback`
-   - Logout: `http://localhost:3000`
-3. **Enable PKCE** (Proof Key for Code Exchange)
-4. **Grant Types**: Authorization Code
-5. **Scopes**: openid, profile, email (add custom scopes as needed)
-6. **Copy Client ID** to your `.env.local`
-
-### 4. Run Development Server
+To start the development server on `http://localhost:3001`:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
-## Project Structure
-
-```
-nextjs-csr-boilerplate/
-├── src/
-│   ├── app/                      # Next.js App Router
-│   │   ├── auth/                 # Authentication pages
-│   │   │   ├── callback/         # OAuth callback handler
-│   │   │   └── login/            # Login page
-│   │   ├── dashboard/            # Protected dashboard
-│   │   ├── layout.tsx            # Root layout
-│   │   ├── page.tsx              # Home page
-│   │   └── providers.tsx         # Client-side providers
-│   ├── components/               # React components
-│   │   ├── auth/                 # Auth-related components
-│   │   ├── common/               # Shared components
-│   │   ├── layout/               # Layout components
-│   │   └── ui/                   # Shadcn UI components
-│   ├── contexts/                 # React contexts
-│   │   └── AuthContext.tsx       # Authentication context
-│   ├── hooks/                    # Custom React hooks
-│   │   ├── useAuth.ts           # Authentication hook
-│   │   └── useApi.ts            # API query hooks
-│   ├── lib/                      # Utility libraries
-│   │   ├── api/                  # API client and services
-│   │   ├── auth/                 # Auth utilities (PKCE, tokens)
-│   │   └── utils.ts              # Common utilities
-│   ├── services/                 # API service layer
-│   │   ├── auth.service.ts      # Auth API calls
-│   │   └── user.service.ts      # User API calls
-│   ├── store/                    # Zustand stores
-│   │   └── useStore.ts          # Global state store
-│   ├── types/                    # TypeScript definitions
-│   │   ├── api.types.ts         # API types
-│   │   ├── auth.types.ts        # Auth types
-│   │   └── user.types.ts        # User types
-│   └── config/                   # Configuration
-│       ├── env.ts               # Environment validation
-│       └── constants.ts         # App constants
-├── public/                       # Static files
-├── .env.local                    # Environment variables (create this)
-├── .eslintrc.json               # ESLint configuration
-├── .prettierrc                  # Prettier configuration
-├── next.config.js               # Next.js configuration
-├── tailwind.config.ts           # Tailwind configuration
-├── tsconfig.json                # TypeScript configuration
-└── package.json                 # Dependencies
-```
-
-## Key Features Explained
-
-### Authentication Flow
-
-1. **Login**: User clicks login → Redirected to Ping with PKCE challenge
-2. **Callback**: Ping redirects back → Exchange code for tokens
-3. **Token Storage**: Tokens stored in memory (secure)
-4. **Auto Refresh**: Refresh token automatically before expiration
-5. **Logout**: Clear local tokens + Ping session termination
-
-### Protected Routes
-
-Routes are protected using the `ProtectedRoute` component:
-
-```tsx
-import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
-
-export default function DashboardPage() {
-  return (
-    <ProtectedRoute>
-      <Dashboard />
-    </ProtectedRoute>
-  );
-}
-```
-
-### API Integration
-
-```tsx
-import { useQuery } from '@tanstack/react-query';
-import { userService } from '@/services/user.service';
-
-function Profile() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['user', 'profile'],
-    queryFn: userService.getProfile,
-  });
-
-  if (isLoading) return <Loading />;
-  if (error) return <Error />;
-  
-  return <div>{data.name}</div>;
-}
-```
-
-### State Management
-
-```tsx
-import { useStore } from '@/store/useStore';
-
-function Component() {
-  const { theme, setTheme } = useStore();
-  
-  return (
-    <button onClick={() => setTheme('dark')}>
-      Current: {theme}
-    </button>
-  );
-}
-```
+This application is intended to be run alongside the `portal-app`.
 
 ## Available Scripts
 

@@ -1,102 +1,59 @@
+// @ts-check
+const { NextFederationPlugin } = require("@module-federation/nextjs-mf");
+
+const PORTAL_REMOTE_URL =
+  process.env.NODE_ENV === "production"
+    ? process.env.NEXT_PUBLIC_PORTAL_REMOTE_URL_PROD
+    : (process.env.NEXT_PUBLIC_PORTAL_REMOTE_URL_DEV ?? "http://localhost:3000");
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // Disable server-side rendering and static generation
-  output: 'export',
-  
-  // Ensure all pages are client-side rendered
   reactStrictMode: true,
-  
-  // Disable ESLint during build (for production)
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-  
-  // Disable TypeScript errors during build (optional)
-  typescript: {
-    ignoreBuildErrors: true,
-  },
-  
-  // Disable image optimization for static export
-  images: {
-    unoptimized: true,
-  },
-  
-  // Configure environment variables
-  env: {
-    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
-    NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
-  },
-  
-  // Security headers
+  poweredByHeader: false,
+
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: "/(.*)",
         headers: [
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "X-XSS-Protection", value: "1; mode=block" },
+          { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on'
+            key: "Access-Control-Allow-Origin",
+            value: PORTAL_REMOTE_URL ?? "http://localhost:3000",
           },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=63072000; includeSubDomains; preload'
-          },
-          {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN'
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff'
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block'
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin'
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()'
-          }
-        ]
-      }
+        ],
+      },
     ];
   },
-  
-  // Webpack configuration for client-side only
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Client-side optimizations
-      config.optimization = {
-        ...config.optimization,
-        splitChunks: {
-          chunks: 'all',
-          cacheGroups: {
-            default: false,
-            vendors: false,
-            // Vendor chunk
-            vendor: {
-              name: 'vendor',
-              chunks: 'all',
-              test: /node_modules/,
-              priority: 20
-            },
-            // Common chunk
-            common: {
-              name: 'common',
-              minChunks: 2,
-              chunks: 'all',
-              priority: 10,
-              reuseExistingChunk: true,
-              enforce: true
-            }
-          }
-        }
-      };
-    }
+
+  webpack(config, options) {
+    const { isServer } = options;
+
+    config.plugins.push(
+      new NextFederationPlugin({
+        name: "signs",
+        filename: "static/chunks/remoteEntry.js",
+        remotes: {
+          portal: `portal@${PORTAL_REMOTE_URL}/_next/static/${isServer ? "ssr" : "chunks"}/remoteEntry.js`,
+        },
+        exposes: {
+          "./ProductsPage": "./src/components/products/ProductsPage.tsx",
+        },
+        shared: {
+          react: { singleton: true, eager: true, requiredVersion: "18.3.1" },
+          "react-dom": { singleton: true, eager: true, requiredVersion: "18.3.1" },
+        },
+        extraOptions: {
+          exposePages: false,
+          enableImageLoaderFix: true,
+          enableUrlLoaderFix: true,
+        },
+      })
+    );
+
     return config;
   },
   
