@@ -72,9 +72,134 @@ This application is intended to be run alongside the `portal-app`.
 
 ## Available Scripts
 
-- `npm run dev`: Starts the development server.
-- `npm run build`: Creates a production build of the application.
-- `npm run start`: Starts the production server.
-- `npm run lint`: Lints the codebase for errors.
-- `npm run format`: Formats the code using Prettier.
-- `npm run type-check`: Runs the TypeScript compiler to check for type errors.
+```bash
+# Development
+npm run dev          # Start dev server
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npm run lint:fix     # Fix ESLint errors
+npm run format       # Format with Prettier
+npm run type-check   # Run TypeScript compiler check
+```
+
+## Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `NEXT_PUBLIC_APP_URL` | Application URL | Yes |
+| `NEXT_PUBLIC_API_BASE_URL` | API base URL | Yes |
+| `NEXT_PUBLIC_PING_ISSUER` | Ping issuer URL | Yes |
+| `NEXT_PUBLIC_PING_CLIENT_ID` | Ping OAuth client ID | Yes |
+| `NEXT_PUBLIC_PING_REDIRECT_URI` | OAuth callback URL | Yes |
+| `NEXT_PUBLIC_PING_LOGOUT_URI` | Logout redirect URL | Yes |
+| `NEXT_PUBLIC_PING_SCOPE` | OAuth scopes | Yes |
+
+## Security Features
+
+- ✅ PKCE implementation for OAuth 2.0
+- ✅ Tokens stored in memory (not localStorage)
+- ✅ Automatic token refresh
+- ✅ CSRF protection
+- ✅ XSS protection via React
+- ✅ Environment variable validation
+- ✅ Secure HTTP headers (CSP ready)
+- ✅ Protected route guards
+
+## Deployment
+
+### Vercel (Recommended)
+
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel
+```
+
+Add environment variables in Vercel dashboard.
+
+### Docker
+
+```bash
+# Build
+docker build -t nextjs-app .
+
+# Run
+docker run -p 3000:3000 nextjs-app
+```
+
+### Other Platforms
+
+Build the application:
+
+```bash
+npm run build
+npm run start
+```
+
+## Customization
+
+### Adding New API Endpoints
+
+1. Define types in `src/types/`
+2. Create service in `src/services/`
+3. Use in components with TanStack Query
+
+### Adding New Routes
+
+1. Create page in `src/app/`
+2. Wrap with `<ProtectedRoute>` if authentication needed
+3. Add navigation links
+
+### Styling
+
+- Global styles: `src/app/globals.css`
+- Tailwind config: `tailwind.config.ts`
+- Add components: `npx shadcn-ui@latest add [component]`
+
+## Troubleshooting
+
+### Authentication Issues
+
+1. **Verify Ping configuration** matches `.env.local`
+2. **Check redirect URIs** are exactly the same
+3. **Ensure PKCE is enabled** in Ping
+4. **Check browser console** for detailed errors
+
+### API Issues
+
+1. **Verify API_BASE_URL** is correct
+2. **Check network tab** for request/response
+3. **Ensure tokens are valid** (not expired)
+4. **Check CORS configuration** on API server
+
+### Build Issues
+
+1. Run `npm run type-check` for TypeScript errors
+2. Run `npm run lint` for ESLint errors
+3. Clear `.next` folder and rebuild
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
+
+## License
+
+MIT
+
+## Support
+
+For issues and questions:
+- Check the [documentation](docs/)
+- Open an issue on GitHub
+- Contact support team
+
+---
+
+***Built with ❤️ using Next.js 14*** 
