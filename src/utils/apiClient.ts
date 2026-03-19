@@ -6,25 +6,58 @@ import axios, {
 import DOMPurify from "dompurify";
 
 /**
- * Token accessor — will be injected by the ProductsPage component
- * so the interceptor can attach the Bearer token from the shared AuthContext.
+ * ─── Token Resolution via Module Federation ────────────────────────
+ *
+ * Instead of manually injecting a tokenAccessor from each component,
+ * we dynamically import the Portal's AuthTokenService singleton.
+ *
+ * AuthTokenService.getToken():
+ *   - Returns cached token if still valid
+ *   - Transparently calls Portal BFF /api/auth/refresh if expired
+ *   - Coalesces concurrent refresh requests (mutex pattern)
+ *   - Throws 'SESSION_EXPIRED' when refresh_token is dead
+ *
+ * This means Remote apps never own any auth logic — the Portal
+ * controls the entire token lifecycle.
+ * ───────────────────────────────────────────────────────────────────
  */
-let tokenAccessor: (() => Promise<string | null>) | null = null;
-let sessionRefresher: (() => Promise<boolean>) | null = null;
 
-export function setTokenAccessor(fn: () => Promise<string | null>): void {
-  tokenAccessor = fn;
-}
+type GetTokenFn = () => Promise<string>;
 
-export function setSessionRefresher(fn: () => Promise<boolean>): void {
-  sessionRefresher = fn;
+let _getToken: GetTokenFn | null = null;
+let _resolvePromise: Promise<GetTokenFn> | null = null;
+
+/**
+ * Lazily resolve the federated getToken function.
+ * Cached after first successful import — subsequent calls are instant.
+ */
+async function resolveGetToken(): Promise<GetTokenFn> {
+  if (_getToken) return _getToken;
+
+  if (!_resolvePromise) {
+    _resolvePromise = (async () => {
+      try {
+        const authService = await import("portal/AuthTokenService");
+        console.log("[apiClient] ✅ portal/AuthTokenService imported successfully. Exports:", Object.keys(authService));
+        _getToken = authService.getToken;
+        return _getToken;
+      } catch (err) {
+        console.warn(
+          "[apiClient] ❌ Failed to import portal/AuthTokenService — running standalone without auth",
+          err
+        );
+        // Standalone fallback: no token
+        _getToken = async () => "";
+        return _getToken;
+      }
+    })();
+  }
+
+  return _resolvePromise;
 }
 
 // ── Create Axios instance ───────────────────────────────────────────
 
-// Client-side requests go through the Signs app's Next.js API proxy
-// to avoid CORS issues (the real backend doesn't support browser preflight).
-// When running inside the Portal via MFE, we need the full Signs app origin.
 const SIGNS_APP_URL =
   process.env.NEXT_PUBLIC_SIGNS_APP_URL ?? "http://localhost:3001";
 
@@ -37,16 +70,39 @@ const apiClient: AxiosInstance = axios.create({
   },
 });
 
-// ── Request interceptor: attach access token ────────────────────────
+// ── Request interceptor: attach access token from Portal ────────────
 
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    if (tokenAccessor) {
-      const token = await tokenAccessor();
+    try {
+      const getToken = await resolveGetToken();
+      const token = await getToken();
+
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
+        // Log first 20 chars + last 10 chars for safety (never log full tokens in prod)
+        const masked = token.length > 30
+          ? `${token.slice(0, 20)}...${token.slice(-10)}`
+          : "(short-token)";
+        console.log(`[apiClient] 🔑 Token attached to ${config.method?.toUpperCase()} ${config.url}`, {
+          tokenPreview: masked,
+          tokenLength: token.length,
+        });
+      } else {
+        console.warn(`[apiClient] ⚠️ No token available for ${config.method?.toUpperCase()} ${config.url}`);
       }
+    } catch (err: any) {
+      // SESSION_EXPIRED → redirect to Portal login
+      if (err?.message === "SESSION_EXPIRED") {
+        console.error("[AuthInterceptor] Session expired — redirecting to login");
+        if (typeof window !== "undefined") {
+          window.location.href = "/login?reason=session_expired";
+        }
+        return Promise.reject(err);
+      }
+      console.error("[AuthInterceptor] Token acquisition failed:", err);
     }
+
     return config;
   },
   (error: AxiosError) => Promise.reject(error)
@@ -56,6 +112,10 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   (response) => {
+    console.log(`[apiClient] ✅ Response ${response.status} from ${response.config.url}`, {
+      hasAuthHeader: !!response.config.headers?.Authorization,
+      dataType: Array.isArray(response.data) ? `array[${response.data.length}]` : typeof response.data,
+    });
     // Deep-sanitize string values in the response payload
     response.data = sanitize(response.data);
     return response;
@@ -65,23 +125,35 @@ apiClient.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // On 401, attempt one silent refresh then retry
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      sessionRefresher
-    ) {
+    // On 401, force a token refresh via AuthTokenService and retry once
+    if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
-      const refreshed = await sessionRefresher();
-      if (refreshed) {
-        // Re-attach updated token
-        if (tokenAccessor) {
-          const newToken = await tokenAccessor();
-          if (newToken) {
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-          }
+
+      try {
+        // Clear the cached token so resolveGetToken fetches a fresh one.
+        // AuthTokenService.getToken() handles refresh internally —
+        // do NOT call useAuth() here (we're outside a React component).
+        _getToken = null;
+        _resolvePromise = null;
+
+        const getToken = await resolveGetToken();
+        const newToken = await getToken();
+
+        if (newToken) {
+          console.log("[AuthInterceptor] 🔄 401 retry — refreshed token, retrying request");
+          originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          return apiClient(originalRequest);
         }
-        return apiClient(originalRequest);
+
+        console.warn("[AuthInterceptor] 🔄 401 retry — no token after refresh");
+      } catch (refreshErr: any) {
+        console.error("[AuthInterceptor] 401 retry failed:", refreshErr);
+        if (
+          refreshErr?.message === "SESSION_EXPIRED" &&
+          typeof window !== "undefined"
+        ) {
+          window.location.href = "/login?reason=session_expired";
+        }
       }
     }
 

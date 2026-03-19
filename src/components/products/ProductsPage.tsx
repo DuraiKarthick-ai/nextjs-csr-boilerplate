@@ -1,29 +1,9 @@
 import React from "react";
 import { useProducts } from "@/hooks/useProducts";
-import { setTokenAccessor, setSessionRefresher } from "@/utils/apiClient";
-import type { AuthContextType, SignItem } from "@/types";
+import { usePortalAuth } from "@/hooks/usePortalAuth";
+import AuthGate from "@/components/auth/AuthGate";
+import type { SignItem } from "@/types";
 import styles from "./ProductsPage.module.css";
-
-type AuthContextModule = {
-  /** Host may expose the raw Context */
-  AuthContext?: React.Context<AuthContextType>;
-  default?: React.Context<AuthContextType>;
-  /** Or a useAuth hook */
-  useAuth?: () => AuthContextType;
-  /** Or a helper to read auth without consuming Context directly */
-  getAuth?: () => AuthContextType;
-};
-
-const fallbackUseAuth = (): AuthContextType => ({
-  isAuthenticated: false,
-  isLoading: false,
-  user: null,
-  error: "Portal auth unavailable",
-  login: () => {},
-  logout: async () => {},
-  getAccessToken: async () => null,
-  refreshSession: async () => false,
-});
 
 /* ── column config ─────────────────────────────────────────────── */
 
@@ -150,42 +130,18 @@ export default function ProductsPage({
 }: {
   initialProducts?: SignItem[];
 }) {
-  /* ── portal auth context (dynamic import) ─── */
-  const [auth, setAuth] = React.useState<AuthContextType>(() => fallbackUseAuth());
+  /* ── portal auth context (hook-safe) ─── */
+  const auth = usePortalAuth();
 
-  React.useEffect(() => {
-    let cancelled = false;
-    if (typeof window === "undefined") return;
-    (async () => {
-      try {
-        const portalAuth = (await import(
-          "portal/AuthContext"
-        )) as unknown as AuthContextModule;
-
-        if (cancelled) return;
-
-        // Prefer useAuth hook if exposed by the host
-        if (portalAuth.useAuth) {
-          setAuth(portalAuth.useAuth());
-        } else if (portalAuth.getAuth) {
-          setAuth(portalAuth.getAuth());
-        }
-      } catch {
-        // keep fallback — running standalone without the portal
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
   const { products, isLoading, error, refetch } = useProducts({
     initialProducts,
   });
 
-  React.useEffect(() => {
-    setTokenAccessor(auth.getAccessToken);
-    setSessionRefresher(auth.refreshSession);
-  }, [auth.getAccessToken, auth.refreshSession]);
+  /* ── Token wiring is no longer needed here ───────────────────────
+   * The apiClient's request interceptor now dynamically imports
+   * portal/AuthTokenService.getToken() and attaches the Bearer token
+   * automatically. No manual accessor injection required.
+   * ─────────────────────────────────────────────────────────────── */
 
   /* ── search filter ─── */
   const [search, setSearch] = React.useState("");
@@ -205,6 +161,7 @@ export default function ProductsPage({
 
   /* ── render ─── */
   return (
+    <AuthGate>
     <div className={styles.root}>
       {/* Header */}
       <div className={styles.header}>
@@ -213,7 +170,7 @@ export default function ProductsPage({
           <p className={styles.subtitle}>
             Loaded from the <strong>Signs</strong> micro-frontend
             {auth.isAuthenticated && auth.user && (
-              <> — authenticated as {auth.user.email}</>
+              <> — authenticated as {auth.user.email ?? auth.user.name ?? auth.user.sub}</>
             )}
           </p>
         </div>
@@ -332,5 +289,6 @@ export default function ProductsPage({
         </>
       )}
     </div>
+    </AuthGate>
   );
 }

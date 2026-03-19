@@ -53,18 +53,34 @@ export interface ProductsResponse {
  * Re-export AuthContextType so Signs can type-check
  * the federated context without importing the full portal package.
  */
+export interface AuthUser {
+  sub: string;
+  email: string | null;
+  name: string | null;
+  roles: string[];
+}
+
 export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: {
-    sub: string;
-    email: string;
-    name: string;
-    roles: string[];
-  } | null;
+  user: AuthUser | null;
   error: string | null;
   login: () => void;
   logout: () => Promise<void>;
   getAccessToken: () => Promise<string | null>;
   refreshSession: () => Promise<boolean>;
+}
+
+/**
+ * Recursively replaces `undefined` values with `null` so the object is
+ * safe to pass through `JSON.stringify` / Next.js `getServerSideProps`.
+ */
+export function sanitizeUser(raw: Record<string, unknown> | null | undefined): AuthUser | null {
+  if (!raw) return null;
+  return {
+    sub: typeof raw.sub === "string" ? raw.sub : "",
+    email: typeof raw.email === "string" ? raw.email : null,
+    name: typeof raw.name === "string" ? raw.name : null,
+    roles: Array.isArray(raw.roles) ? raw.roles : [],
+  };
 }

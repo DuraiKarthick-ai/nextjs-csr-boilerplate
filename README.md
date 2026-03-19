@@ -23,6 +23,8 @@ The `signs-app` is configured as a **remote** in the Module Federation setup.
 - **Consumes:**
   - `portal/AuthContext`: Consumes the authentication context from the `portal-app` to get access to the user's session and tokens.
 
+> 📖 **For a detailed guide on how authentication works in this MFE, see [AUTHENTICATION.md](./AUTHENTICATION.md).**
+
 ### API Proxy
 
 To handle CORS issues when calling the backend API from the browser, this application uses a Next.js API route as a proxy.
