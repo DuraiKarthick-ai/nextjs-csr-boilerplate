@@ -50,7 +50,7 @@ function resolvePortalAuthContext(): Promise<React.Context<AuthContextType> | nu
   return _ctxPromise;
 }
 
-// ── Fallback (standalone / no Portal) ─────────────────────────────
+// ── Fallback (standalone / no Portal) New─────────────────────────────
 
 const fallbackAuth: AuthContextType = {
   isAuthenticated: false,
