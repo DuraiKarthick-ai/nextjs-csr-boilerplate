@@ -55,11 +55,15 @@ const STATUS_CONFIG: Record<JobStatus, { className: string; icon: string }> = {
 
 interface SignsManagementProps {
   data: SignsDashboardData;
+  /** Whether the dashboard data is currently being fetched */
+  isLoading?: boolean;
+  /** Callback to trigger a data refresh */
+  onRefresh?: () => void;
 }
 
 /* ── Component ─────────────────────────────────────────────────── */
 
-export default function SignsManagement({ data }: SignsManagementProps) {
+export default function SignsManagement({ data, isLoading, onRefresh }: SignsManagementProps) {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [currentPage, setCurrentPage] = React.useState(1);
 
@@ -79,8 +83,14 @@ export default function SignsManagement({ data }: SignsManagementProps) {
       <div className={styles.topBar}>
         <div className={styles.topBarLeft}>
           <span className={styles.gridIcon} aria-hidden>⣿</span>
-          <button className={styles.refreshBtn} type="button" aria-label="Refresh">
-            ↻
+          <button
+            className={styles.refreshBtn}
+            type="button"
+            aria-label="Refresh"
+            disabled={isLoading}
+            onClick={() => onRefresh?.()}
+          >
+            {isLoading ? "⏳" : "↻"}
           </button>
           <span className={styles.lastUpdated}>{data.lastUpdated}</span>
         </div>
