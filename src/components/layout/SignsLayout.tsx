@@ -2,19 +2,8 @@ import React from "react";
 import Sidebar from "./Sidebar";
 import SignsManagement from "@/components/dashboard/SignsManagement";
 import { SIDEBAR_ITEMS } from "@/data/mockDashboard";
-import { MOCK_DASHBOARD_DATA } from "@/data/mockDashboard";
-import type { SignsDashboardData } from "@/types/dashboard";
+import { useDashboard } from "@/hooks/useDashboard";
 import styles from "./SignsLayout.module.css";
-
-/* ── Props ─────────────────────────────────────────────────────── */
-
-interface SignsLayoutProps {
-  /**
-   * Dashboard data — defaults to mock data.
-   * When the real API is ready, pass live data here.
-   */
-  dashboardData?: SignsDashboardData;
-}
 
 /* ── Component ─────────────────────────────────────────────────── */
 
@@ -22,12 +11,13 @@ interface SignsLayoutProps {
  * SignsLayout — Top-level layout for the Signs MFE.
  *
  * Renders a left sidebar with navigation and the active screen
- * in the content area. Currently only "Signs Management" has a
- * real screen; other sidebar items show a placeholder.
+ * in the content area. Dashboard data is fetched from the remote
+ * API via the `useDashboard` hook; on error the UI falls back to
+ * mock data so the screen is never blank.
  */
-export default function SignsLayout({ dashboardData }: SignsLayoutProps) {
+export default function SignsLayout() {
   const [activeId, setActiveId] = React.useState("signs-management");
-  const data = dashboardData ?? MOCK_DASHBOARD_DATA;
+  const { data, isLoading, error, refetch } = useDashboard();
 
   return (
     <div className={styles.layout}>
@@ -38,7 +28,31 @@ export default function SignsLayout({ dashboardData }: SignsLayoutProps) {
       />
       <main className={styles.content}>
         {activeId === "signs-management" ? (
-          <SignsManagement data={data} />
+          <>
+            {/* Non-blocking error banner */}
+            {error && (
+              <div className={styles.errorBanner}>
+                <span>⚠ {error}</span>
+                <button
+                  className={styles.retryBtn}
+                  type="button"
+                  onClick={() => void refetch()}
+                >
+                  Retry
+                </button>
+              </div>
+            )}
+
+            {/* Show spinner ONLY on initial load, then swap to the dashboard */}
+            {isLoading && data.recentActivity.length === 0 ? (
+              <div className={styles.loadingOverlay}>
+                <div className={styles.spinner} />
+                <p>Loading dashboard…</p>
+              </div>
+            ) : (
+              <SignsManagement data={data} isLoading={isLoading} onRefresh={refetch} />
+            )}
+          </>
         ) : (
           <PlaceholderScreen id={activeId} />
         )}
