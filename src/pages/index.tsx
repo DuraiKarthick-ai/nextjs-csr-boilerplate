@@ -1,14 +1,22 @@
-﻿import React from "react";
+﻿"use client";
+import { useState } from "react";
+
+import React from "react";
 import dynamic from "next/dynamic";
+
+import Header from "../components/Header/Header";
+import Layout from "../components/Layout/layout";
+
+import styles from "./index.module.scss";
 
 const AuthGate = dynamic(() => import("@/components/auth/AuthGate"), {
   ssr: false,
 });
 
-const SignsLayout = dynamic(
-  () => import("@/components/layout/SignsLayout"),
-  { ssr: false }
-);
+// const SignsLayout = dynamic(
+//   () => import("@/components/layout/SignsLayout"),
+//   { ssr: false }
+// );
 
 /**
  * Landing page for the Signs app.
@@ -22,12 +30,14 @@ const SignsLayout = dynamic(
  * Module Federation's shared React singleton — not available during SSR.
  */
 export default function SignsIndex() {
+
+  const [open, setOpen] = useState(true);
+
   return (
     <>
-      <title>Signs Management</title>
-      <AuthGate>
-        <SignsLayout />
-      </AuthGate>
+        <Header open={open} toggle={() => setOpen(!open)} />
+
+        <Layout open={open} />
     </>
   );
 }

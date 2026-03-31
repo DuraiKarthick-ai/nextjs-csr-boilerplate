@@ -1,0 +1,75 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+@use "../../styles/breakpoint" as *;
+
+.sideNav {
+  background-color: $primary-color;
+  padding: 14px 20px;
+  height: 100%;
+
+  a {
+    @include font-size(16px);
+    color: $white-color;
+    @include flex();
+    @include align-items(center);
+  }
+
+  .myApps {
+    a {
+      padding: 6px 0;
+
+      i {
+        padding: 12px 6px;
+        margin-right: 12px;
+        background-color: $primary-color;
+        border-radius: 4px;
+      }
+    }
+  }
+
+  nav {
+    ul {
+      li {
+        margin: 16px 0;
+
+        a {
+          padding: 14px 20px;
+          border-radius: 4px;
+          border-left: 3px solid $primary-color;
+
+          &.active {
+            background-color: $sideNavActive;
+            border-left: 3px solid $white-color;
+
+
+            i {
+              transform: rotate(180deg);
+            }
+          }
+
+          &:hover {
+            background-color: $sideNavActive;
+            border-left: 3px solid $white-color;
+          }
+
+          i {
+            margin-left: auto;
+          }
+        }
+      }
+    }
+  }
+
+  .bottomLink {
+    padding: 20px 0;
+    border-top: 1px solid $white-color;
+
+    a {
+      padding: 14px 20px;
+    }
+
+    i {
+      margin-right: 12px;
+    }
+  }
+}

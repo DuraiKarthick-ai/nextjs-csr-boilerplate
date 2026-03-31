@@ -1,0 +1,72 @@
+
+// Breakpoint Variables
+$sm: 576px !default;
+$md: 768px !default;
+$lg: 992px !default;
+$xl: 1200px !default;
+
+// Color Variables
+$primary-color: #005DAB;
+$primary-btn-color: #3071A9;
+$primary-btn-hover-color: #4580B2;
+
+
+
+
+$title-color: #333333;
+$text-color: #666666;
+$light-black-color: #999999;
+$bg-color: #F8F8F8;
+$black-medium-color: #404040;
+$black-color: #000000;
+$theme-yellow-color: #EEE8A9;
+$white-color: #ffffff;
+
+$sideNavActive: #2f7abb;
+
+$extra-light-color: #F4F5F5;
+$light-gray: #EEEEEE;
+$medium-gray: #D9D9D9;
+$gray: #AFAFAF;
+$red-color: #C00000;
+
+$Roboto: 'Roboto';
+
+@font-face {
+  font-family: "Roboto";
+  src:
+    local("Roboto-Bold"),
+    url(../fonts/Roboto-Bold.ttf) format("truetype");
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src:
+    local("Roboto-Medium"),
+    url(../fonts/Roboto-Medium.ttf) format("truetype");
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src:
+    local("Roboto-Regular"),
+    url(../fonts/Roboto-Regular.ttf) format("truetype");
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "Roboto";
+  src:
+    local("Roboto-Light"),
+    url(../fonts/Roboto-Light.ttf) format("truetype");
+  font-weight: 300;
+  font-style: normal;
+}
+
+
+

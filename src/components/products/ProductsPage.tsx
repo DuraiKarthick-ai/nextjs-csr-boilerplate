@@ -1,5 +1,5 @@
 import React from "react";
-import SignsLayout from "@/components/layout/SignsLayout";
+// import SignsLayout from "@/components/layout/SignsLayout";
 
 /* ── component ─────────────────────────────────────────────────── */
 
@@ -14,5 +14,5 @@ import SignsLayout from "@/components/layout/SignsLayout";
  * API inside SignsLayout → useDashboard.
  */
 export default function ProductsPage() {
-  return <SignsLayout />;
+  // return <SignsLayout />;
 }

@@ -1,0 +1,120 @@
+@use "variables" as *;
+@use "mixins" as *;
+@use "typography" as *;
+@use "utilities" as *;
+@use "breakpoint" as *;
+@use "reset" as *;
+
+body {
+  background-color: $bg-color;
+  font-family: $Roboto;
+  @include font-size(14px);
+  color: $black-color;
+  @include up($lg) {
+    @include font-size(16px);
+  }
+
+  .container {
+    @include container();
+  }
+}
+
+.primaryButton {
+  font-family: $Roboto;
+  @include font-size(16px);
+  font-weight: 400;
+  line-height: 20px;
+  color: $white-color;
+  border-radius: 3px;
+  padding: 8px 36px;
+  border: 2px solid $primary-btn-color;
+  background-color: $primary-btn-color;
+  transition: transform 300ms ease;
+
+  &:hover {
+    background-color: $primary-btn-hover-color;
+  }
+}
+
+.primaryButtonOutline {
+  font-family: $Roboto;
+  @include font-size(16px);
+  font-weight: 400;
+  line-height: 20px;
+  color: $text-color;
+  border-radius: 3px;
+  border: 2px solid $primary-btn-color;
+  padding: 8px 36px;
+  background-color: $white-color;
+  transition: transform 300ms ease;
+
+  &:hover {
+    border-color: $primary-btn-hover-color;
+  }
+}
+
+input[type="text"],
+input[type="number"],
+input[type="password"] {
+  @include font-size(16px);
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: normal;
+  color: $text-color;
+  width: 100%;
+  border: none;
+  padding: 12px 8px;
+  border-bottom: 2px solid $medium-gray;
+  background-color: $extra-light-color;
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+  }
+
+  &:disabled {
+    color: $light-black-color;
+  }
+}
+
+.inputLabelWrap {
+  position: relative;
+
+  .iconClose {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateX(-50%);
+    margin-top: 4px;
+    cursor: pointer;
+  }
+}
+
+.dropdown {
+  position: relative;
+
+  select {
+    @include font-size(16px);
+    line-height: 20px;
+    font-weight: 400;
+    letter-spacing: normal;
+    color: $text-color;
+    width: 100%;
+    border: none;
+    padding: 12px 8px;
+    background-color: $extra-light-color;
+    border-bottom: 2px solid $medium-gray;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+  }
+  i {
+    position: absolute;
+    margin-top: -2px;
+    top: 50%;
+    right: 6px;
+    transform: translateX(-50%);
+  }
+}

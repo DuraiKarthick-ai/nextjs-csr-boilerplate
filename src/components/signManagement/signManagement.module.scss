@@ -1,0 +1,179 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+@use "../../styles/breakpoint" as *;
+
+.contentWrap {
+  border: 1px solid $medium-gray;
+  border-radius: 10px;
+	height: 100%;
+	box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+
+  .topContentBar {
+		padding: 16px;
+    @include flex();
+    @include justify-content(space-between);
+		
+
+    ul {
+      @include flex();
+      @include align-items(center);
+			li {
+
+				p {
+					@include font-size(12px);
+    			font-weight: 500;
+				}
+			}
+    }
+
+		.leftActionWrap {
+			ul {
+				
+				li {
+					position: relative;
+					padding: 0 16px;
+
+					&:first-child {
+						padding-left: 0;
+					}
+
+					&:last-child {
+						padding-right: 0;
+					}
+
+					&:first-child:after {
+						content: '';
+						position: absolute;
+						border-left: 1px solid #CCCCCC;
+						height: 100%;
+						right: 0;
+						top: 0;
+					}
+				}
+			}
+		}
+
+		.rightActionWrap {
+			ul {
+				
+				li {
+					padding: 0 10px;
+
+					&:last-child {
+						padding-right: 0;
+					}
+				}
+			}
+		}
+  }
+
+  .section {
+		padding: 16px;
+
+		.sectionTitle {
+			h2 {
+				padding-bottom: 10px;
+			}
+		}
+
+		.groupBox {
+			padding: 30px 24px;
+			border: 1px solid $medium-gray;
+			border-radius: 10px;
+			// height: 100%;
+
+			.subTitle {
+				padding-bottom: 26px;
+
+				p {
+					@include font-size(22px);
+					line-height: 24px;
+				}
+			}
+
+			.gridWrap {
+				margin-left: -16px;
+				margin-right: -16px;
+				max-width: 95%;
+
+				.grid {
+					padding: 0 16px;
+					flex: 1;
+
+					ul {
+						li {
+							padding-bottom: 20px;
+							position: relative;
+
+							&:last-child {
+								padding-bottom: 0;
+							}
+
+							.addField {
+								position: absolute;
+								top: 50%;
+								right: -52px;
+								transform: translateX(-50%);
+								// border: 1px solid $medium-gray;
+								padding: 6px;
+								border-radius: 16px;
+								cursor: pointer;
+							}
+						}
+					}
+				}
+			}
+
+		}
+
+		.buttonWrap {
+			max-width: 95%;
+			padding: 30px 16px;
+			margin-left: -16px;
+			margin-right: -16px;
+
+			ul {
+				@include flex();
+				@include justify-content(end);
+
+				li {
+					padding: 0 6px;
+
+					&:last-child {
+						padding-right: 0;
+					}
+				}
+			}
+		}
+  }
+}
+
+.tabContainer {
+  display: inline-flex;
+  border: 1px solid #d1d1d1;
+  border-radius: 4px;
+  overflow: hidden;
+	margin-bottom: 26px;
+
+  .tab {
+    @include font-size(14px);
+    font-weight: 500;
+    color: $text-color;
+    padding: 6px 20px;
+    background-color: $white-color;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    border-right: 1px solid $medium-gray;
+    transition: all 0.2s ease;
+
+    &:last-child {
+      border-right: none;
+    }
+
+    &.active {
+      background: $primary-btn-color;
+      color: $white-color;
+    }
+  }
+}

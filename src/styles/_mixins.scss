@@ -1,0 +1,51 @@
+
+@mixin font-size($size, $line-height: normal) {
+  font-size: $size;
+  line-height: $line-height;
+}
+
+
+@mixin container($width: 1400px) {
+  max-width: $width;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+@mixin flex {
+  display: -webkit-box;    /* old WebKit */
+  display: -ms-flexbox;    /* IE10/11 */
+  display: flex;           /* modern */
+}
+
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin flex-wrap($wrap) {
+  -ms-flex-wrap: $wrap;
+  flex-wrap: $wrap;
+}
+
+@mixin justify-content($value) {
+  /* Legacy fallbacks */
+  -webkit-box-pack: #{_box-pack($value)};
+  -ms-flex-pack: #{_box-pack($value)};
+
+  /* Modern */
+  justify-content: $value;
+}
+
+@mixin align-items($value) {
+  -webkit-box-align: #{_box-align($value)};
+  -ms-flex-align: #{_box-align($value)};
+  align-items: $value;
+}
+
+@mixin align-content($value) {
+  /* No -webkit-box equivalent for multi-line content alignment */
+  -ms-flex-line-pack: #{_box-pack($value)};
+  align-content: $value;
+}

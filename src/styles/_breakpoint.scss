@@ -1,0 +1,24 @@
+@use 'variables' as *;
+
+//Oprion 1
+// Generic "min-width" mixin
+@mixin up($min) {
+  // Use directly with numbers or variables: 768px, $md, etc.
+  @media (min-width: $min) {
+    @content;
+  }
+}
+
+// Optional: down & between helpers
+@mixin down($max) {
+  // subtract a tiny value to avoid overlap with the next min-width query
+  @media (max-width: ($max - 1)) {
+    @content;
+  }
+}
+
+@mixin between($min, $max) {
+  @media (min-width: $min) and (max-width: ($max - 1)) {
+    @content;
+  }
+}
