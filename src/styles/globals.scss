@@ -88,6 +88,28 @@ input[type="password"] {
     margin-top: 4px;
     cursor: pointer;
   }
+
+  .validationMsg {
+    @include font-size(12px);
+    line-height: 16px;
+    font-weight: 400;
+    display: inline-block;
+    padding: 6px 0;
+
+    &.info {
+      color: $text-color;
+    }
+    &.error {
+      color: $red-color
+    }
+  }
+
+  label {
+    .mandatoryStar {
+      color: $red-color;
+      margin-left: 4px;
+    }
+  }
 }
 
 .dropdown {

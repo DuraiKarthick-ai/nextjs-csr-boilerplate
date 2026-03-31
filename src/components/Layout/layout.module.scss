@@ -4,9 +4,8 @@
 
 .layout {
   display: flex;
-  height: calc(100dvh - 134px);
-  // 910px is the minimum design height for the layout; adjust if design requirements change
-  min-height: calc(910px - 134px);
+  // height: calc(100vh - 134px);
+  // min-height: calc(910px - 134px);
 }
 
 .sidebar {
