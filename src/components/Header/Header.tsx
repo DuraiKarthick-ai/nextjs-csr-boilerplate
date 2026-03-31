@@ -70,7 +70,7 @@ export default function Header({ toggle, open }: HeaderProps) {
                     </Link>
                   </li>
                   <li>
-                    <Link href={""} className="d-flex flex-aligin-center">
+                    <Link href={""} className="d-flex flex-align-center">
                       <span>Welcome, Roshini</span>
                       <i>
                         {downIcon}
