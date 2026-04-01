@@ -1,11 +1,17 @@
 "use client";
 import { useState } from "react";
 import styles from "./signManagement.module.scss";
+import TextField from "@mui/material/TextField";
+import { ThemeProvider } from "@mui/material/styles";
+import theme from "@/theme/customizeTheme";
+import { FormControl, MenuItem, Select, Switch } from "@mui/material";
 
 export default function SignManagement() {
   const [active, setActive] = useState("item");
 
   const [value, setValue] = useState("");
+
+  // const [printOnlyOnHand, setPrintOnlyOnHand] = useState(true);
 
   const dropdownIcon = (
     <svg
@@ -144,7 +150,10 @@ export default function SignManagement() {
         </div>
         <div className={styles.groupBox}>
           <div className={styles.subTitle}>
-            <p>Quick Print - Item</p>
+            {false && (
+              <p>Quick Print - Item</p>
+            )}
+            <p>Quick Print - Department & Category</p>
           </div>
 
           <div className={styles.tabContainer}>
@@ -168,95 +177,191 @@ export default function SignManagement() {
             </button>
           </div>
 
-          <div className={`d-flex ${styles.gridWrap}`}>
-            <div className={styles.grid}>
-              <div className="inputLabelWrap">
-                <label className="label">Size</label>
-                {/* <input type="text" placeholder="Select Any"></input> */}
-
-                <div className="dropdown">
-                  <i>{dropdownIcon}</i>
-                  <select>
-                    <option>Select Any</option>
-                    <option>Option 1</option>
-                    <option>Option 2</option>
-                    <option>Option 3</option>
-                  </select>
-                </div>
+          {/* Ouick Print Item */}
+          {false && (
+            <div className={`d-flex ${styles.gridWrap}`}>
+              <div className={styles.grid}>
+                <ul>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Size</label>
+                      <ThemeProvider theme={theme}>
+                        <FormControl fullWidth size="small">
+                          <Select
+                            displayEmpty
+                            defaultValue=""
+                            inputProps={{ 'aria-label': 'Select Size' }}
+                          >
+                            <MenuItem value="" disabled>
+                              Select Size
+                            </MenuItem>
+                            <MenuItem value={10}>Small</MenuItem>
+                            <MenuItem value={20}>Medium</MenuItem>
+                            <MenuItem value={30}>Large</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </ThemeProvider>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div className={styles.grid}>
+                <ul>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Item # / UPC</label>
+                      {/* <input
+                        type="text"
+                        value={value}
+                        onChange={(e) => setValue(e.target.value)}
+                        placeholder="Enter or Scan Item # / UPC"
+                      ></input> */}
+                      <ThemeProvider theme={theme}>
+                        <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Department #" variant="outlined" />
+                      </ThemeProvider>
+                      {value && (
+                        <i className="iconClose" onClick={() => setValue("")}>{clearIcon}</i>
+                      )}
+                    </div>
+                  </li>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Item # / UPC</label>
+                      <ThemeProvider theme={theme}>
+                        <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Department #" variant="outlined" />
+                      </ThemeProvider>
+                    </div>
+                  </li>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Item # / UPC</label>
+                      <ThemeProvider theme={theme}>
+                        <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Department #" variant="outlined" />
+                      </ThemeProvider>
+                    </div>
+                  </li>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Item # / UPC</label>
+                      <ThemeProvider theme={theme}>
+                        <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Department #" variant="outlined" />
+                      </ThemeProvider>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div className={styles.grid}>
+                <ul>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Quantity</label>
+                      <ThemeProvider theme={theme}>
+                        <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Department #" variant="outlined" />
+                      </ThemeProvider>
+                    </div>
+                  </li>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Quantity</label>
+                      <ThemeProvider theme={theme}>
+                        <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Department #" variant="outlined" />
+                      </ThemeProvider>
+                    </div>
+                  </li>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Quantity</label>
+                      <ThemeProvider theme={theme}>
+                        <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Department #" variant="outlined" />
+                      </ThemeProvider>
+                    </div>
+                  </li>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Quantity</label>
+                      <ThemeProvider theme={theme}>
+                        <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Department #" variant="outlined" />
+                      </ThemeProvider>
+                    </div>
+                    <div className={styles.addField}>
+                      <i>
+                        {addFieldIcon}
+                      </i>
+                    </div>
+                  </li>
+                </ul>
               </div>
             </div>
-            <div className={styles.grid}>
-              <ul>
-                <li>
-                  <div className="inputLabelWrap">
-                    <label className="label">Item # / UPC</label>
-                    <input
-                      type="text"
-                      value={value}
-                      onChange={(e) => setValue(e.target.value)}
-                      placeholder="Enter or Scan Item # / UPC"
-                    ></input>
-                    {value && (
-                      <i className="iconClose" onClick={() => setValue("")}>{clearIcon}</i>
-                    )}
-                  </div>
-                </li>
-                <li>
-                  <div className="inputLabelWrap">
-                    <label className="label">Item # / UPC</label>
-                    {/* This input is intentionally uncontrolled for demonstration purposes. */}
-                    <input type="text" placeholder="Enter or Scan Item # / UPC"></input>
-                  </div>
-                </li>
-                <li>
-                  <div className="inputLabelWrap">
-                    <label className="label">Item # / UPC</label>
-                    <input type="text" placeholder="Enter or Scan Item # / UPC"></input>
-                  </div>
-                </li>
-                <li>
-                  <div className="inputLabelWrap">
-                    <label className="label">Item # / UPC</label>
-                    <input type="text" placeholder="Enter or Scan Item # / UPC"></input>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div className={styles.grid}>
-              <ul>
-                <li>
-                  <div className="inputLabelWrap">
-                    <label className="label">Quantity</label>
-                    <input type="text" placeholder="1"></input>
-                  </div>
-                </li>
-                <li>
-                  <div className="inputLabelWrap">
-                    <label className="label">Quantity</label>
-                    <input type="text" placeholder="1"></input>
-                  </div>
-                </li>
-                <li>
-                  <div className="inputLabelWrap">
-                    <label className="label">Quantity</label>
-                    <input type="text" placeholder="1"></input>
-                  </div>
-                </li>
-                <li>
-                  <div className="inputLabelWrap">
-                    <label className="label">Quantity</label>
-                    <input type="text" placeholder="1"></input>
-                  </div>
-                  <div className={styles.addField}>
-                    <i>
-                      {addFieldIcon}
-                    </i>
-                  </div>
-                </li>
-              </ul>
-            </div>
-          </div>
+          )}
 
+          {/* Ouick Print Department & Category */}
+          {true && (
+            <div className={`d-flex ${styles.gridWrap}`}>
+              <div className={styles.grid}>
+                <ul>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Department #<span className="mandatoryStar">*</span></label>
+                      <ThemeProvider theme={theme}>
+                        <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Department #" variant="outlined" />
+                      </ThemeProvider>
+                    </div>
+                  </li>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Cat Code #</label>
+                      <ThemeProvider theme={theme}>
+                        <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Category Code" variant="outlined" />
+                      </ThemeProvider>
+                      <span className="validationMsg info">Leave Blank for All</span>
+                    </div>
+                  </li>
+                  <li>
+                    <div className={styles.toggleWrap}>
+                      <label className="label">PRINT ONLY ITEMS WITH ON HAND</label>
+                      <ThemeProvider theme={theme}>
+                        <Switch defaultChecked />
+                      </ThemeProvider>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div className={styles.grid}>
+                <ul>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Size</label>
+                      <ThemeProvider theme={theme}>
+                        <FormControl fullWidth size="small">
+                          <Select
+                            displayEmpty
+                            defaultValue=""
+                            inputProps={{ 'aria-label': 'Select Size' }}
+                          >
+                            <MenuItem value="" disabled>
+                              Select Size
+                            </MenuItem>
+                            <MenuItem value={10}>Small</MenuItem>
+                            <MenuItem value={20}>Medium</MenuItem>
+                            <MenuItem value={30}>Large</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </ThemeProvider>
+                    </div>
+                  </li>
+                  <li>
+                    <div className="inputLabelWrap">
+                      <label className="label">Quantity</label>
+                      <ThemeProvider theme={theme}>
+                        <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Quantity" variant="outlined" />
+                      </ThemeProvider>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          )}
+          
           <div className={styles.buttonWrap}>
             <ul>
               <li>

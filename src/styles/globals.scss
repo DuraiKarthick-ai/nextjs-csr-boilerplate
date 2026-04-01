@@ -81,29 +81,29 @@ body {
   font-weight: 500;
 }
 
-input[type="text"],
-input[type="number"],
-input[type="password"] {
-  @include font-size(16px);
-  line-height: 20px;
-  font-weight: 400;
-  letter-spacing: normal;
-  color: $text-color;
-  width: 100%;
-  border: none;
-  padding: 12px 8px;
-  border-bottom: 2px solid $medium-gray;
-  background-color: $extra-light-color;
+// input[type="text"],
+// input[type="number"],
+// input[type="password"] {
+//   @include font-size(16px);
+//   line-height: 20px;
+//   font-weight: 400;
+//   letter-spacing: normal;
+//   color: $text-color;
+//   width: 100%;
+//   border: none;
+//   padding: 12px 8px;
+//   border-bottom: 2px solid $medium-gray;
+//   background-color: $extra-light-color;
 
-  &:focus {
-    outline: none;
-    border-color: $primary-color;
-  }
+//   &:focus {
+//     outline: none;
+//     border-color: $primary-color;
+//   }
 
-  &:disabled {
-    color: $light-black-color;
-  }
-}
+//   &:disabled {
+//     color: $light-black-color;
+//   }
+// }
 
 .inputLabelWrap {
   position: relative;
