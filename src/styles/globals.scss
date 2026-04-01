@@ -53,6 +53,34 @@ body {
   }
 }
 
+.printButton {
+  font-family: $Roboto;
+  @include font-size(14px);
+  font-weight: 400;
+  line-height: 16px;
+  color: $white-color;
+  border-radius: 3px;
+  padding: 8px 36px;
+  border: 2px solid $primary-btn-color;
+  background-color: $primary-btn-color;
+  transition: transform 300ms ease;
+
+  &:hover {
+    background-color: $primary-btn-hover-color;
+  }
+}
+
+.statusTag {
+  background-color: $status-green;
+  @include font-size(14px);
+  line-height: 18px;
+  color: $text-color;
+  text-align: center;
+  padding: 8px 12px;
+  border-radius: 3px;
+  font-weight: 500;
+}
+
 input[type="text"],
 input[type="number"],
 input[type="password"] {

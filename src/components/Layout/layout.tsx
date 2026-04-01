@@ -3,6 +3,7 @@ import styles from "./layout.module.scss";
 import SignManagement from "../signManagement/signManagement";
 
 import { ReactNode } from "react";
+import Dashboard from "../dashboard/dashboard";
 
 interface LayoutProps {
   open: boolean;
@@ -19,7 +20,8 @@ export default function Layout({ open, children }: LayoutProps) {
         </aside>
           
         <main className={styles.main}>
-          <SignManagement></SignManagement>
+          {/* <SignManagement></SignManagement> */}
+          <Dashboard></Dashboard>
           {/* will call the content here */}
           {children}
           
