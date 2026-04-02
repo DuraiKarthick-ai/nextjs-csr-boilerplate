@@ -16,20 +16,21 @@ export interface StatCard {
   icon: "jobs" | "completed" | "templates" | "printers";
 }
 
-/** Job status in the Recent Activity table */
-export type JobStatus = "Completed" | "Pending" | "Printing" | "Failed";
-
-/** A single row in the Recent Activity table */
-export interface RecentActivityJob {
-  jobId: string;
-  product: string;
-  template: string;
-  status: JobStatus;
+/**
+ * A single row in the Batch Activity table.
+ * Matches the MockAPI v1/dashboard response shape.
+ */
+export interface DashboardActivity {
+  id: number;
+  activityName: string;
+  status: string;
+  printCount: number;
+  lastUpdated: string;
 }
 
 /** Full dashboard data payload */
 export interface SignsDashboardData {
   stats: StatCard[];
-  recentActivity: RecentActivityJob[];
+  activities: DashboardActivity[];
   lastUpdated: string;
 }

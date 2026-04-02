@@ -5,84 +5,77 @@ import {
   type PortalAuthResult,
 } from "@/hooks/usePortalAuth";
 
-/* ── AuthGate ──────────────────────────────────────────────────────
+/**
+ * AuthGate — UI-layer authentication gate.
  *
- * Wraps any screen that requires Portal authentication.
+ * OWASP A01: This is the client-side UX layer only.
+ * Real server-side protection is enforced by src/middleware.ts which
+ * validates tokens before any React code runs.
  *
- *  • Standalone mode  → shows a message + redirect link to the Portal.
- *  • Not authenticated → shows a "please log in" prompt.
- *  • Authenticated     → renders children.
- *
- * Usage:
- *   <AuthGate>
- *     <ProductsPage />
- *   </AuthGate>
- *
- * Or use the hook directly for more control:
- *   const auth = usePortalAuth();
- * ─────────────────────────────────────────────────────────────────── */
+ * Renders:
+ *  - Spinner while resolving federated context
+ *  - "Go to Portal" screen in standalone mode
+ *  - "Please Log In" if federated but unauthenticated
+ *  - children when fully authenticated
+ */
 
 interface AuthGateProps {
   children: React.ReactNode;
-  /** Optional: override where the "Go to Portal" link points. */
   portalUrl?: string;
 }
 
 export default function AuthGate({ children, portalUrl }: AuthGateProps) {
+  const authRequired = process.env.NEXT_PUBLIC_AUTH_REQUIRED !== "false";
   const auth: PortalAuthResult = usePortalAuth();
   const loginUrl = portalUrl ?? PORTAL_LOGIN_URL;
 
-  /* ── Still resolving the federated context ─── */
+  /* ── Auth bypass — skip all auth checks when disabled via env ─── */
+  if (!authRequired) {
+    return <>{children}</>;
+  }
+
   if (auth.isResolvingCtx) {
     return (
       <div style={containerStyle}>
-        <div style={spinnerStyle} />
-        <p style={{ color: "#64748b", marginTop: "1rem" }}>
+        <div style={spinnerStyle} aria-hidden="true" />
+        <p style={{ color: "#64748b", marginTop: "1rem" }} role="status">
           Connecting to Portal…
         </p>
       </div>
     );
   }
 
-  /* ── Standalone — Portal not available ─── */
   if (auth.isStandalone) {
     return (
       <div style={containerStyle}>
-        <div style={cardStyle}>
-          <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>🔒</div>
+        <div style={cardStyle} role="main">
+          <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }} aria-hidden="true">🔒</div>
           <h2 style={headingStyle}>Authentication Required</h2>
           <p style={descStyle}>
             This micro-frontend must be accessed through the{" "}
-            <strong>Portal</strong> application. Running it standalone does not
-            provide the authentication context needed to fetch data.
+            <strong>Portal</strong> application.
           </p>
-          <a href={loginUrl} style={linkBtnStyle}>
+          {/* OWASP A10: loginUrl is validated against allowlist in usePortalAuth */}
+          <a href={loginUrl} style={linkBtnStyle} rel="noopener noreferrer">
             Go to Portal →
           </a>
           <p style={hintStyle}>
-            If you&apos;re a developer, start the Portal on{" "}
-            <code style={codeStyle}>{loginUrl}</code> and access the Signs app
-            from there.
+            Developer? Start the Portal at{" "}
+            <code style={codeStyle}>{loginUrl}</code> first.
           </p>
         </div>
       </div>
     );
   }
 
-  /* ── Federated but user not authenticated yet ─── */
   if (!auth.isAuthenticated && !auth.isLoading) {
     return (
       <div style={containerStyle}>
-        <div style={cardStyle}>
-          <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>🔑</div>
+        <div style={cardStyle} role="main">
+          <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }} aria-hidden="true">🔑</div>
           <h2 style={headingStyle}>Please Log In</h2>
-          <p style={descStyle}>
-            You need to be logged in to view this page.
-          </p>
-          <button
-            onClick={() => auth.login()}
-            style={linkBtnStyle}
-          >
+          <p style={descStyle}>You need to be logged in to view this page.</p>
+          <button onClick={() => auth.login()} style={linkBtnStyle} type="button">
             Log in via Portal
           </button>
         </div>
@@ -90,23 +83,21 @@ export default function AuthGate({ children, portalUrl }: AuthGateProps) {
     );
   }
 
-  /* ── Auth loading state ─── */
   if (auth.isLoading) {
     return (
       <div style={containerStyle}>
-        <div style={spinnerStyle} />
-        <p style={{ color: "#64748b", marginTop: "1rem" }}>
+        <div style={spinnerStyle} aria-hidden="true" />
+        <p style={{ color: "#64748b", marginTop: "1rem" }} role="status">
           Checking authentication…
         </p>
       </div>
     );
   }
 
-  /* ── Authenticated — render the protected content ─── */
   return <>{children}</>;
 }
 
-/* ── Inline styles (no CSS module dependency) ─────────────────────── */
+/* ── Inline styles ───────────────────────────────────────────────── */
 
 const containerStyle: React.CSSProperties = {
   display: "flex",

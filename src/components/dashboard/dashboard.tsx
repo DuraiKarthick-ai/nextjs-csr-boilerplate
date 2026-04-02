@@ -1,7 +1,22 @@
+"use client";
+
 import Link from "next/link";
 import styles from "./dashboard.module.scss";
+import { useDashboard } from "@/hooks/useDashboard";
+import { useTableScroll } from "@/hooks/useTableScroll";
 
+/**
+ * Dashboard component — Sign Management Dashboard.
+ *
+ * Fetches batch activity data from the dashboard API via useDashboard hook
+ * and renders the Batch Activity table with live status and print counts.
+ *
+ * @returns {JSX.Element} The rendered dashboard UI.
+ */
 export default function Dashboard() {
+  const { data, isLoading, error } = useDashboard();
+  const { visibleCount, scrollRef } = useTableScroll(data.activities.length);
+  const visibleActivities = data.activities.slice(0, visibleCount);
 
   const tabIcon = (
     <svg
@@ -105,7 +120,7 @@ export default function Dashboard() {
               </i>
             </li>
             <li>
-              <p>Last Updated 10:31am - 08/02/25</p>
+              <p>{isLoading ? "Loading…" : data.lastUpdated}</p>
             </li>
           </ul>
         </div>
@@ -159,6 +174,7 @@ export default function Dashboard() {
               <p>Batch Activity</p>
             </div>
 
+            <div className={styles.tableScrollWrap} ref={scrollRef}>
             <table className={styles.table}>
               <thead>
                 <tr>
@@ -171,32 +187,30 @@ export default function Dashboard() {
               </thead>
 
               <tbody>
-                <tr>
-                  <td><p>Emergency Price Change</p></td>
-                  <td>
-                    <div className="statusTag"><span>Ready to Print</span></div></td>
-                  <td><button className="printButton">Print (10)</button></td>
-                </tr>
-
-                <tr>
-                  <td><p>Endcap</p></td>
-                  <td><div className="statusTag"><span>Ready to Print</span></div></td>
-                  <td><button className="printButton">Print (25)</button></td>
-                </tr>
-
-                <tr>
-                  <td><p>Item Name Change</p></td>
-                  <td><div className="statusTag"><span>Ready to Print</span></div></td>
-                  <td><button className="printButton">Print (12)</button></td>
-                </tr>
-
-                <tr>
-                  <td><p>Sign Audit Exceptions</p></td>
-                  <td><div className="statusTag"><span>Ready to Print</span></div></td>
-                  <td><button className="printButton">Print (12)</button></td>
-                </tr>
+                {isLoading && (
+                  <tr>
+                    <td colSpan={3}><p>Loading batch activity…</p></td>
+                  </tr>
+                )}
+                {error && (
+                  <tr>
+                    <td colSpan={3}><p>Failed to load batch activity. Please try again.</p></td>
+                  </tr>
+                )}
+                {!isLoading && !error && visibleActivities.map((activity) => (
+                  <tr key={activity.id}>
+                    <td><p>{activity.activityName}</p></td>
+                    <td>
+                      <div className="statusTag"><span>{activity.status}</span></div>
+                    </td>
+                    <td>
+                      <button className="printButton">Print ({activity.printCount})</button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
+            </div>
           </div>
 
         </div>

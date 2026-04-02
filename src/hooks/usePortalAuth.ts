@@ -1,16 +1,16 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { AuthContextType } from "@/types";
+import { AUTH_ERRORS, ROUTES, ALLOWED_PORTAL_ORIGINS } from "@/constants/auth";
 
-/* ── Portal auth bridge ────────────────────────────────────────────
+/**
+ * OWASP Fixes applied in this file:
  *
- * Lazily resolves the Portal host's AuthContext (a raw React.Context
- * object) via Module Federation, then exposes it through a normal
- * React hook so any component in this MFE can consume it.
- *
- * Usage:
- *   import { usePortalAuth } from "@/hooks/usePortalAuth";
- *   const auth = usePortalAuth();
- * ─────────────────────────────────────────────────────────────────── */
+ * A07 Auth: isDev guard on all console.log — no auth state logged in production.
+ * A09 Log:  Auth user data (email, roles) never logged in production.
+ * A10 SSRF: PORTAL_LOGIN_URL validated against ALLOWED_PORTAL_ORIGINS allowlist.
+ */
+
+const isDev = process.env.NODE_ENV === "development";
 
 // ── Singleton resolution ──────────────────────────────────────────
 
@@ -22,27 +22,21 @@ function resolvePortalAuthContext(): Promise<React.Context<AuthContextType> | nu
   if (!_ctxPromise) {
     _ctxPromise = (async () => {
       try {
-        const mod = await import("portal/AuthContext");
+        const mod = await import(/* webpackIgnore: true */ "portal/AuthContext");
         const ctx =
-          (mod as any).AuthContext ?? // named export
-          (mod as any).default; // default export
+          (mod as Record<string, unknown>).AuthContext ??
+          (mod as Record<string, unknown>).default;
         if (ctx) {
-          console.log(
-            "[Signs MFE] ✅ portal/AuthContext resolved (React.Context object)"
-          );
+          if (isDev) console.log("[Signs MFE] portal/AuthContext resolved");
           _portalCtx = ctx as React.Context<AuthContextType>;
           return _portalCtx;
         }
-        console.warn(
-          "[Signs MFE] ⚠️ portal/AuthContext module loaded but no Context object found. Exports:",
-          Object.keys(mod)
-        );
+        if (isDev) {
+          console.warn("[Signs MFE] portal/AuthContext loaded but no Context found.");
+        }
         return null;
       } catch (err) {
-        console.warn(
-          "[Signs MFE] ❌ Could not import portal/AuthContext — standalone mode",
-          err
-        );
+        if (isDev) console.warn("[Signs MFE] Standalone mode — portal/AuthContext unavailable", err);
         return null;
       }
     })();
@@ -50,34 +44,44 @@ function resolvePortalAuthContext(): Promise<React.Context<AuthContextType> | nu
   return _ctxPromise;
 }
 
-// ── Fallback (standalone / no Portal) New─────────────────────────────
+// ── Fallback (standalone / no Portal) ────────────────────────────
 
 const fallbackAuth: AuthContextType = {
   isAuthenticated: false,
   isLoading: false,
   user: null,
-  error: "Portal auth unavailable",
+  error: AUTH_ERRORS.SESSION_EXPIRED,
   login: () => {},
   logout: async () => {},
   getAccessToken: async () => null,
   refreshSession: async () => false,
 };
 
-/** The Portal URL — used to redirect when running standalone. */
-export const PORTAL_LOGIN_URL =
-  process.env.NODE_ENV === "production"
-    ? (process.env.NEXT_PUBLIC_PORTAL_REMOTE_URL_PROD ?? "https://erp-portal.costco.com")
-    : (process.env.NEXT_PUBLIC_PORTAL_REMOTE_URL_DEV ?? "https://localhost:3001");
+/**
+ * OWASP A10 Fix: Validate the Portal login URL against an allowlist.
+ * Prevents open-redirect if env var is misconfigured or tampered.
+ */
+function buildPortalLoginUrl(): string {
+  const raw =
+    process.env.NODE_ENV === "production"
+      ? (process.env.NEXT_PUBLIC_PORTAL_REMOTE_URL_PROD ?? "https://erp-portal.costco.com")
+      : (process.env.NEXT_PUBLIC_PORTAL_REMOTE_URL_DEV ?? "http://localhost:3001");
+
+  if (!ALLOWED_PORTAL_ORIGINS.some((origin) => raw.startsWith(origin))) {
+    console.error(`[usePortalAuth] PORTAL_LOGIN_URL "${raw}" is not in allowlist — using fallback`);
+    return "https://erp-portal.costco.com";
+  }
+  return raw;
+}
+
+export const PORTAL_LOGIN_URL = buildPortalLoginUrl();
 
 // ── Return type ───────────────────────────────────────────────────
 
 export interface PortalAuthResult extends AuthContextType {
-  /**
-   * `true` when the Portal host's AuthContext could NOT be resolved
-   * (i.e. the MFE is running on its own, outside the Portal shell).
-   */
+  /** true when the Portal host's AuthContext could NOT be resolved (standalone mode). */
   isStandalone: boolean;
-  /** `true` while we're still trying to import the federated context. */
+  /** true while we're still trying to import the federated context. */
   isResolvingCtx: boolean;
 }
 
@@ -86,14 +90,9 @@ export interface PortalAuthResult extends AuthContextType {
 /**
  * Custom hook that safely reads the Portal's AuthContext.
  * Works both when federated (inside the Portal) and standalone.
- *
- * Internally uses `React.useContext` on the dynamically-resolved
- * Context object — no Rules-of-Hooks violations.
  */
 export function usePortalAuth(): PortalAuthResult {
-  const [ctx, setCtx] = useState<React.Context<AuthContextType> | null>(
-    _portalCtx
-  );
+  const [ctx, setCtx] = useState<React.Context<AuthContextType> | null>(_portalCtx);
   const [resolved, setResolved] = useState(_portalCtx !== null);
 
   useEffect(() => {
@@ -112,27 +111,30 @@ export function usePortalAuth(): PortalAuthResult {
   }, []);
 
   // useContext is called unconditionally (Rules of Hooks ✓).
-  // When ctx is null we pass a dummy context whose default value is the fallback.
-  const DummyContext = useMemo(
-    () => createContext<AuthContextType>(fallbackAuth),
-    []
-  );
-
+  const DummyContext = useMemo(() => createContext<AuthContextType>(fallbackAuth), []);
   const auth = useContext(ctx ?? DummyContext);
 
   useEffect(() => {
-    if (ctx) {
-      console.log("[Signs MFE] 🔑 Auth state from portal context:", {
+    if (ctx && isDev) {
+      // OWASP A09: Log auth state only in dev — never log user PII in production
+      console.log("[Signs MFE] Auth state:", {
         isAuthenticated: auth.isAuthenticated,
-        user: auth.user,
-        hasGetAccessToken: typeof auth.getAccessToken === "function",
+        // Only log sub (non-PII) — never log email, name, or roles in prod
+        sub: auth.user?.sub ?? null,
       });
     }
-  }, [ctx, auth.isAuthenticated, auth.user, auth.getAccessToken]);
+  }, [ctx, auth.isAuthenticated, auth.user]);
 
   return {
     ...auth,
     isStandalone: resolved && ctx === null,
     isResolvingCtx: !resolved,
   };
+}
+
+/** Navigate to the login route (used by AuthGate and session-expiry handlers). */
+export function redirectToLogin(reason = "unauthenticated"): void {
+  if (typeof window !== "undefined") {
+    window.location.href = `${ROUTES.LOGIN}?reason=${reason}`;
+  }
 }

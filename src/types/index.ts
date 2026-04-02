@@ -37,19 +37,6 @@ export interface SignItem {
 export type SignItemsResponse = SignItem[];
 
 /**
- * @deprecated — kept for backward compat; aliased to SignItem.
- */
-export type Product = SignItem;
-
-/**
- * @deprecated — kept for backward compat.
- */
-export interface ProductsResponse {
-  products: SignItem[];
-  total: number;
-}
-
-/**
  * Re-export AuthContextType so Signs can type-check
  * the federated context without importing the full portal package.
  */

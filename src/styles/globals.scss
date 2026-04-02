@@ -1,170 +1,267 @@
-@use "variables" as *;
-@use "mixins" as *;
-@use "typography" as *;
-@use "utilities" as *;
-@use "breakpoint" as *;
-@use "reset" as *;
+/**
+ * OWASP A05 Fix: Fonts moved from src/fonts/ to public/fonts/
+ * so Next.js serves them as static assets with proper Cache-Control headers
+ * instead of webpack processing them.
+ *
+ * Structure fix: Using next/font/local (recommended) or direct @font-face
+ * from public/fonts (simpler, no build-time processing needed for TTFs).
+ */
 
+/* ── Partials ───────────────────────────────────────────────────── */
+@use './reset';
+@use './variables';
+@use './typography';
+@use './utilities';
+@use './breakpoint';
+@use './mixins';
+
+/* ── Roboto Font Family ─────────────────────────────────────────── */
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto-Thin.ttf') format('truetype');
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto-Light.ttf') format('truetype');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto-Medium.ttf') format('truetype');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto-SemiBold.ttf') format('truetype');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Roboto';
+  src: url('/fonts/Roboto-Italic.ttf') format('truetype');
+  font-weight: 400;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* ── Base ───────────────────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
 body {
-  background-color: $bg-color;
-  font-family: $Roboto;
-  @include font-size(14px);
-  color: $black-color;
-  @include up($lg) {
-    @include font-size(16px);
+  margin: 0;
+  padding: 0;
+  font-family: 'Roboto', sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333333;
+  background-color: #f4f5f5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ── Layout helpers ─────────────────────────────────────────────── */
+.container {
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.flex-align-center {
+  align-items: center;
+}
+
+/* ── Accessibility ──────────────────────────────────────────────── */
+/* OWASP A05: Visible focus ring for keyboard navigation */
+:focus-visible {
+  outline: 2px solid #005DAB;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Remove default outline only when :focus-visible is supported */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── Form elements ──────────────────────────────────────────────── */
+.inputLabelWrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #333333;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mandatoryStar {
+  color: #d32f2f;
+  margin-left: 2px;
+}
+
+.validationMsg {
+  font-size: 11px;
+  margin-top: 2px;
+
+  &.info {
+    color: #666666;
   }
 
-  .container {
-    @include container();
+  &.error {
+    color: #d32f2f;
   }
 }
 
+.iconClose {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(4px);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+
+  &:focus-visible {
+    outline: 2px solid #005DAB;
+    border-radius: 50%;
+  }
+}
+
+/* ── Buttons ────────────────────────────────────────────────────── */
 .primaryButton {
-  font-family: $Roboto;
-  @include font-size(16px);
-  font-weight: 400;
-  line-height: 20px;
-  color: $white-color;
-  border-radius: 3px;
-  padding: 8px 36px;
-  border: 2px solid $primary-btn-color;
-  background-color: $primary-btn-color;
-  transition: transform 300ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  background-color: #005DAB;
+  color: #ffffff;
+  border: 1px solid #005DAB;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+  min-height: 40px;
 
   &:hover {
-    background-color: $primary-btn-hover-color;
+    background-color: #004a8f;
+    border-color: #004a8f;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #005DAB;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
   }
 }
 
 .primaryButtonOutline {
-  font-family: $Roboto;
-  @include font-size(16px);
-  font-weight: 400;
-  line-height: 20px;
-  color: $text-color;
-  border-radius: 3px;
-  border: 2px solid $primary-btn-color;
-  padding: 8px 36px;
-  background-color: $white-color;
-  transition: transform 300ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  background-color: transparent;
+  color: #005DAB;
+  border: 1px solid #005DAB;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  min-height: 40px;
 
   &:hover {
-    border-color: $primary-btn-hover-color;
+    background-color: rgba(0, 93, 171, 0.06);
+  }
+
+  &:focus-visible {
+    outline: 2px solid #005DAB;
+    outline-offset: 2px;
   }
 }
 
 .printButton {
-  font-family: $Roboto;
-  @include font-size(14px);
-  font-weight: 400;
-  line-height: 16px;
-  color: $white-color;
-  border-radius: 3px;
-  padding: 8px 36px;
-  border: 2px solid $primary-btn-color;
-  background-color: $primary-btn-color;
-  transition: transform 300ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 16px;
+  background-color: #005DAB;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  min-height: 32px;
 
   &:hover {
-    background-color: $primary-btn-hover-color;
+    background-color: #004a8f;
+  }
+
+  &:focus-visible {
+    outline: 2px solid #005DAB;
+    outline-offset: 2px;
   }
 }
 
+/* ── Status tags ────────────────────────────────────────────────── */
 .statusTag {
-  background-color: $status-green;
-  @include font-size(14px);
-  line-height: 18px;
-  color: $text-color;
-  text-align: center;
-  padding: 8px 12px;
-  border-radius: 3px;
-  font-weight: 500;
-}
+  display: inline-flex;
+  align-items: center;
 
-// input[type="text"],
-// input[type="number"],
-// input[type="password"] {
-//   @include font-size(16px);
-//   line-height: 20px;
-//   font-weight: 400;
-//   letter-spacing: normal;
-//   color: $text-color;
-//   width: 100%;
-//   border: none;
-//   padding: 12px 8px;
-//   border-bottom: 2px solid $medium-gray;
-//   background-color: $extra-light-color;
-
-//   &:focus {
-//     outline: none;
-//     border-color: $primary-color;
-//   }
-
-//   &:disabled {
-//     color: $light-black-color;
-//   }
-// }
-
-.inputLabelWrap {
-  position: relative;
-
-  .iconClose {
-    position: absolute;
-    top: 50%;
-    right: 0;
-    transform: translateX(-50%);
-    margin-top: 4px;
-    cursor: pointer;
-  }
-
-  .validationMsg {
-    @include font-size(12px);
-    line-height: 16px;
-    font-weight: 400;
-    display: inline-block;
-    padding: 6px 0;
-
-    &.info {
-      color: $text-color;
-    }
-    &.error {
-      color: $red-color
-    }
-  }
-
-  label {
-    .mandatoryStar {
-      color: $red-color;
-      margin-left: 4px;
-    }
-  }
-}
-
-.dropdown {
-  position: relative;
-
-  select {
-    @include font-size(16px);
-    line-height: 20px;
-    font-weight: 400;
-    letter-spacing: normal;
-    color: $text-color;
-    width: 100%;
-    border: none;
-    padding: 12px 8px;
-    background-color: $extra-light-color;
-    border-bottom: 2px solid $medium-gray;
-    outline: none;
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    cursor: pointer;
-  }
-  i {
-    position: absolute;
-    margin-top: -2px;
-    top: 50%;
-    right: 6px;
-    transform: translateX(-50%);
+  span {
+    padding: 3px 10px;
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
   }
 }

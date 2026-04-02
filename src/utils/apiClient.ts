@@ -3,50 +3,38 @@ import axios, {
   type AxiosInstance,
   type InternalAxiosRequestConfig,
 } from "axios";
-import DOMPurify from "dompurify";
+import { sanitize } from "@/utils/sanitize";
+import { AUTH_ERRORS, ROUTES, API_TIMEOUT_MS, MAX_REFRESH_ATTEMPTS } from "@/constants/auth";
 
 /**
- * ─── Token Resolution via Module Federation ────────────────────────
+ * OWASP Fixes applied in this file:
  *
- * Instead of manually injecting a tokenAccessor from each component,
- * we dynamically import the Portal's AuthTokenService singleton.
- *
- * AuthTokenService.getToken():
- *   - Returns cached token if still valid
- *   - Transparently calls Portal BFF /api/auth/refresh if expired
- *   - Coalesces concurrent refresh requests (mutex pattern)
- *   - Throws 'SESSION_EXPIRED' when refresh_token is dead
- *
- * This means Remote apps never own any auth logic — the Portal
- * controls the entire token lifecycle.
- * ───────────────────────────────────────────────────────────────────
+ * A03 XSS:  Uses isomorphic sanitize() — works in SSR/Node, not just browser.
+ * A07 Auth: Max refresh attempt counter prevents infinite 401 retry loops.
+ * A09 Log:  All console.log/warn calls are guarded by isDev — silent in prod.
+ * A10 SSRF: API base URL is validated against an allowlist before use.
  */
+
+const isDev = process.env.NODE_ENV === "development";
 
 type GetTokenFn = () => Promise<string>;
 
 let _getToken: GetTokenFn | null = null;
 let _resolvePromise: Promise<GetTokenFn> | null = null;
+let _refreshAttempts = 0;
 
-/**
- * Lazily resolve the federated getToken function.
- * Cached after first successful import — subsequent calls are instant.
- */
 async function resolveGetToken(): Promise<GetTokenFn> {
   if (_getToken) return _getToken;
 
   if (!_resolvePromise) {
     _resolvePromise = (async () => {
       try {
-        const authService = await import("portal/AuthTokenService");
-        console.log("[apiClient] ✅ portal/AuthTokenService imported successfully. Exports:", Object.keys(authService));
+        const authService = await import(/* webpackIgnore: true */ "portal/AuthTokenService");
+        if (isDev) console.log("[apiClient] portal/AuthTokenService imported.");
         _getToken = authService.getToken;
         return _getToken;
       } catch (err) {
-        console.warn(
-          "[apiClient] ❌ Failed to import portal/AuthTokenService — running standalone without auth",
-          err
-        );
-        // Standalone fallback: no token
+        if (isDev) console.warn("[apiClient] Standalone mode — no portal auth", err);
         _getToken = async () => "";
         return _getToken;
       }
@@ -56,21 +44,44 @@ async function resolveGetToken(): Promise<GetTokenFn> {
   return _resolvePromise;
 }
 
-// ── Create Axios instance ───────────────────────────────────────────
+// ── OWASP A10: Validate API base URL against allowlist ──────────────
 
-const SIGNS_APP_URL =
-  process.env.NEXT_PUBLIC_SIGNS_APP_URL ?? "http://localhost:3001";
+const ALLOWED_API_ORIGINS = [
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "https://erp-portal.costco.com",
+  "https://69ce482633a09f831b7d3ab9.mockapi.io",
+];
+
+function validateApiUrl(url: string): string {
+  try {
+    const origin = new URL(url).origin;
+    if (!ALLOWED_API_ORIGINS.some((a) => origin === a || url.startsWith(a))) {
+      throw new Error(`API URL not in allowlist: ${origin}`);
+    }
+    return url;
+  } catch {
+    console.error("[apiClient] Invalid API base URL — falling back to localhost");
+    return "http://localhost:3002";
+  }
+}
+
+const SIGNS_APP_URL = validateApiUrl(
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3002"
+);
+
+// ── Axios instance ──────────────────────────────────────────────────
 
 const apiClient: AxiosInstance = axios.create({
   baseURL: SIGNS_APP_URL,
-  timeout: 15_000,
+  timeout: API_TIMEOUT_MS,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
   },
 });
 
-// ── Request interceptor: attach access token from Portal ────────────
+// ── Request interceptor: attach Bearer token ────────────────────────
 
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
@@ -80,29 +91,24 @@ apiClient.interceptors.request.use(
 
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
-        // Log first 20 chars + last 10 chars for safety (never log full tokens in prod)
-        const masked = token.length > 30
-          ? `${token.slice(0, 20)}...${token.slice(-10)}`
-          : "(short-token)";
-        console.log(`[apiClient] 🔑 Token attached to ${config.method?.toUpperCase()} ${config.url}`, {
-          tokenPreview: masked,
-          tokenLength: token.length,
-        });
-      } else {
-        console.warn(`[apiClient] ⚠️ No token available for ${config.method?.toUpperCase()} ${config.url}`);
+        // OWASP A09: never log token data in production
+        if (isDev) {
+          const masked = token.length > 30 ? `${token.slice(0, 10)}...[redacted]` : "(short)";
+          console.log(`[apiClient] Token attached — preview: ${masked}`);
+        }
+      } else if (isDev) {
+        console.warn(`[apiClient] No token for ${config.method?.toUpperCase()} ${config.url}`);
       }
-    } catch (err: any) {
-      // SESSION_EXPIRED → redirect to Portal login
-      if (err?.message === "SESSION_EXPIRED") {
-        console.error("[AuthInterceptor] Session expired — redirecting to login");
+    } catch (err: unknown) {
+      const error = err as Error;
+      if (error?.message === AUTH_ERRORS.SESSION_EXPIRED) {
         if (typeof window !== "undefined") {
-          window.location.href = "/login?reason=session_expired";
+          window.location.href = `${ROUTES.LOGIN}?reason=session_expired`;
         }
         return Promise.reject(err);
       }
-      console.error("[AuthInterceptor] Token acquisition failed:", err);
+      if (isDev) console.error("[AuthInterceptor] Token acquisition failed:", err);
     }
-
     return config;
   },
   (error: AxiosError) => Promise.reject(error)
@@ -112,11 +118,8 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   (response) => {
-    console.log(`[apiClient] ✅ Response ${response.status} from ${response.config.url}`, {
-      hasAuthHeader: !!response.config.headers?.Authorization,
-      dataType: Array.isArray(response.data) ? `array[${response.data.length}]` : typeof response.data,
-    });
-    // Deep-sanitize string values in the response payload
+    if (isDev) console.log(`[apiClient] ${response.status} ${response.config.url}`);
+    // OWASP A03: sanitize all string values — isomorphic, works in SSR too
     response.data = sanitize(response.data);
     return response;
   },
@@ -125,63 +128,43 @@ apiClient.interceptors.response.use(
       _retry?: boolean;
     };
 
-    // On 401, force a token refresh via AuthTokenService and retry once
     if (error.response?.status === 401 && !originalRequest._retry) {
+      // OWASP A07: enforce max refresh attempts before forcing re-login
+      if (_refreshAttempts >= MAX_REFRESH_ATTEMPTS) {
+        _refreshAttempts = 0;
+        if (typeof window !== "undefined") {
+          window.location.href = `${ROUTES.LOGIN}?reason=session_expired`;
+        }
+        return Promise.reject(error);
+      }
+
       originalRequest._retry = true;
+      _refreshAttempts++;
 
       try {
-        // Clear the cached token so resolveGetToken fetches a fresh one.
-        // AuthTokenService.getToken() handles refresh internally —
-        // do NOT call useAuth() here (we're outside a React component).
         _getToken = null;
         _resolvePromise = null;
-
         const getToken = await resolveGetToken();
         const newToken = await getToken();
 
         if (newToken) {
-          console.log("[AuthInterceptor] 🔄 401 retry — refreshed token, retrying request");
+          if (isDev) console.log("[AuthInterceptor] Token refreshed — retrying");
           originalRequest.headers.Authorization = `Bearer ${newToken}`;
+          _refreshAttempts = 0;
           return apiClient(originalRequest);
         }
-
-        console.warn("[AuthInterceptor] 🔄 401 retry — no token after refresh");
-      } catch (refreshErr: any) {
-        console.error("[AuthInterceptor] 401 retry failed:", refreshErr);
-        if (
-          refreshErr?.message === "SESSION_EXPIRED" &&
-          typeof window !== "undefined"
-        ) {
-          window.location.href = "/login?reason=session_expired";
+      } catch (refreshErr: unknown) {
+        const e = refreshErr as Error;
+        if (e?.message === AUTH_ERRORS.SESSION_EXPIRED && typeof window !== "undefined") {
+          _refreshAttempts = 0;
+          window.location.href = `${ROUTES.LOGIN}?reason=session_expired`;
         }
+        if (isDev) console.error("[AuthInterceptor] 401 retry failed:", refreshErr);
       }
     }
 
     return Promise.reject(error);
   }
 );
-
-// ── Sanitizer ───────────────────────────────────────────────────────
-
-/**
- * Recursively sanitize all string values in an object using DOMPurify.
- * Guards against XSS payloads embedded in API responses.
- */
-function sanitize<T>(data: T): T {
-  if (typeof data === "string") {
-    return DOMPurify.sanitize(data) as unknown as T;
-  }
-  if (Array.isArray(data)) {
-    return data.map(sanitize) as unknown as T;
-  }
-  if (data !== null && typeof data === "object") {
-    const cleaned: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(data)) {
-      cleaned[key] = sanitize(value);
-    }
-    return cleaned as T;
-  }
-  return data;
-}
 
 export default apiClient;
