@@ -1,0 +1,25 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+@use '../../styles/breakpoint' as *;
+
+.layout {
+  display: flex;
+  // height: calc(100vh - 134px);
+  // min-height: calc(910px - 134px);
+}
+
+.sidebar {
+  width: 290px;
+
+  &.closed {
+    display: none;
+  }
+
+}
+
+.main {
+  flex: 1;
+  padding: 20px;
+  height: 100%;
+  background-color: $white-color;
+}

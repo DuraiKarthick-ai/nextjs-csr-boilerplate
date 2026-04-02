@@ -1,0 +1,65 @@
+@use "./variables" as *;
+@use "./mixins" as *;
+@use './breakpoint' as *;
+
+h1 {
+  @include font-size(28px);
+  font-weight: 700;
+  @include up($lg) {
+    @include font-size(32px);
+  }
+}
+
+h2 {
+  @include font-size(20px);
+  font-weight: 500;
+  @include up($lg) {
+   @include font-size(22px); //
+  }
+}
+
+h3 {
+  @include font-size(18px);
+  font-weight: 500;
+  @include up($lg) {
+    @include font-size(20px);
+  }
+}
+
+h4 {
+  @include font-size(14px);
+  font-weight: 500;
+  @include up($lg) {
+    @include font-size(16px);
+  }
+}
+
+p {
+  @include font-size(14px);
+  font-weight: 400;
+  @include up($lg) {
+    @include font-size(16px);
+  }
+}
+
+a {
+  @include font-size(14px);
+  font-weight: 400;
+  @include up($lg) {
+    @include font-size(16px);
+  }
+}
+
+label.label {
+  @include font-size(12px);
+  font-weight: 500;
+  color: $text-color;
+  text-transform: uppercase;
+  line-height: 20px;
+  padding-bottom: 6px;
+  display: inline-block;
+
+  .astrik {
+    color: $red-color;
+  }
+}
