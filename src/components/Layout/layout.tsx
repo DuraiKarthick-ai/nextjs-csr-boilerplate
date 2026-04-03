@@ -1,6 +1,7 @@
 import SideNav from "../sideNav/sideNav";
 import styles from "./layout.module.scss";
 import SignManagement from "../signManagement/signManagement";
+import CustomPrint from "../customPrint/customPrint";
 
 import { ReactNode } from "react";
 import Dashboard from "../dashboard/dashboard";
@@ -21,8 +22,8 @@ export default function Layout({ open, children }: LayoutProps) {
           
         <main className={styles.main}>
           {/* <SignManagement></SignManagement> */}
-          <Dashboard></Dashboard>
-          {/* will call the content here */}
+          {/* <Dashboard></Dashboard> */}
+          <CustomPrint></CustomPrint>
           {children}
           
         </main>

@@ -195,9 +195,9 @@ export default function SignManagement() {
                             <MenuItem value="" disabled>
                               Select Size
                             </MenuItem>
-                            <MenuItem value={10}>Small</MenuItem>
-                            <MenuItem value={20}>Medium</MenuItem>
-                            <MenuItem value={30}>Large</MenuItem>
+                            <MenuItem value={10}>S-Small</MenuItem>
+                            <MenuItem value={20}>M-Medium</MenuItem>
+                            <MenuItem value={30}>L-Large</MenuItem>
                           </Select>
                         </FormControl>
                       </ThemeProvider>
@@ -341,9 +341,9 @@ export default function SignManagement() {
                             <MenuItem value="" disabled>
                               Select Size
                             </MenuItem>
-                            <MenuItem value={10}>Small</MenuItem>
-                            <MenuItem value={20}>Medium</MenuItem>
-                            <MenuItem value={30}>Large</MenuItem>
+                            <MenuItem value={10}>S-Small</MenuItem>
+                            <MenuItem value={20}>M-Medium</MenuItem>
+                            <MenuItem value={30}>L-Large</MenuItem>
                           </Select>
                         </FormControl>
                       </ThemeProvider>
