@@ -22,9 +22,15 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Local env files
-.env*.local
+# OWASP A02 Fix: .env files with real secrets are NEVER committed.
+# Only .env.example (with placeholders) belongs in git.
 .env
+.env.local
+.env.development
+.env.development.local
+.env.test.local
+.env.production
+.env.production.local
 
 # Vercel
 .vercel

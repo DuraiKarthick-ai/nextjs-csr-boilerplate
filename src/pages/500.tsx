@@ -1,10 +1,5 @@
-import React from "react";
+import Link from "next/link";
 
-/**
- * Custom 500 page.
- * Intentionally avoids next/head and next/link to prevent Module Federation
- * shared-React singleton errors during static prerendering.
- */
 export default function ServerError() {
   return (
     <div
@@ -13,32 +8,29 @@ export default function ServerError() {
         flexDirection: "column",
         alignItems: "center",
         justifyContent: "center",
-        minHeight: "60vh",
-        textAlign: "center",
-        padding: "2rem",
-        fontFamily: "system-ui, sans-serif",
+        minHeight: "100vh",
+        fontFamily: "Roboto, sans-serif",
+        color: "#333",
       }}
     >
-      <h1 style={{ fontSize: "4rem", fontWeight: 800, color: "#e2e8f0" }}>
-        500
-      </h1>
-      <p style={{ fontSize: "1.125rem", color: "#64748b", marginTop: "0.5rem" }}>
-        Something went wrong on our end. Please try again later.
+      <h1 style={{ fontSize: "4rem", margin: 0, color: "#d32f2f" }}>500</h1>
+      <p style={{ fontSize: "1.25rem", marginTop: "1rem", color: "#666" }}>
+        An unexpected error occurred.
       </p>
-      {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-      <a
+      <Link
         href="/"
         style={{
           marginTop: "1.5rem",
-          padding: "0.5rem 1.25rem",
-          border: "1px solid #e2e8f0",
-          borderRadius: 6,
-          fontSize: "0.875rem",
-          color: "#334155",
+          padding: "10px 24px",
+          background: "#005DAB",
+          color: "#fff",
+          borderRadius: 4,
+          textDecoration: "none",
+          fontWeight: 500,
         }}
       >
-        ← Back to Home
-      </a>
+        Go to Home
+      </Link>
     </div>
   );
 }
