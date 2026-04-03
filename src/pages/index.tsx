@@ -13,7 +13,7 @@ import Layout from "../components/layout/layout";
  * OWASP A01: Server-side auth protection is handled by middleware.ts.
  * AuthGate here provides the UI-layer redirect for unauthenticated users.
  */
-const AuthGate = dynamic(() => import("@/components/auth/authGate"), {
+const AuthGate = dynamic(() => import("@/components/auth/AuthGate"), {
   ssr: false,
 });
 

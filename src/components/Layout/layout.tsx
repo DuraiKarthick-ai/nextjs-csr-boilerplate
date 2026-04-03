@@ -1,6 +1,7 @@
 import SideNav from "../sideNav/sideNav";
 import styles from "./layout.module.scss";
 import Dashboard from "../dashboard/dashboard";
+import QuickSign from "../quickSign/quickSign";
 import { ReactNode } from "react";
 
 interface LayoutProps {
@@ -16,7 +17,8 @@ export default function Layout({ open, children }: LayoutProps) {
           <SideNav />
         </aside>
         <main className={styles.main}>
-          <Dashboard />
+          {/* <Dashboard /> */}
+          <QuickSign />
           {children}
         </main>
       </div>
