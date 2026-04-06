@@ -1,7 +1,9 @@
 import SideNav from "../sideNav/sideNav";
 import styles from "./layout.module.scss";
 import Dashboard from "../dashboard/dashboard";
+import QuickSign from "../quickSign/quickSign";
 import { ReactNode } from "react";
+import CustomPrint from "../customPrint/customPrint";
 
 interface LayoutProps {
   open: boolean;
@@ -17,6 +19,8 @@ export default function Layout({ open, children }: LayoutProps) {
         </aside>
         <main className={styles.main}>
           <Dashboard />
+          <QuickSign />
+          <CustomPrint/>
           {children}
         </main>
       </div>

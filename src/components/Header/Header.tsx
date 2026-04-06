@@ -2,7 +2,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./header.module.scss";
-
+import logo from "../../images/costco_wholesale.png";
 
 interface HeaderProps {
   toggle: () => void;
@@ -56,7 +56,7 @@ export default function Header({ toggle, open }: HeaderProps) {
               <div className={styles.logoWrap}>
                 <Link href={"/"}>
                   <div className={styles.logo}>
-                    <Image src="/images/costco_wholesale.png" alt="web logo" width={160} height={40} priority loading="eager" />
+                    <Image src={logo} alt="web logo" width={160} height={40} priority loading="eager" />
                   </div>
                 </Link>
                 <h4>Replatform ERP</h4>

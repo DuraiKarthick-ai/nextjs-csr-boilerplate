@@ -50,16 +50,3 @@ a {
   }
 }
 
-label.label {
-  @include font-size(12px);
-  font-weight: 500;
-  color: $text-color;
-  text-transform: uppercase;
-  line-height: 20px;
-  padding-bottom: 6px;
-  display: inline-block;
-
-  .astrik {
-    color: $red-color;
-  }
-}
