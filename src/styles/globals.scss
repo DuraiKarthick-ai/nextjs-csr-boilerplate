@@ -8,117 +8,30 @@
  */
 
 /* ── Partials ───────────────────────────────────────────────────── */
-@use './reset';
-@use './variables';
-@use './typography';
-@use './utilities';
-@use './breakpoint';
-@use './mixins';
-
-/* ── Roboto Font Family ─────────────────────────────────────────── */
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto-Thin.ttf') format('truetype');
-  font-weight: 100;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto-Light.ttf') format('truetype');
-  font-weight: 300;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto-Medium.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto-SemiBold.ttf') format('truetype');
-  font-weight: 600;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Roboto';
-  src: url('/fonts/Roboto-Italic.ttf') format('truetype');
-  font-weight: 400;
-  font-style: italic;
-  font-display: swap;
-}
-
-/* ── Base ───────────────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@use 'variables' as *;
+@use 'mixins' as *;
+@use 'typography' as *;
+@use 'utilities' as *;
+@use 'breakpoint' as *;
+@use 'reset' as *;
 
 html,
 body {
   margin: 0;
   padding: 0;
-  font-family: 'Roboto', sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  color: #333333;
-  background-color: #f4f5f5;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
+  background-color: $bg-color;
+  font-family: $Roboto;
+  @include font-size(14px);
+  color: $black-color;
+  @include up($lg) {
+    @include font-size(16px);
+  }
 
-/* ── Layout helpers ─────────────────────────────────────────────── */
-.container {
-  width: 100%;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-
-.d-flex {
-  display: flex;
-}
-
-.flex-align-center {
-  align-items: center;
-}
-
-/* ── Accessibility ──────────────────────────────────────────────── */
-/* OWASP A05: Visible focus ring for keyboard navigation */
-:focus-visible {
-  outline: 2px solid #005DAB;
-  outline-offset: 2px;
-  border-radius: 2px;
-}
-
-/* Remove default outline only when :focus-visible is supported */
-:focus:not(:focus-visible) {
-  outline: none;
+  .container{
+    @include container();
+  }
 }
 
 /* ── Form elements ──────────────────────────────────────────────── */
@@ -129,17 +42,24 @@ body {
   gap: 4px;
 }
 
-.label {
-  font-size: 12px;
+label.label {
+  @include font-size(12px);
   font-weight: 500;
-  color: #333333;
+  color: $text-color;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
+  line-height: 20px;
+  padding-bottom: 6px;
+  display: inline-block;
 
-.mandatoryStar {
-  color: #d32f2f;
-  margin-left: 2px;
+  .astrik {
+    color: $red-color;
+    margin-left: 2px;
+  }
+
+  .mandatoryStar {
+    color: $red-color;
+    margin-left: 2px;
+  }
 }
 
 .validationMsg {
@@ -147,11 +67,11 @@ body {
   margin-top: 2px;
 
   &.info {
-    color: #666666;
+    color: $text-color;
   }
 
   &.error {
-    color: #d32f2f;
+    color: $red-color;
   }
 }
 
@@ -165,7 +85,7 @@ body {
   align-items: center;
 
   &:focus-visible {
-    outline: 2px solid #005DAB;
+    outline: 2px solid $primary-color;
     border-radius: 50%;
   }
 }
@@ -176,23 +96,22 @@ body {
   align-items: center;
   justify-content: center;
   padding: 10px 24px;
-  background-color: #005DAB;
+  background-color: $primary-color;
   color: #ffffff;
-  border: 1px solid #005DAB;
+  border: 1px solid $primary-color;
   border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
+  @include font-size(16px);
+  font-weight: 400;
   cursor: pointer;
   transition: background-color 0.2s ease, border-color 0.2s ease;
-  min-height: 40px;
 
   &:hover {
-    background-color: #004a8f;
-    border-color: #004a8f;
+    background-color: $primary-btn-hover-color;
+    border-color: $primary-btn-hover-color;
   }
 
   &:focus-visible {
-    outline: 2px solid #005DAB;
+    outline: 2px solid $primary-color;
     outline-offset: 2px;
   }
 
@@ -208,21 +127,20 @@ body {
   justify-content: center;
   padding: 10px 24px;
   background-color: transparent;
-  color: #005DAB;
-  border: 1px solid #005DAB;
+  color: $primary-color;
+  border: 1px solid $primary-color;
   border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
+  @include font-size(16px);
+  font-weight: 400;
   cursor: pointer;
   transition: background-color 0.2s ease;
-  min-height: 40px;
 
   &:hover {
     background-color: rgba(0, 93, 171, 0.06);
   }
 
   &:focus-visible {
-    outline: 2px solid #005DAB;
+    outline: 2px solid $primary-color;
     outline-offset: 2px;
   }
 }
@@ -231,22 +149,22 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 6px 16px;
-  background-color: #005DAB;
+  padding: 8px 16px;
+  background-color: $primary-color;
   color: #ffffff;
   border: none;
   border-radius: 4px;
-  font-size: 13px;
-  font-weight: 500;
+  @include font-size(14px);
+  line-height: 16px;
+  font-weight: 400;
   cursor: pointer;
-  min-height: 32px;
 
   &:hover {
-    background-color: #004a8f;
+    background-color: $primary-btn-hover-color;
   }
 
   &:focus-visible {
-    outline: 2px solid #005DAB;
+    outline: 2px solid $primary-color;
     outline-offset: 2px;
   }
 }
@@ -257,11 +175,14 @@ body {
   align-items: center;
 
   span {
-    padding: 3px 10px;
+    padding: 8px 10px;
     background-color: #e8f5e9;
     color: #2e7d32;
-    border-radius: 12px;
-    font-size: 12px;
+    border-radius: 4px;
+    @include font-size(14px);
+    line-height: 16px;
     font-weight: 500;
+    min-width: 200px;
+    text-align: center;
   }
 }
