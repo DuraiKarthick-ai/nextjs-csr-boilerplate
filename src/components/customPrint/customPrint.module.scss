@@ -132,8 +132,36 @@
     border: 1px solid #d1d1d1;
     padding: 20px 24px;
     width: 100%;
-    max-width: 680px;
+    @include container(680px);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    input[type="text"] {
+      letter-spacing: normal;
+      color: $text-color;
+      width: 100%;
+      border: none;
+      padding: 2px 6px;
+      border: 1px solid $primary-color;;
+      background-color: $white-color;
+
+      &:focus {
+        outline: none;
+        border-color: $primary-color;
+      }
+
+      &:disabled {
+        color: $light-black-color;
+      }
+    }
+
+    .editableField {
+      h1 {
+        border: 1px solid $primary-color;
+      }
+      h2 {
+        border: 1px solid $primary-color;
+      }
+    }
 
     .signHeader {
       padding-bottom: 20px;
@@ -143,9 +171,17 @@
           padding: 2px 0;
 
           h1 {
-            border: 1px solid $primary-color;
             padding: 2px 6px;
-            display: inline-block;
+            display: block;
+            width: 100%;
+          }
+
+          input[type="text"] {
+            @include font-size(28px);
+            font-weight: 700;
+            @include up($lg) {
+              @include font-size(32px);
+            }
           }
         }
       }
@@ -167,10 +203,17 @@
 
           h2 {
             font-weight: 700;
-            border: 1px solid $primary-color;
             padding: 2px 6px;
-            display: inline-block;
+            display: block;
             width: 100%;
+          }
+
+          input[type="text"] {
+            @include font-size(20px);
+            font-weight: 700;
+            @include up($lg) {
+              @include font-size(22px);
+            }
           }
         }
       }
@@ -202,6 +245,15 @@
             font-size: 60px;
             line-height: 56px;
           }
+          input[type="text"] {
+            @include font-size(50px);
+            font-weight: 700;
+            text-align: right;
+            max-height: 58px;
+            @include up($lg) {
+              @include font-size(60px);
+            }
+          }
         }
 
       }
@@ -219,6 +271,9 @@
   ul {
     @include flex();
     @include justify-content(end);
+    width: 100%;
+    @include container(680px);
+
     li {
 
       .actionBtn {
