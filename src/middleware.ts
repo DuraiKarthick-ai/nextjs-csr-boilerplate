@@ -20,7 +20,7 @@ import { NextRequest, NextResponse } from "next/server";
  *   await jwtVerify(token, publicKey);
  */
 
-const PROTECTED_PATHS = ["/dashboard", "/signs", "/products"];
+const PROTECTED_PATHS = ["/dashboard", "/quickSign", "/customSign", "/signWorklist", "/signAudit", "/signs", "/products"];
 
 /** Allowed Portal origins — validated at middleware level (OWASP A10 SSRF guard). */
 const ALLOWED_PORTAL_ORIGINS = [
@@ -41,6 +41,11 @@ function buildLoginRedirect(req: NextRequest, reason: string): NextResponse {
 
 export function middleware(req: NextRequest): NextResponse {
   const { pathname } = req.nextUrl;
+
+  // ── Auth bypass — mirrors AuthGate's NEXT_PUBLIC_AUTH_REQUIRED check ──
+  if (process.env.NEXT_PUBLIC_AUTH_REQUIRED === "false") {
+    return NextResponse.next();
+  }
 
   // ── OWASP A10: Validate Origin header against allowlist ──────────
   const origin = req.headers.get("origin");

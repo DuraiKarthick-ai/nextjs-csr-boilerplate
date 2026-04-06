@@ -1,7 +1,27 @@
+"use client";
+import { useState } from "react";
 import Link from "next/link";
 import styles from "./sideNav.module.scss";
+import type { ViewType } from "@/types";
 
-export default function SideNav() {
+interface SideNavProps {
+  /** The currently active view key used to highlight the matching nav button. */
+  activeView: ViewType;
+  /** Callback invoked with the selected ViewType when a nav button is clicked. */
+  onNavigate: (view: ViewType) => void;
+}
+
+/**
+ * Sidebar navigation component for the Signs Management application.
+ *
+ * Renders navigation buttons for each application view and highlights
+ * the currently active one. Delegates view switching to the onNavigate callback.
+ *
+ * @param {SideNavProps} props - activeView key and onNavigate callback.
+ * @returns {JSX.Element} The rendered sidebar navigation.
+ */
+export default function SideNav({ activeView, onNavigate }: SideNavProps) {
+  const [isMenuOpen, setIsMenuOpen] = useState(true);
   const backIcon = (
     <svg
       width="12"
@@ -58,32 +78,55 @@ export default function SideNav() {
       <nav>
         <ul className={styles.mainMenu}>
           <li>
-            <Link href="#" className={styles.active}>
+            <button
+              className={`${styles.menuToggle} ${isMenuOpen ? styles.active : ""}`}
+              onClick={() => setIsMenuOpen((prev) => !prev)}
+            >
               <span>Signs Management</span>
               <i>{downArrow}</i>
-            </Link>
-            <ul className={styles.subMenu}>
+            </button>
+            {isMenuOpen && <ul className={styles.subMenu}>
               <li>
-                <Link href="#">
-                  <span>Sign Worklist</span>
-                </Link>
+                <button
+                  className={activeView === "dashboard" ? styles.activeSubItem : ""}
+                  onClick={() => onNavigate("dashboard")}
+                >
+                  <span>Sign Dashboard</span>
+                </button>
               </li>
               <li>
-                <Link href="#">
-                  <span>Custom Sign</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="#">
-                  <span>Sign Audit</span>
-                </Link>
-              </li>
-              <li>
-                <Link href="#">
+                <button
+                  className={activeView === "quickSign" ? styles.activeSubItem : ""}
+                  onClick={() => onNavigate("quickSign")}
+                >
                   <span>Quick Sign Print</span>
-                </Link>
+                </button>
               </li>
-            </ul>
+              <li>
+                <button
+                  className={activeView === "customSign" ? styles.activeSubItem : ""}
+                  onClick={() => onNavigate("customSign")}
+                >
+                  <span>Custom Sign</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  className={activeView === "signWorklist" ? styles.activeSubItem : ""}
+                  onClick={() => onNavigate("signWorklist")}
+                >
+                  <span>Sign Worklist</span>
+                </button>
+              </li>
+              <li>
+                <button
+                  className={activeView === "signAudit" ? styles.activeSubItem : ""}
+                  onClick={() => onNavigate("signAudit")}
+                >
+                  <span>Sign Audit</span>
+                </button>
+              </li>
+            </ul>}
           </li>
         </ul>
       </nav>

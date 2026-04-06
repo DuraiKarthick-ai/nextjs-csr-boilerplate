@@ -1,29 +1,21 @@
 "use client";
-import { useState } from "react";
-import dynamic from "next/dynamic";
-import Header from "../components/header/header";
-import Layout from "../components/layout/layout";
+import { useEffect } from "react";
+import { useRouter } from "next/router";
 
 /**
- * Landing page for the Signs app.
+ * Root index page — redirects to the default /dashboard view.
  *
- * Both AuthGate and Layout are loaded with ssr: false because they depend
- * on Module Federation's shared React singleton — not available during SSR.
+ * The actual app shell lives in [view].tsx which reads the active view
+ * from the URL so the browser address bar always reflects the current screen.
  *
- * OWASP A01: Server-side auth protection is handled by middleware.ts.
- * AuthGate here provides the UI-layer redirect for unauthenticated users.
+ * @returns {null} Renders nothing while the redirect is in progress.
  */
-const AuthGate = dynamic(() => import("@/components/auth/AuthGate"), {
-  ssr: false,
-});
+export default function IndexRedirect(): null {
+  const router = useRouter();
 
-export default function SignsIndex() {
-  const [open, setOpen] = useState(true);
+  useEffect(() => {
+    void router.replace("/dashboard");
+  }, [router]);
 
-  return (
-    <AuthGate>
-      <Header open={open} toggle={() => setOpen(!open)} />
-      <Layout open={open}>{null}</Layout>
-    </AuthGate>
-  );
+  return null;
 }

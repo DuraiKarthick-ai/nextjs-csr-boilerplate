@@ -59,6 +59,18 @@ export interface AuthContextType {
 }
 
 /**
+ * Identifies each navigable view in the Signs Management application.
+ * Used to drive conditional rendering in Layout and active-state
+ * highlighting in SideNav.
+ */
+export type ViewType =
+  | "dashboard"
+  | "quickSign"
+  | "customSign"
+  | "signWorklist"
+  | "signAudit";
+
+/**
  * Recursively replaces `undefined` values with `null` so the object is
  * safe to pass through `JSON.stringify` / Next.js `getServerSideProps`.
  */
