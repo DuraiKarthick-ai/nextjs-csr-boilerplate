@@ -10,11 +10,8 @@
 
 .sidebar {
   width: 290px;
-
-  &.closed {
-    display: none;
-  }
-
+  min-width: 290px;
+  flex-shrink: 0;
 }
 
 .main {
@@ -22,4 +19,15 @@
   padding: 20px;
   height: 100%;
   background-color: $white-color;
+}
+
+.navFolded {
+
+  .sidebar {
+    display: none;
+  }
+
+  .borderTop {
+    max-width: 100% !important;
+  }
 }
