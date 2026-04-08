@@ -79,7 +79,7 @@ export default function SideNav({ activeView, onNavigate }: SideNavProps) {
         <ul className={styles.mainMenu}>
           <li>
             <button
-              className={`${styles.menuToggle} ${isMenuOpen ? styles.active : ""}`}
+              className={isMenuOpen ? styles.activeMainItem : ""}
               onClick={() => setIsMenuOpen((prev) => !prev)}
             >
               <span>Signs Management</span>

@@ -271,7 +271,7 @@ export const datePickerTheme = createTheme({
         root: {
           backgroundColor: "#ffffff",
           height: "32px",
-          minWidth: "110px",
+          minWidth: "120px",
           paddingRight: "unset",
           "& .MuiOutlinedInput-notchedOutline": {
             border: "1px solid #d1d1d1",

@@ -1,10 +1,12 @@
 "use client";
 
+import React from "react";
 import Link from "next/link";
 import styles from "./dashboard.module.scss";
 import ContentWrapper from "../contentWrapper/contentWrapper";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useTableScroll } from "@/hooks/useTableScroll";
+import { Dialog } from "@mui/material";
 
 /**
  * Dashboard component — Sign Management Dashboard.
@@ -15,6 +17,18 @@ import { useTableScroll } from "@/hooks/useTableScroll";
  * @returns {JSX.Element} The rendered dashboard UI.
  */
 export default function Dashboard() {
+
+  const rows = [1, 2, 3];
+
+  const [open, setOpen] = React.useState(false);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
   const { data, isLoading, error } = useDashboard();
   const { visibleCount, scrollRef } = useTableScroll(data.activities.length);
   const visibleActivities = data.activities.slice(0, visibleCount);
@@ -30,76 +44,142 @@ export default function Dashboard() {
       <path d="M15.4467 9.9271L17.2783 8.09544L12.9033 3.72044L11.0717 5.5521L6.24167 0.733769C5.33167 -0.17623 3.85 -0.17623 2.94 0.733769L0.723333 2.95044C-0.186667 3.86044 -0.186667 5.3421 0.723333 6.2521L5.54167 11.0704L0 16.6238V20.9988H4.375L9.92833 15.4454L14.7467 20.2638C15.855 21.3721 17.3483 20.9638 18.0483 20.2638L20.265 18.0471C21.175 17.1371 21.175 15.6554 20.265 14.7454L15.4467 9.9271ZM7.21 9.41377L2.38 4.59544L4.585 2.37877L6.06667 3.86044L4.69 5.24877L6.335 6.89377L7.72333 5.50544L9.415 7.1971L7.21 9.41377ZM16.4033 18.6188L11.585 13.8004L13.8017 11.5838L15.4933 13.2754L14.105 14.6638L15.75 16.3088L17.1383 14.9204L18.62 16.4021L16.4033 18.6188Z" fill="#005DAB"/>
       <path d="M20.6616 4.71204C21.1166 4.25704 21.1166 3.52204 20.6616 3.06704L17.9316 0.33704C17.3833 -0.211294 16.6249 -0.00129366 16.2866 0.33704L14.1516 2.47204L18.5266 6.84704L20.6616 4.71204Z" fill="#005DAB"/>
     </svg>
-
   )
 
-  return (
-    <ContentWrapper title="Sign Management Dashboard" lastUpdated={isLoading ? "Loading…" : data.lastUpdated}>
-        <div className={styles.groupBox}>
-          <ul>
-            <li>
-              <Link href="/quickSign">
-                <div className={styles.quickLinksWrap}>
-                  <i>{quickPrintIcon}</i>
-                  <label>Quick Print</label>
-                </div>
-              </Link>
-            </li>
-            <li>
-              <Link href="/customSign">
-                <div className={styles.quickLinksWrap}>
-                  <i>{customPrintIcon}</i>
-                  <label>Custom Sign</label>
-                </div>
-              </Link>
-            </li>
-          </ul>
-          
-          <div className={styles.tableContainer}>
-            <div className={styles.title}>
-              <p>Batch Activity</p>
-            </div>
+  const dialogCloseIcon = (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <g clip-path="url(#clip0_54627_16206)">
+        <path
+          d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
+          fill="#64686C"
+        />
+      </g>
+      <defs>
+        <clipPath id="clip0_54627_16206">
+          <rect width="24" height="24" fill="white" />
+        </clipPath>
+      </defs>
+    </svg>
+  );
 
-            <div className={styles.tableScrollWrap} ref={scrollRef}>
+  return (
+    <ContentWrapper
+      title="Sign Management Dashboard"
+      lastUpdated={isLoading ? "Loading…" : data.lastUpdated}
+    >
+      <div className={styles.groupBox}>
+        <ul>
+          <li>
+            <Link href="/quickSign">
+              <div className={styles.quickLinksWrap}>
+                <i>{quickPrintIcon}</i>
+                <label>Quick Print</label>
+              </div>
+            </Link>
+          </li>
+          <li>
+            <Link href="/customSign">
+              <div className={styles.quickLinksWrap}>
+                <i>{customPrintIcon}</i>
+                <label>Custom Sign</label>
+              </div>
+            </Link>
+          </li>
+        </ul>
+
+        <div className={styles.tableContainer}>
+          <div className={styles.title}>
+            <p>Batch Activity</p>
+          </div>
+
+          <div className={styles.tableScrollWrap} ref={scrollRef}>
             <table className={styles.table}>
               <thead>
                 <tr>
                   <th>
                     <p>Batch Jobs</p>
                   </th>
-                  <th><p>Status</p></th>
-                  <th><p>Actions</p></th>
+                  <th>
+                    <p>Status</p>
+                  </th>
+                  <th>
+                    <p>Actions</p>
+                  </th>
                 </tr>
               </thead>
 
               <tbody>
-                {isLoading && (
+
+                {isLoading && rows.map((row) => (
                   <tr>
-                    <td colSpan={3}><p>Loading batch activity…</p></td>
-                  </tr>
-                )}
-                {error && (
-                  <tr>
-                    <td colSpan={3}><p>Failed to load batch activity. Please try again.</p></td>
-                  </tr>
-                )}
-                {!isLoading && !error && visibleActivities.map((activity) => (
-                  <tr key={activity.id}>
-                    <td><p>{activity.activityName}</p></td>
                     <td>
-                      <div className="statusTag"><span>{activity.status}</span></div>
+                      <div className="shimmer md"></div>
                     </td>
                     <td>
-                      <button className="printButton">Print ({activity.printCount})</button>
+                      <div className="shimmer sm"></div>
+                    </td>
+                    <td>
+                      <div className="shimmer xs"></div>
                     </td>
                   </tr>
                 ))}
+
+                {error && (
+                  <tr>
+                    <td colSpan={3}>
+                      <div className={`${styles.noDatafound} noDataContent`}>
+                        <h4>No records found</h4>
+                        <label>Failed to load batch activity. Please try again.</label>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+
+                {!isLoading &&
+                  !error &&
+                  visibleActivities.map((activity) => (
+                    <tr key={activity.id}>
+                      <td>
+                        <p>{activity.activityName}</p>
+                      </td>
+                      <td>
+                        <div className="statusTag">
+                          <span>{activity.status}</span>
+                        </div>
+                      </td>
+                      <td>
+                        <button className="printButton" onClick={handleClickOpen}>
+                          Print ({activity.printCount})
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  
               </tbody>
             </table>
-            </div>
           </div>
-
         </div>
+      </div>
+
+      <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+        <div className={styles.successfullDialog}>
+          <div className={styles.dialogClose} onClick={handleClose}>
+            <i>{dialogCloseIcon}</i>
+          </div>
+          <h1>Printed Successfully</h1>
+          <p>5 pages Printed successfully in Xerox Phaser 6510 81 ED D4</p>
+          <button className="primaryButton" onClick={handleClose}>
+            ok
+          </button>
+        </div>
+      </Dialog>
+
     </ContentWrapper>
   );
 }
