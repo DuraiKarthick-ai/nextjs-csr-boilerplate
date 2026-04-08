@@ -38,6 +38,37 @@
 
   nav {
     ul {
+
+      &.mainMenu {
+
+        button.activeMainItem {
+          background-color: $sideNavActive;
+          border-left: 3px solid $white-color;
+
+          i {
+            transform: rotate(180deg);
+          }
+        }
+
+        > button:hover {
+          background-color: $sideNavActive;
+          border-left: 3px solid $white-color;
+        }
+      }
+
+      &.subMenu {
+
+        button.activeSubItem {
+          background-color: $sideNavActive;
+          border-left: 3px solid $sideNavActive;
+        }
+
+        button:hover {
+          background-color: $sideNavActive;
+          border-left: 3px solid $sideNavActive;
+        }
+      }
+
       li {
         margin: 16px 0;
 
@@ -45,44 +76,6 @@
           padding: 14px 20px;
           border-radius: 4px;
           border-left: 3px solid $primary-color;
-
-          &.active {
-            background-color: $sideNavActive;
-            border-left: 3px solid $white-color;
-
-            i {
-              transform: rotate(180deg);
-            }
-          }
-
-          &:hover {
-            background-color: $sideNavActive;
-            border-left: 3px solid $white-color;
-          }
-
-          i {
-            margin-left: auto;
-          }
-        }
-
-        .menuToggle {
-          padding: 14px 20px;
-          border-radius: 4px;
-          border-left: 3px solid $primary-color;
-
-          &.active {
-            background-color: $sideNavActive;
-            border-left: 3px solid $white-color;
-
-            i {
-              transform: rotate(180deg);
-            }
-          }
-
-          &:hover {
-            background-color: $sideNavActive;
-            border-left: 3px solid $white-color;
-          }
 
           i {
             margin-left: auto;
@@ -94,14 +87,8 @@
           border-radius: 4px;
           border-left: 3px solid $primary-color;
 
-          &.activeSubItem {
-            background-color: $sideNavActive;
-            border-left: 3px solid $white-color;
-          }
-
-          &:hover {
-            background-color: $sideNavActive;
-            border-left: 3px solid $white-color;
+          i {
+            margin-left: auto;
           }
         }
       }
