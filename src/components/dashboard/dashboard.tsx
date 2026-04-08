@@ -133,7 +133,7 @@ export default function Dashboard() {
                 {error && (
                   <tr>
                     <td colSpan={3}>
-                      <div className="noDataContent">
+                      <div className={`${styles.noDatafound} noDataContent`}>
                         <h4>No records found</h4>
                         <label>Failed to load batch activity. Please try again.</label>
                       </div>
