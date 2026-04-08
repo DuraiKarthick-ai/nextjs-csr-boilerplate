@@ -53,8 +53,6 @@
   .tableScrollWrap {
     max-height: 280px;
     overflow-y: auto;
-    border: 1px solid $table-border-color;
-    border-radius: 6px;
   }
 
   .table {
@@ -69,7 +67,7 @@
 
     th {
       padding: 16px;
-      border-bottom: 1px solid $table-border-color;
+      border: 1px solid $medium-gray;
 
       p {
         @include font-size(14px);
@@ -85,6 +83,31 @@
         @include font-size(14px);
         color: $primary-color;
       }
+
     }
+  }
+}
+
+.successfullDialog {
+  position: relative;
+  padding: 46px 36px;
+  width: 100%;
+  color: $text-color;
+
+  .dialogClose {
+    position: absolute;
+    right: 16px;
+    top: 16px;
+    cursor: pointer;
+  }
+
+  h1 {
+    padding-bottom: 26px;
+  }
+
+  p {
+    padding-bottom: 26px;
+    line-height: 22px;
+    max-width: 320px;
   }
 }

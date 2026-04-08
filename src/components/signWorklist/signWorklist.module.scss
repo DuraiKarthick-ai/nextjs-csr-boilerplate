@@ -153,6 +153,14 @@
         &.checkboxCell {
           text-align: center;
         }
+
+        .printStatusTag {
+          display: block;
+          height: 28px;
+          width: 50px;
+          border-radius: 4px;
+          background-color: $green-color;
+        }
       }
     }
   }

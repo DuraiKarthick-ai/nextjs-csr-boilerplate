@@ -25,7 +25,7 @@ $border-color: #cccccc;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     top: 9px;
-    left: 12px;
+    left: 0px;
 
     &.active {
       background-color: $primary-color;
@@ -51,7 +51,7 @@ $border-color: #cccccc;
   .logoWrap {
     @include flex();
     @include align-items(center);
-    padding-left: 62px;
+    padding-left: 52px;
 
     h4 {
       padding-left: 10px;
