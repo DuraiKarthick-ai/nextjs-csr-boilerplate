@@ -56,36 +56,52 @@ export default function QuickSign() {
   return (
     <ContentWrapper title="Signs Management">
         <div className={styles.groupBox}>
-          <div className={styles.subTitle}>
-            {false && (
-              <p>Quick Print - Item</p>
-            )}
-            <p>Quick Print - Department & Category</p>
+
+          <div className={styles.tabsHeading}>
+            <ul>
+              <li>
+                <button
+                  className={`${styles.tab} ${active === "item" ? styles.active : ""}`}
+                  onClick={() => setActive("item")}
+                >
+                  By Item
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`${styles.tab} ${active === "dept" ? styles.active : ""}`}
+                  onClick={() => setActive("dept")}
+                >
+                  By Department & Category
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`${styles.tab} ${active === "endcap" ? styles.active : ""}`}
+                  onClick={() => setActive("endcap")}
+                >
+                  By Endcap
+                </button>
+              </li>
+            </ul>
           </div>
 
-          <div className={styles.tabContainer}>
-            <button
-              className={`${styles.tab} ${active === "item" ? styles.active : ""}`}
-              onClick={() => setActive("item")}
-            >
-              By Item
-            </button>
-            <button
-              className={`${styles.tab} ${active === "dept" ? styles.active : ""}`}
-              onClick={() => setActive("dept")}
-            >
-              By Department & Category
-            </button>
-            <button
-              className={`${styles.tab} ${active === "endcap" ? styles.active : ""}`}
-              onClick={() => setActive("endcap")}
-            >
-              By Endcap
-            </button>
+          <div className={styles.subTitle}>
+            
+            {/* Ouick Print Item */}
+            {active === "item" && (
+              <p>Quick Print - Item</p>
+            )}
+
+            {/* Quick Print Department & Category */}
+            {active === "dept" && (
+              <p>Quick Print - Department & Category</p>
+            )}
+
           </div>
 
           {/* Ouick Print Item */}
-          {true && (
+          {active === "item" && (
             <div className={`d-flex ${styles.gridWrap}`}>
               <div className={styles.grid}>
                 <ul>
@@ -202,7 +218,7 @@ export default function QuickSign() {
           )}
 
           {/* Ouick Print Department & Category */}
-          {true && (
+          {active === "dept" && (
             <div className={`d-flex ${styles.gridWrap}`}>
               <div className={styles.grid}>
                 <ul>
@@ -279,6 +295,7 @@ export default function QuickSign() {
               </li>
             </ul>
           </div>
+
         </div>
     </ContentWrapper>
   );

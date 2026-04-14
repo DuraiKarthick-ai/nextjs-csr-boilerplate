@@ -8,12 +8,12 @@
  */
 
 /* ── Partials ───────────────────────────────────────────────────── */
-@use 'variables' as *;
-@use 'mixins' as *;
-@use 'typography' as *;
-@use 'utilities' as *;
-@use 'breakpoint' as *;
-@use 'reset' as *;
+@use "variables" as *;
+@use "mixins" as *;
+@use "typography" as *;
+@use "utilities" as *;
+@use "breakpoint" as *;
+@use "reset" as *;
 
 html,
 body {
@@ -29,7 +29,7 @@ body {
     @include font-size(16px);
   }
 
-  .container{
+  .container {
     @include container();
   }
 }
@@ -103,7 +103,9 @@ label.label {
   @include font-size(16px);
   font-weight: 400;
   cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
 
   &:hover {
     background-color: $primary-btn-hover-color;
@@ -158,6 +160,7 @@ label.label {
   line-height: 16px;
   font-weight: 400;
   cursor: pointer;
+  min-width: 110px;
 
   &:hover {
     background-color: $primary-btn-hover-color;
@@ -197,7 +200,7 @@ label.label {
     color: $title-color;
     padding-bottom: 6px;
   }
-  
+
   label {
     color: $text-color;
     @include font-size(14px);
@@ -209,12 +212,7 @@ label.label {
 .shimmer {
   height: 20px;
   border-radius: 4px;
-  background: linear-gradient(
-    90deg,
-    #e0e0e0 25%,
-    #f0f0f0 37%,
-    #e0e0e0 63%
-  );
+  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 37%, #e0e0e0 63%);
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
 

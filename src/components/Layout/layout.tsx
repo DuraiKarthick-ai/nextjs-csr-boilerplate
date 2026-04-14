@@ -5,6 +5,7 @@ import QuickSign from "../quickSign/quickSign";
 import { ReactNode } from "react";
 import CustomPrint from "../customPrint/customPrint";
 import SignWorklist from "../signWorklist/signWorklist";
+import SignAudit from "../signAudit/signAudit";
 import type { ViewType } from "@/types";
 
 interface LayoutProps {
@@ -35,6 +36,7 @@ export default function Layout({ open, children, activeView, onNavigate }: Layou
           {activeView === "quickSign" && <QuickSign />}
           {activeView === "customSign" && <CustomPrint />}
           {activeView === "signWorklist" && <SignWorklist />}
+          {activeView === "signAudit" && <SignAudit />}
           {children}
         </main>
       </div>

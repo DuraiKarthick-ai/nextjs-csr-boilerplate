@@ -69,34 +69,45 @@
 	}
 }
 
-.tabContainer {
-  display: inline-flex;
-  border: 1px solid #d1d1d1;
-  border-radius: 4px;
-  overflow: hidden;
-	margin-bottom: 26px;
+.tabsHeading {
+  padding-bottom: 26px;
 
-  .tab {
-    @include font-size(14px);
-    font-weight: 500;
-    color: $text-color;
-    padding: 6px 20px;
-    background-color: $white-color;
-    border: none;
-    outline: none;
-    cursor: pointer;
-    border-right: 1px solid $medium-gray;
-    transition: all 0.2s ease;
+  ul {
+    @include flex();
+    @include align-items(center);
 
-    &:last-child {
-      border-right: none;
-    }
+    li{
+      padding-right: 16px;
+      
+      &:last-child {
+        padding-right: 0;
+      }
 
-    &.active {
-      background: $primary-btn-color;
-      color: $white-color;
+      .tab {
+        @include font-size(16px);
+        font-weight: 500;
+        color: $text-color;
+        padding: 10px 8px;
+        background-color: $white-color;
+        border: none;
+        outline: none;
+        cursor: pointer;
+        border-radius: 2px;
+        transition: all 0.2s ease;
+        border-bottom: 2px solid transparent;
+          
+        &.active {
+          border-color: $primary-btn-color;
+          color: $primary-btn-color;
+        }
+
+        &:not(.active):hover {
+          background-color: $extra-light-color;
+        }
+      }
     }
   }
+
 }
 
 // Toggle Switch Styles
