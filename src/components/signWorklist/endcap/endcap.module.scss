@@ -1,0 +1,9 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
+@use "../../../styles/breakpoint" as *;
+
+.endcapSection {
+  h2 {
+    padding-bottom: 10px;
+  }
+}

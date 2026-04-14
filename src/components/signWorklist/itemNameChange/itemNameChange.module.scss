@@ -1,0 +1,9 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
+@use "../../../styles/breakpoint" as *;
+
+.itemNameChangeSection {
+  h2 {
+    padding-bottom: 10px;
+  }
+}

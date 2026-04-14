@@ -1,0 +1,186 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+@use "../../styles/breakpoint" as *;
+
+.groupBox {
+  padding: 36px 24px;
+  border: 1px solid $medium-gray;
+  border-radius: 10px;
+
+  .subTitle {
+    padding-bottom: 26px;
+
+    p {
+      @include font-size(22px);
+      line-height: 24px;
+    }
+  }
+
+  .filterBar {
+    padding-bottom: 30px;
+
+    label {
+      padding-bottom: 12px;
+      display: block
+    }
+
+    ul {
+      @include flex();
+      @include align-items(center);
+
+      li {
+        padding-right: 16px;
+
+        .dropdownWrap {
+          max-width: 120px;
+          width: 100%;
+         }
+
+         a {
+          @include font-size(14px);
+          font-weight: 400;
+          color: $primary-color;
+          text-decoration: none;
+         }
+  
+        &:last-child {
+          padding-right: 0;
+        }
+      }
+    }
+  }
+}
+
+.tableWrap {
+  width: 100%;
+
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 4px;
+
+    &:hover {
+      background: #a1a1a1;
+    }
+  }
+}
+
+.dataTable {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: $white-color;
+
+  thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: $white-color;
+
+    tr {
+      th {
+        @include font-size(14px);
+        font-weight: 500;
+        color: $text-color;
+        padding: 12px 8px;
+        text-align: left;
+        border: 1px solid $medium-gray;
+        vertical-align: top;
+        white-space: nowrap;
+
+        &.checkboxCell {
+          text-align: center;
+          
+          .thContent {
+            @include justify-content(center);
+            margin-top: -4px;
+          }
+        }
+
+        .thContent {
+          @include flex();
+          @include align-items(center);
+
+          .sortIcon {
+            min-width: 10px;
+            cursor: pointer;
+            margin-left: 6px;
+          }
+        }
+
+        .filterWrap {
+          input[type="date"] {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid $medium-gray;
+            border-radius: 4px;
+            font-size: 13px;
+            line-height: 16px;
+            color: #333333;
+            background-color: $white-color;
+            height: 32px;
+            box-sizing: border-box;
+
+            &:focus {
+              outline: none;
+              border-color: $primary-color;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  tbody {
+    tr {
+      &:nth-child(even) {
+        background-color: #fafafa;
+      }
+
+      td {
+        padding: 12px 8px;
+        border-bottom: 1px solid #eee;
+
+        p {
+          @include font-size(14px);
+          font-weight: 400;
+          color: $text-color;
+        }
+
+        &.checkboxCell {
+          text-align: center;
+        }
+
+        .printStatusTag {
+          display: block;
+          height: 28px;
+          width: 50px;
+          border-radius: 4px;
+          background-color: $green-color;
+        }
+      }
+    }
+  }
+}
+
+.pagination {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 22px 8px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
+
+  p {
+    @include font-size(14px);
+    color: $text-color;
+    font-weight: 500;
+  }
+}

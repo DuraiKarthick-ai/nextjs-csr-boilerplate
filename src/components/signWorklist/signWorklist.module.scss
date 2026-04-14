@@ -2,7 +2,7 @@
 @use "../../styles/mixins" as *;
 @use "../../styles/breakpoint" as *;
 
-.groupBox {
+.signManagement {
   padding: 36px 24px;
   border: 1px solid $medium-gray;
   border-radius: 10px;
@@ -16,166 +16,47 @@
     }
   }
 
-  .tabContainer {
-    display: inline-flex;
-    border: 1px solid #d1d1d1;
-    border-radius: 4px;
-    overflow: hidden;
-    margin-bottom: 26px;
+  .tabsHeading {
+    padding-bottom: 26px;
 
-    .tab {
-      @include font-size(14px);
-      font-weight: 500;
-      color: $text-color;
-      padding: 6px 20px;
-      background-color: $white-color;
-      border: none;
-      outline: none;
-      cursor: pointer;
-      border-right: 1px solid $medium-gray;
-      transition: all 0.2s ease;
+    ul {
+      @include flex();
+      @include align-items(center);
 
-      &:last-child {
-        border-right: none;
-      }
+      li {
+        padding-right: 16px;
 
-      &.active {
-        background: $primary-btn-color;
-        color: $white-color;
-      }
-    }
-  }
-}
-
-.tableWrap {
-  width: 100%;
-  max-width: 986px;
-  overflow: auto;
-
-  &::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 4px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #c1c1c1;
-    border-radius: 4px;
-
-    &:hover {
-      background: #a1a1a1;
-    }
-  }
-}
-
-.dataTable {
-  width: 100%;
-  border-collapse: collapse;
-  background-color: $white-color;
-
-  thead {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background-color: $white-color;
-
-    tr {
-      th {
-        @include font-size(14px);
-        font-weight: 500;
-        color: $text-color;
-        padding: 12px 8px;
-        text-align: left;
-        border: 1px solid $medium-gray;
-        vertical-align: top;
-        white-space: nowrap;
-
-        &.checkboxCell {
-          text-align: center;
+        &:last-child {
+          padding-right: 0;
         }
 
-        .thContent {
-          @include flex();
-          @include align-items(center);
-          margin-bottom: 8px;
-
-          .sortIcon {
-            min-width: 10px;
-            cursor: pointer;
-            margin-left: 6px;
-          }
-        }
-
-        .filterWrap {
-          input[type="date"] {
-            width: 100%;
-            padding: 6px 10px;
-            border: 1px solid $medium-gray;
-            border-radius: 4px;
-            font-size: 13px;
-            line-height: 16px;
-            color: #333333;
-            background-color: $white-color;
-            height: 32px;
-            box-sizing: border-box;
-
-            &:focus {
-              outline: none;
-              border-color: $primary-color;
-            }
-          }
-        }
-      }
-    }
-  }
-
-  tbody {
-    tr {
-
-      &:nth-child(even) {
-        background-color: #fafafa;
-      }
-
-      td {
-        padding: 12px 8px;
-        border-bottom: 1px solid #eee;
-
-        p {
-          @include font-size(14px);
-          font-weight: 400;
+        .tab {
+          @include font-size(16px);
+          font-weight: 500;
           color: $text-color;
-        }
+          padding: 10px 8px;
+          background-color: $white-color;
+          border: none;
+          outline: none;
+          cursor: pointer;
+          border-radius: 2px;
+          transition: all 0.2s ease;
+          border-bottom: 2px solid transparent;
 
-        &.checkboxCell {
-          text-align: center;
-        }
+          &.active {
+            border-color: $primary-btn-color;
+            color: $primary-btn-color;
+          }
 
-        .printStatusTag {
-          display: block;
-          height: 28px;
-          width: 50px;
-          border-radius: 4px;
-          background-color: $green-color;
+          &:not(.active):hover {
+            background-color: $extra-light-color;
+          }
         }
       }
     }
   }
-}
 
-.pagination {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 22px 8px;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
-
-  p {
-    @include font-size(14px);
-    color: $text-color;
-    font-weight: 500;
+  .tabsContent {
+    padding: 16px 0;
   }
 }
