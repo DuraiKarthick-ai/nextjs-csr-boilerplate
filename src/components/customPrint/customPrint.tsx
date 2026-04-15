@@ -80,7 +80,7 @@ export default function CustomPrint(): JSX.Element {
       signContent.badge7,
     ].filter(Boolean);
 
-    await submitPrint({
+    const success = await submitPrint({
       storeId: DEFAULT_STORE_ID,
       requestedBy: DEFAULT_REQUESTED_BY,
       printRequests: [
@@ -104,6 +104,9 @@ export default function CustomPrint(): JSX.Element {
         },
       ],
     });
+    if (success) {
+      handleReset();
+    }
   };
 
       const zoomInIcon = (
@@ -187,8 +190,10 @@ export default function CustomPrint(): JSX.Element {
                         variant="outlined"
                         value={itemNumber}
                         onChange={(e) => setItemNumber(e.target.value)}
+                        error={!!printError}
                       />
                     </ThemeProvider>
+                    {printError && <span className="validationMsg error">{printError}</span>}
                   </div>
                 </li>
                 <li>

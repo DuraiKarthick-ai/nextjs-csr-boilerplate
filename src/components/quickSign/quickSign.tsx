@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import TextField from "@mui/material/TextField";
 import { ThemeProvider } from "@mui/material/styles";
 import { Autocomplete, CircularProgress, FormControl, MenuItem, Select, Switch } from "@mui/material";
@@ -7,66 +7,29 @@ import theme from "@/theme/customizeTheme";
 import ContentWrapper from "../contentWrapper/contentWrapper";
 import PrintSuccessDialog from "../printSuccessDialog/printSuccessDialog";
 import { usePrint } from "@/hooks/usePrint";
-import type { SignSize, ByItemEntry, ByDepartmentCategoryEntry, PrintRequestPayload } from "@/types/print";
+import type { ByItemEntry, ByDepartmentCategoryEntry, PrintRequestPayload } from "@/types/print";
+import { useItemSearch } from "./hooks/useItemSearch";
+import type { ItemRow, ItemSearchResult, QuickSignTab, DeptForm } from "./quickSign.types";
+import {
+  DEFAULT_STORE_ID,
+  DEFAULT_REQUESTED_BY,
+  SIZE_MAP,
+  MAX_ITEM_DIGITS,
+  MIN_SEARCH_LENGTH,
+  INITIAL_ITEM_ROWS,
+  INITIAL_DEPT_FORM,
+} from "./quickSign.constants";
 import styles from "./quickSign.module.scss";
 
-/** Default store and user — replace with real context values when available. */
-const DEFAULT_STORE_ID = "1234";
-const DEFAULT_REQUESTED_BY = "g197511";
+/** Regex pattern to validate numeric-only input up to MAX_ITEM_DIGITS. */
+const ITEM_INPUT_PATTERN = new RegExp(`^\\d{0,${MAX_ITEM_DIGITS}}$`);
 
-/** Maps select option values to API sign sizes. */
-const SIZE_MAP: Record<number, SignSize> = {
-  10: "SMALL",
-  20: "MEDIUM",
-  30: "LARGE",
-};
-
-/** Shape of an item returned by the item-search API. */
-interface ItemSearchResult {
-  date: string;
-  itemNumber: number;
-  itemName: string;
-  dept: string;
-  upc: string;
-  regularPrice: number;
-  salePrice: number;
-}
-
-/** Item search mock API URL. */
-const ITEM_SEARCH_URL = "https://69ce482633a09f831b7d3ab9.mockapi.io/api/v1/dashboard/itemSearch";
-
-/** State shape for a single "By Item" row. */
-interface ItemRow {
-  itemNumberOrUpc: string;
-  quantity: string;
-  selectedItem: ItemSearchResult | null;
-}
-
-/** State shape for the "By Department & Category" form. */
-interface DeptForm {
-  departmentNumber: string;
-  categoryCode: string;
-  size: number | "";
-  quantity: string;
-  printOnlyItemsWithOnHand: boolean;
-}
-
-/** Number of item rows shown by default. */
-const DEFAULT_ROW_COUNT = 6;
-
-const INITIAL_ITEM_ROWS: ItemRow[] = Array.from({ length: DEFAULT_ROW_COUNT }, () => ({
-  itemNumberOrUpc: "",
-  quantity: "1",
-  selectedItem: null,
-}));
-
-const INITIAL_DEPT_FORM: DeptForm = {
-  departmentNumber: "",
-  categoryCode: "",
-  size: "",
-  quantity: "",
-  printOnlyItemsWithOnHand: true,
-};
+/** SVG icon for the "add row" button. */
+const AddFieldIcon = (): JSX.Element => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="#64686C" />
+  </svg>
+);
 
 /**
  * QuickSign component — Quick Sign Print screen.
@@ -77,51 +40,24 @@ const INITIAL_DEPT_FORM: DeptForm = {
  * @returns {JSX.Element} The rendered Quick Sign Print view.
  */
 export default function QuickSign(): JSX.Element {
-  const [active, setActive] = useState("item");
+  const [active, setActive] = useState<QuickSignTab>("item");
   const [itemSize, setItemSize] = useState<number | "">("");
   const [itemRows, setItemRows] = useState<ItemRow[]>(INITIAL_ITEM_ROWS);
   const [deptForm, setDeptForm] = useState<DeptForm>({ ...INITIAL_DEPT_FORM });
+
   const { isPrinting, printResult, printError, submitPrint, resetPrint } = usePrint();
-
-  const [searchOptions, setSearchOptions] = useState<Record<number, ItemSearchResult[]>>({});
-  const [searchLoading, setSearchLoading] = useState<Record<number, boolean>>({});
-  const searchTimerRef = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
-
-  /**
-   * Fetches item search results for a given row after a 300ms debounce.
-   * Only triggers when the query is at least 5 numeric digits.
-   */
-  const handleItemSearch = (index: number, query: string): void => {
-    if (searchTimerRef.current[index]) clearTimeout(searchTimerRef.current[index]);
-    if (query.length < 5) {
-      setSearchOptions((prev) => ({ ...prev, [index]: [] }));
-      return;
-    }
-    searchTimerRef.current[index] = setTimeout(async () => {
-      setSearchLoading((prev) => ({ ...prev, [index]: true }));
-      try {
-        const res = await fetch(`${ITEM_SEARCH_URL}?search=${encodeURIComponent(query)}`);
-        const data: ItemSearchResult[] = res.ok ? await res.json() : [];
-        setSearchOptions((prev) => ({ ...prev, [index]: data }));
-      } catch {
-        setSearchOptions((prev) => ({ ...prev, [index]: [] }));
-      } finally {
-        setSearchLoading((prev) => ({ ...prev, [index]: false }));
-      }
-    }, 300);
-  };
-
-  const clearIcon = (
-    <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M10 0C4.47 0 0 4.47 0 10C0 15.53 4.47 20 10 20C15.53 20 20 15.53 20 10C20 4.47 15.53 0 10 0ZM15 13.59L13.59 15L10 11.41L6.41 15L5 13.59L8.59 10L5 6.41L6.41 5L10 8.59L13.59 5L15 6.41L11.41 10L15 13.59Z" fill="#64686C" />
-    </svg>
-  );
-
-  const addFieldIcon = (
-    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="#64686C" />
-    </svg>
-  );
+  const {
+    searchOptions,
+    searchLoading,
+    invalidRows,
+    printedRows,
+    printedMessage,
+    triggerSearch,
+    clearInvalid,
+    clearPrinted,
+    markPrinted,
+    resetSearch,
+  } = useItemSearch();
 
   /**
    * Updates a single field in an item row by index.
@@ -135,28 +71,53 @@ export default function QuickSign(): JSX.Element {
   };
 
   /**
+   * Handles text input changes in the item Autocomplete field.
+   * Validates numeric-only input, clears row status flags, and triggers search.
+   *
+   * @param {number} index - Row index.
+   * @param {string} value - The new input value.
+   */
+  const handleItemInputChange = (index: number, value: string): void => {
+    if (value !== "" && !ITEM_INPUT_PATTERN.test(value)) return;
+
+    setItemRows((prev) =>
+      prev.map((r, i) => (i === index ? { ...r, itemNumberOrUpc: value, selectedItem: null } : r))
+    );
+
+    if (invalidRows.has(index)) clearInvalid(index);
+    if (printedRows.has(index)) clearPrinted(index);
+
+    triggerSearch(index, value);
+  };
+
+  /**
+   * Handles selection of an item from the Autocomplete dropdown.
+   *
+   * @param {number} index - Row index.
+   * @param {ItemSearchResult | null} item - The selected item, or null if cleared.
+   */
+  const handleItemSelect = (index: number, item: ItemSearchResult | null): void => {
+    setItemRows((prev) =>
+      prev.map((r, i) =>
+        i === index
+          ? { ...r, itemNumberOrUpc: item ? String(item.itemNumber) : "", selectedItem: item }
+          : r
+      )
+    );
+  };
+
+  /**
    * Whether all existing item rows have been filled (item number entered).
    *
    * @returns {boolean} True when every row has a non-empty item number.
    */
-  const allRowsFilled = (): boolean => {
-    return itemRows.every((r) => r.itemNumberOrUpc.trim() !== "");
-  };
+  const allRowsFilled = (): boolean => itemRows.every((r) => r.itemNumberOrUpc.trim() !== "");
 
   /**
    * Adds a new blank item row.
    */
   const addItemRow = (): void => {
     setItemRows((prev) => [...prev, { itemNumberOrUpc: "", quantity: "1", selectedItem: null }]);
-  };
-
-  /**
-   * Removes an item row by index.
-   *
-   * @param {number} index - Row index to remove.
-   */
-  const removeItemRow = (index: number): void => {
-    setItemRows((prev) => prev.filter((_, i) => i !== index));
   };
 
   /**
@@ -173,6 +134,9 @@ export default function QuickSign(): JSX.Element {
 
   /**
    * Whether the Print button should be disabled based on mandatory field validation.
+   * For "By Item": requires size, at least one filled row, all filled rows must have
+   * a quantity and a valid selectedItem from the search API.
+   * For "By Dept": requires department number.
    *
    * @returns {boolean} True when required fields are missing.
    */
@@ -182,7 +146,8 @@ export default function QuickSign(): JSX.Element {
       const hasSize = !!itemSize;
       const filledRows = itemRows.filter((r) => r.itemNumberOrUpc.trim() !== "");
       const allHaveQuantity = filledRows.every((r) => r.quantity.trim() !== "");
-      return !hasSize || filledRows.length === 0 || !allHaveQuantity;
+      const allHaveSelection = filledRows.every((r) => r.selectedItem !== null);
+      return !hasSize || filledRows.length === 0 || !allHaveQuantity || !allHaveSelection;
     }
     return !deptForm.departmentNumber.trim();
   };
@@ -194,65 +159,116 @@ export default function QuickSign(): JSX.Element {
     setItemSize("");
     setItemRows([...INITIAL_ITEM_ROWS]);
     setDeptForm({ ...INITIAL_DEPT_FORM });
-    setSearchOptions({});
-    setSearchLoading({});
+    resetSearch();
     resetPrint();
   };
 
   /**
-   * Builds and submits the print request payload from current form state.
+   * Builds and submits a "By Item" print request.
+   * Validates that filled rows have a selectedItem; flags invalid rows.
+   * On success, marks valid rows as printed with inline message.
+   * Suppresses the popup dialog when there are also invalid rows.
    */
-  const handlePrint = async (): Promise<void> => {
-    let payload: PrintRequestPayload;
+  const handleItemPrint = async (): Promise<void> => {
+    const size = itemSize ? SIZE_MAP[itemSize] : undefined;
+    if (!size) return;
 
-    if (active === "item") {
-      const size = itemSize ? SIZE_MAP[itemSize] : undefined;
-      if (!size) return;
+    const validIndices: number[] = [];
+    const invalid = new Set<number>();
 
-      const entries: ByItemEntry[] = itemRows
-        .filter((r) => r.itemNumberOrUpc.trim() !== "")
-        .map((r) => ({
-          itemNumberOrUpc: r.itemNumberOrUpc.trim(),
-          size,
-          quantity: Number(r.quantity) || 1,
-        }));
+    itemRows.forEach((r, i) => {
+      if (r.itemNumberOrUpc.trim() !== "") {
+        if (r.selectedItem) {
+          validIndices.push(i);
+        } else {
+          invalid.add(i);
+        }
+      }
+    });
 
-      if (entries.length === 0) return;
-
-      payload = {
-        storeId: DEFAULT_STORE_ID,
-        requestedBy: DEFAULT_REQUESTED_BY,
-        printRequests: [{ type: "BY_ITEM", entries }],
-      };
-    } else {
-      if (!deptForm.departmentNumber.trim()) return;
-      const size = deptForm.size ? SIZE_MAP[deptForm.size] : undefined;
-      if (!size) return;
-
-      const entries: ByDepartmentCategoryEntry[] = [
-        {
-          departmentNumber: deptForm.departmentNumber.trim(),
-          categoryCode: deptForm.categoryCode.trim() || null,
-          size,
-          quantity: Number(deptForm.quantity) || 1,
-          printOnlyItemsWithOnHand: deptForm.printOnlyItemsWithOnHand,
-        },
-      ];
-
-      payload = {
-        storeId: DEFAULT_STORE_ID,
-        requestedBy: DEFAULT_REQUESTED_BY,
-        printRequests: [{ type: "BY_DEPARTMENT_CATEGORY", entries }],
-      };
+    if (invalid.size > 0) {
+      // handled by isPrintDisabled but kept as safety check
+      return;
     }
 
-    await submitPrint(payload);
+    if (validIndices.length === 0) return;
+
+    const entries: ByItemEntry[] = validIndices.map((i) => ({
+      itemNumberOrUpc: itemRows[i]!.itemNumberOrUpc.trim(),
+      size,
+      quantity: Number(itemRows[i]!.quantity) || 1,
+    }));
+
+    const response = await submitPrint({
+      storeId: DEFAULT_STORE_ID,
+      requestedBy: DEFAULT_REQUESTED_BY,
+      printRequests: [{ type: "BY_ITEM", entries }],
+    });
+
+    if (response) {
+      markPrinted(validIndices, `${response.responseMessage} \u2014 ${response.printerName}`);
+      if (invalid.size > 0) {
+        resetPrint();
+      }
+    }
   };
 
-  const successMessage =
-    printResult
-      ? `${printResult.responseMessage} — ${printResult.printerName}`
-      : "";
+  /**
+   * Builds and submits a "By Department & Category" print request.
+   * On success, resets the entire form.
+   */
+  const handleDeptPrint = async (): Promise<void> => {
+    if (!deptForm.departmentNumber.trim()) return;
+    const size = deptForm.size ? SIZE_MAP[deptForm.size] : undefined;
+    if (!size) return;
+
+    const entries: ByDepartmentCategoryEntry[] = [
+      {
+        departmentNumber: deptForm.departmentNumber.trim(),
+        categoryCode: deptForm.categoryCode.trim() || null,
+        size,
+        quantity: Number(deptForm.quantity) || 1,
+        printOnlyItemsWithOnHand: deptForm.printOnlyItemsWithOnHand,
+      },
+    ];
+
+    const result = await submitPrint({
+      storeId: DEFAULT_STORE_ID,
+      requestedBy: DEFAULT_REQUESTED_BY,
+      printRequests: [{ type: "BY_DEPARTMENT_CATEGORY", entries }],
+    });
+
+    if (result) {
+      handleReset();
+    }
+  };
+
+  /**
+   * Dispatches the print action based on the active tab.
+   */
+  const handlePrint = async (): Promise<void> => {
+    if (active === "item") {
+      await handleItemPrint();
+    } else {
+      await handleDeptPrint();
+    }
+  };
+
+  /**
+   * Computes the helper text for a given item row based on its status.
+   *
+   * @param {number} index - Row index.
+   * @returns {string | undefined} Helper text to display, or undefined.
+   */
+  const getItemHelperText = (index: number): string | undefined => {
+    if (invalidRows.has(index)) return "Item not available";
+    if (printedRows.has(index) && printedMessage) return printedMessage;
+    return undefined;
+  };
+
+  const successMessage = printResult
+    ? `${printResult.responseMessage} \u2014 ${printResult.printerName}`
+    : "";
 
   return (
     <ContentWrapper title="Signs Management">
@@ -325,23 +341,14 @@ export default function QuickSign(): JSX.Element {
                             inputValue={row.itemNumberOrUpc}
                             onInputChange={(_e, value, reason) => {
                               if (reason !== "input") return;
-                              // Only allow numeric, max 7 digits
-                              if (value !== "" && !/^\d{0,7}$/.test(value)) return;
-                              setItemRows((prev) => prev.map((r, i) => i === index ? { ...r, itemNumberOrUpc: value, selectedItem: null } : r));
-                              handleItemSearch(index, value);
+                              handleItemInputChange(index, value);
                             }}
-                            onChange={(_e, newValue) => {
-                              setItemRows((prev) => prev.map((r, i) => i === index ? {
-                                ...r,
-                                itemNumberOrUpc: newValue ? String(newValue.itemNumber) : "",
-                                selectedItem: newValue,
-                              } : r));
-                              if (newValue) setSearchOptions((prev) => ({ ...prev, [index]: [] }));
-                            }}
+                            onChange={(_e, newValue) => handleItemSelect(index, newValue)}
                             getOptionLabel={(option) => `${option.itemNumber} - ${option.itemName}`}
                             isOptionEqualToValue={(option, val) => option.itemNumber === val.itemNumber}
                             filterOptions={(x) => x}
-                            noOptionsText="Type at least 5 digits to search"
+                            open={row.itemNumberOrUpc.length >= MIN_SEARCH_LENGTH && !row.selectedItem && (searchOptions[index] || []).length > 0}
+                            noOptionsText=""
                             renderInput={(params) => (
                               <TextField
                                 {...params}
@@ -349,6 +356,10 @@ export default function QuickSign(): JSX.Element {
                                 size="small"
                                 placeholder="Enter Item # (min 5 digits)"
                                 variant="outlined"
+                                error={invalidRows.has(index)}
+                                helperText={getItemHelperText(index)}
+                                color={printedRows.has(index) ? "success" : undefined}
+                                FormHelperTextProps={printedRows.has(index) ? { sx: { color: "green" } } : undefined}
                                 InputProps={{
                                   ...params.InputProps,
                                   endAdornment: (
@@ -379,7 +390,7 @@ export default function QuickSign(): JSX.Element {
                       </div>
                       {index === itemRows.length - 1 && allRowsFilled() && (
                         <div className={styles.addField}>
-                          <i onClick={addItemRow}>{addFieldIcon}</i>
+                          <i onClick={addItemRow}><AddFieldIcon /></i>
                         </div>
                       )}
                     </li>
@@ -481,7 +492,11 @@ export default function QuickSign(): JSX.Element {
             </div>
           )}
 
-          {printError && <p className="errorMsg">{printError}</p>}
+          {printError && (
+            <div className={styles.printError}>
+              <p>{printError}</p>
+            </div>
+          )}
           
           <div className={styles.buttonWrap}>
             <ul>

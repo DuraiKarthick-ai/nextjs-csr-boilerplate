@@ -89,6 +89,16 @@
 	}
 }
 
+.printError {
+	max-width: 95%;
+	padding: 12px 16px;
+
+	p {
+		color: $red-color;
+		@include font-size(14px);
+	}
+}
+
 .tabsHeading {
   padding-bottom: 26px;
 

@@ -17,8 +17,8 @@ export interface UsePrintResult {
   printResult: PrintResponse | null;
   /** Error message from the last failed print attempt, or null. */
   printError: string | null;
-  /** Submits a print request with the given payload. */
-  submitPrint: (payload: PrintRequestPayload) => Promise<void>;
+  /** Submits a print request with the given payload. Returns the response on success, null on failure. */
+  submitPrint: (payload: PrintRequestPayload) => Promise<PrintResponse | null>;
   /** Resets printResult and printError back to null. */
   resetPrint: () => void;
 }
@@ -38,7 +38,7 @@ export function usePrint(): UsePrintResult {
    *
    * @param {PrintRequestPayload} payload - The print request to submit.
    */
-  const submitPrint = useCallback(async (payload: PrintRequestPayload): Promise<void> => {
+  const submitPrint = useCallback(async (payload: PrintRequestPayload): Promise<PrintResponse | null> => {
     setIsPrinting(true);
     setPrintError(null);
     setPrintResult(null);
@@ -46,9 +46,11 @@ export function usePrint(): UsePrintResult {
     try {
       const result = await printService.submitPrint(payload);
       setPrintResult(result);
+      return result;
     } catch (err) {
       const message = err instanceof Error ? err.message : "Print request failed";
       setPrintError(message);
+      return null;
     } finally {
       setIsPrinting(false);
     }
