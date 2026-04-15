@@ -84,6 +84,17 @@
         color: $primary-color;
       }
 
+      .batchLink {
+        @include font-size(14px);
+        color: $dark-blue-color;
+        cursor: pointer;
+        text-decoration: none;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+
       .noDatafound {
         margin-left: -16px;
         margin-right: -16px;

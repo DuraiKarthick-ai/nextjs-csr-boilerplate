@@ -1,5 +1,6 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/router";
 import ContentWrapper from "../contentWrapper/contentWrapper";
 import styles from "./signWorklist.module.scss";
 import SignAuditSection from "./signAudit/signAudit";
@@ -12,9 +13,20 @@ import ItemNameChange from "./itemNameChange/itemNameChange";
  *
  * @returns {JSX.Element} The rendered Sign Worklist view.
  */
-export default function SignWorklist(): JSX.Element {
+/** Valid worklist tab keys. */
+const VALID_TABS = new Set(["price", "endcap", "item", "audit"]);
 
+export default function SignWorklist(): JSX.Element {
+  const router = useRouter();
   const [active, setActive] = useState("price");
+
+  /** Sync active tab from the URL query param on mount or query change. */
+  useEffect(() => {
+    const tab = router.query.tab;
+    if (typeof tab === "string" && VALID_TABS.has(tab)) {
+      setActive(tab);
+    }
+  }, [router.query.tab]);
 
   return (
     <ContentWrapper title="Signs Management">
