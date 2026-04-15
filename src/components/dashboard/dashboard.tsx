@@ -2,11 +2,11 @@
 
 import React from "react";
 import Link from "next/link";
-import styles from "./dashboard.module.scss";
-import ContentWrapper from "../contentWrapper/contentWrapper";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useTableScroll } from "@/hooks/useTableScroll";
+import ContentWrapper from "../contentWrapper/contentWrapper";
 import PrintSuccessDialog from "../printSuccessDialog/printSuccessDialog";
+import styles from "./dashboard.module.scss";
 
 const PRINT_SUCCESS_TITLE = "Printed Successfully";
 const PRINT_SUCCESS_MESSAGE = "5 pages Printed successfully in Xerox Phaser 6510 81 ED D4";

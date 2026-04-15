@@ -1,12 +1,12 @@
+import { ReactNode } from "react";
+import type { ViewType } from "@/types";
 import SideNav from "../sideNav/sideNav";
-import styles from "./layout.module.scss";
 import Dashboard from "../dashboard/dashboard";
 import QuickSign from "../quickSign/quickSign";
-import { ReactNode } from "react";
 import CustomPrint from "../customPrint/customPrint";
 import SignWorklist from "../signWorklist/signWorklist";
 import SignAudit from "../signAudit/signAudit";
-import type { ViewType } from "@/types";
+import styles from "./layout.module.scss";
 
 interface LayoutProps {
   open: boolean;

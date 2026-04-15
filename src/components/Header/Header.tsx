@@ -1,8 +1,8 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import styles from "./header.module.scss";
 import logo from "../../images/costco_wholesale.png";
+import styles from "./header.module.scss";
 
 interface HeaderProps {
   toggle: () => void;

@@ -1,12 +1,12 @@
 import { ThemeProvider } from "@emotion/react";
-import styles from "./signAudit.module.scss";
 import { Checkbox, FormControl, MenuItem, Select } from "@mui/material";
 import { useState } from "react";
-import { datePickerTheme, tableFilterTheme } from "@/theme/customizeTheme";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import Link from "next/link";
+import { datePickerTheme, tableFilterTheme } from "@/theme/customizeTheme";
+import styles from "./signAudit.module.scss";
 
 // Static table data
 const initialData = [
@@ -53,7 +53,6 @@ export default function SignAuditSection() {
      </svg>
    );
 
-   const [active, setActive] = useState("price");
    const [sortKey, setSortKey] = useState<SortKey | null>(null);
    const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
    const [data, setData] = useState(initialData);

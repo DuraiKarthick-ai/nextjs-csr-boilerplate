@@ -1,8 +1,7 @@
 "use client";
 import { useState } from "react";
-
-import styles from "./signWorklist.module.scss";
 import ContentWrapper from "../contentWrapper/contentWrapper";
+import styles from "./signWorklist.module.scss";
 import SignAuditSection from "./signAudit/signAudit";
 import EmergencyPriceChange from "./emergencyPriceChange/emergencyPriceChange";
 import Endcap from "./endcap/endcap";

@@ -27,7 +27,7 @@ jest.mock("@/components/auth/authGate", () => {
   return MockAuthGate;
 });
 
-jest.mock("@/components/header/Header", () => {
+jest.mock("@/components/header/header", () => {
   const MockHeader = () => <header data-testid="header" />;
   MockHeader.displayName = "MockHeader";
   return MockHeader;

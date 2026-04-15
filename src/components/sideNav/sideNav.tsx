@@ -1,8 +1,8 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import styles from "./sideNav.module.scss";
 import type { ViewType } from "@/types";
+import styles from "./sideNav.module.scss";
 
 interface SideNavProps {
   /** The currently active view key used to highlight the matching nav button. */
