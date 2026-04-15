@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import TextField from "@mui/material/TextField";
 import { ThemeProvider } from "@mui/material/styles";
-import { FormControl, MenuItem, Select, Switch } from "@mui/material";
+import { Autocomplete, CircularProgress, FormControl, MenuItem, Select, Switch } from "@mui/material";
 import theme from "@/theme/customizeTheme";
 import ContentWrapper from "../contentWrapper/contentWrapper";
 import PrintSuccessDialog from "../printSuccessDialog/printSuccessDialog";
@@ -21,10 +21,25 @@ const SIZE_MAP: Record<number, SignSize> = {
   30: "LARGE",
 };
 
+/** Shape of an item returned by the item-search API. */
+interface ItemSearchResult {
+  date: string;
+  itemNumber: number;
+  itemName: string;
+  dept: string;
+  upc: string;
+  regularPrice: number;
+  salePrice: number;
+}
+
+/** Item search mock API URL. */
+const ITEM_SEARCH_URL = "https://69ce482633a09f831b7d3ab9.mockapi.io/api/v1/dashboard/itemSearch";
+
 /** State shape for a single "By Item" row. */
 interface ItemRow {
   itemNumberOrUpc: string;
   quantity: string;
+  selectedItem: ItemSearchResult | null;
 }
 
 /** State shape for the "By Department & Category" form. */
@@ -42,6 +57,7 @@ const DEFAULT_ROW_COUNT = 6;
 const INITIAL_ITEM_ROWS: ItemRow[] = Array.from({ length: DEFAULT_ROW_COUNT }, () => ({
   itemNumberOrUpc: "",
   quantity: "1",
+  selectedItem: null,
 }));
 
 const INITIAL_DEPT_FORM: DeptForm = {
@@ -66,6 +82,34 @@ export default function QuickSign(): JSX.Element {
   const [itemRows, setItemRows] = useState<ItemRow[]>(INITIAL_ITEM_ROWS);
   const [deptForm, setDeptForm] = useState<DeptForm>({ ...INITIAL_DEPT_FORM });
   const { isPrinting, printResult, printError, submitPrint, resetPrint } = usePrint();
+
+  const [searchOptions, setSearchOptions] = useState<Record<number, ItemSearchResult[]>>({});
+  const [searchLoading, setSearchLoading] = useState<Record<number, boolean>>({});
+  const searchTimerRef = useRef<Record<number, ReturnType<typeof setTimeout>>>({});
+
+  /**
+   * Fetches item search results for a given row after a 300ms debounce.
+   * Only triggers when the query is at least 5 numeric digits.
+   */
+  const handleItemSearch = (index: number, query: string): void => {
+    if (searchTimerRef.current[index]) clearTimeout(searchTimerRef.current[index]);
+    if (query.length < 5) {
+      setSearchOptions((prev) => ({ ...prev, [index]: [] }));
+      return;
+    }
+    searchTimerRef.current[index] = setTimeout(async () => {
+      setSearchLoading((prev) => ({ ...prev, [index]: true }));
+      try {
+        const res = await fetch(`${ITEM_SEARCH_URL}?search=${encodeURIComponent(query)}`);
+        const data: ItemSearchResult[] = res.ok ? await res.json() : [];
+        setSearchOptions((prev) => ({ ...prev, [index]: data }));
+      } catch {
+        setSearchOptions((prev) => ({ ...prev, [index]: [] }));
+      } finally {
+        setSearchLoading((prev) => ({ ...prev, [index]: false }));
+      }
+    }, 300);
+  };
 
   const clearIcon = (
     <svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -103,7 +147,7 @@ export default function QuickSign(): JSX.Element {
    * Adds a new blank item row.
    */
   const addItemRow = (): void => {
-    setItemRows((prev) => [...prev, { itemNumberOrUpc: "", quantity: "1" }]);
+    setItemRows((prev) => [...prev, { itemNumberOrUpc: "", quantity: "1", selectedItem: null }]);
   };
 
   /**
@@ -150,6 +194,8 @@ export default function QuickSign(): JSX.Element {
     setItemSize("");
     setItemRows([...INITIAL_ITEM_ROWS]);
     setDeptForm({ ...INITIAL_DEPT_FORM });
+    setSearchOptions({});
+    setSearchLoading({});
     resetPrint();
   };
 
@@ -272,13 +318,48 @@ export default function QuickSign(): JSX.Element {
                       <div className={`inputLabelWrap ${styles.itemField}`}>
                         {index === 0 && <label className="label">Item # / UPC</label>}
                         <ThemeProvider theme={theme}>
-                          <TextField
-                            fullWidth
-                            size="small"
-                            placeholder="Enter or Scan Item # / UPC"
-                            variant="outlined"
-                            value={row.itemNumberOrUpc}
-                            onChange={(e) => updateItemRow(index, "itemNumberOrUpc", e.target.value)}
+                          <Autocomplete<ItemSearchResult>
+                            options={searchOptions[index] || []}
+                            loading={searchLoading[index] || false}
+                            value={row.selectedItem}
+                            inputValue={row.itemNumberOrUpc}
+                            onInputChange={(_e, value, reason) => {
+                              if (reason !== "input") return;
+                              // Only allow numeric, max 7 digits
+                              if (value !== "" && !/^\d{0,7}$/.test(value)) return;
+                              setItemRows((prev) => prev.map((r, i) => i === index ? { ...r, itemNumberOrUpc: value, selectedItem: null } : r));
+                              handleItemSearch(index, value);
+                            }}
+                            onChange={(_e, newValue) => {
+                              setItemRows((prev) => prev.map((r, i) => i === index ? {
+                                ...r,
+                                itemNumberOrUpc: newValue ? String(newValue.itemNumber) : "",
+                                selectedItem: newValue,
+                              } : r));
+                              if (newValue) setSearchOptions((prev) => ({ ...prev, [index]: [] }));
+                            }}
+                            getOptionLabel={(option) => `${option.itemNumber} - ${option.itemName}`}
+                            isOptionEqualToValue={(option, val) => option.itemNumber === val.itemNumber}
+                            filterOptions={(x) => x}
+                            noOptionsText="Type at least 5 digits to search"
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                fullWidth
+                                size="small"
+                                placeholder="Enter Item # (min 5 digits)"
+                                variant="outlined"
+                                InputProps={{
+                                  ...params.InputProps,
+                                  endAdornment: (
+                                    <>
+                                      {searchLoading[index] ? <CircularProgress size={18} /> : null}
+                                      {params.InputProps.endAdornment}
+                                    </>
+                                  ),
+                                }}
+                              />
+                            )}
                           />
                         </ThemeProvider>
                       </div>
