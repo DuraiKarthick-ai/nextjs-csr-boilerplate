@@ -36,9 +36,13 @@ interface DeptForm {
   printOnlyItemsWithOnHand: boolean;
 }
 
-const INITIAL_ITEM_ROWS: ItemRow[] = [
-  { itemNumberOrUpc: "", quantity: "" },
-];
+/** Number of item rows shown by default. */
+const DEFAULT_ROW_COUNT = 6;
+
+const INITIAL_ITEM_ROWS: ItemRow[] = Array.from({ length: DEFAULT_ROW_COUNT }, () => ({
+  itemNumberOrUpc: "",
+  quantity: "1",
+}));
 
 const INITIAL_DEPT_FORM: DeptForm = {
   departmentNumber: "",
@@ -87,10 +91,19 @@ export default function QuickSign(): JSX.Element {
   };
 
   /**
+   * Whether all existing item rows have been filled (item number entered).
+   *
+   * @returns {boolean} True when every row has a non-empty item number.
+   */
+  const allRowsFilled = (): boolean => {
+    return itemRows.every((r) => r.itemNumberOrUpc.trim() !== "");
+  };
+
+  /**
    * Adds a new blank item row.
    */
   const addItemRow = (): void => {
-    setItemRows((prev) => [...prev, { itemNumberOrUpc: "", quantity: "" }]);
+    setItemRows((prev) => [...prev, { itemNumberOrUpc: "", quantity: "1" }]);
   };
 
   /**
@@ -241,7 +254,7 @@ export default function QuickSign(): JSX.Element {
                             onChange={(e) => setItemSize(e.target.value as number | "")}
                             inputProps={{ "aria-label": "Select Size" }}
                           >
-                            <MenuItem value="" disabled>Select Size</MenuItem>
+                            <MenuItem value="" disabled>Select Any</MenuItem>
                             <MenuItem value={10}>Small</MenuItem>
                             <MenuItem value={20}>Medium</MenuItem>
                             <MenuItem value={30}>Large</MenuItem>
@@ -252,12 +265,12 @@ export default function QuickSign(): JSX.Element {
                   </li>
                 </ul>
               </div>
-              <div className={styles.grid}>
+              <div className={`${styles.grid} ${styles.gridItemRows}`}>
                 <ul>
                   {itemRows.map((row, index) => (
-                    <li key={`item-${index}`}>
-                      <div className="inputLabelWrap">
-                        <label className="label">Item # / UPC</label>
+                    <li key={`item-${index}`} className={styles.itemRow}>
+                      <div className={`inputLabelWrap ${styles.itemField}`}>
+                        {index === 0 && <label className="label">Item # / UPC</label>}
                         <ThemeProvider theme={theme}>
                           <TextField
                             fullWidth
@@ -268,25 +281,14 @@ export default function QuickSign(): JSX.Element {
                             onChange={(e) => updateItemRow(index, "itemNumberOrUpc", e.target.value)}
                           />
                         </ThemeProvider>
-                        {row.itemNumberOrUpc && (
-                          <i className="iconClose" onClick={() => updateItemRow(index, "itemNumberOrUpc", "")}>{clearIcon}</i>
-                        )}
                       </div>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className={styles.grid}>
-                <ul>
-                  {itemRows.map((row, index) => (
-                    <li key={`qty-${index}`}>
-                      <div className="inputLabelWrap">
-                        <label className="label">Quantity</label>
+                      <div className={`inputLabelWrap ${styles.qtyField}`}>
+                        {index === 0 && <label className="label">Quantity</label>}
                         <ThemeProvider theme={theme}>
                           <TextField
                             fullWidth
                             size="small"
-                            placeholder="Enter Quantity"
+                            placeholder="1"
                             variant="outlined"
                             type="number"
                             value={row.quantity}
@@ -294,15 +296,10 @@ export default function QuickSign(): JSX.Element {
                           />
                         </ThemeProvider>
                       </div>
-                      {index === itemRows.length - 1 && (
+                      {index === itemRows.length - 1 && allRowsFilled() && (
                         <div className={styles.addField}>
                           <i onClick={addItemRow}>{addFieldIcon}</i>
                         </div>
-                      )}
-                      {itemRows.length > 1 && (
-                        <button type="button" className="iconClose" onClick={() => removeItemRow(index)} aria-label="Remove row">
-                          {clearIcon}
-                        </button>
                       )}
                     </li>
                   ))}

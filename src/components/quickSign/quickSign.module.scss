@@ -45,6 +45,26 @@
 					}
 				}
 			}
+
+			&.gridItemRows {
+				flex: 3;
+
+				ul {
+					li.itemRow {
+						@include flex();
+						gap: 16px;
+
+						.itemField {
+							flex: 2;
+						}
+
+						.qtyField {
+							flex: 1;
+							max-width: 200px;
+						}
+					}
+				}
+			}
 		}
 	}
 }
