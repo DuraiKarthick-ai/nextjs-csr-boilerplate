@@ -2,11 +2,11 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
 import dynamic from "next/dynamic";
-import Header from "../components/header/header";
+import Header from "../components/header/Header";
 import Layout from "../components/layout/layout";
 import type { ViewType } from "@/types";
 
-const AuthGate = dynamic(() => import("@/components/auth/AuthGate"), {
+const AuthGate = dynamic(() => import("@/components/auth/authGate"), {
   ssr: false,
 });
 

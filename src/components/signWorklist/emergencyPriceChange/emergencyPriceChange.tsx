@@ -11,15 +11,15 @@ import dayjs, { Dayjs } from "dayjs";
 
 // Static table data
 const initialData = [
-  { id: 1, date: "07/05/2025", itemNo: "2345678", itemName: "Frozen Yogurt", dept: "023", category: "OBD", upc: "16456", oh: "Y", quantity: 12, changeReason: "Rebate change", signSize: "M" },
-  { id: 2, date: "07/05/2025", itemNo: "3456278", itemName: "Potato Fish Sticks", dept: "112", category: "OSS", upc: "29996", oh: "Y", quantity: 34, changeReason: "Price change", signSize: "L" },
-  { id: 3, date: "07/05/2025", itemNo: "4562378", itemName: "Smoked Black Pepper Jerky...", dept: "1234", category: "AAE", upc: "23765", oh: "Y", quantity: 543, changeReason: "Rebate change", signSize: "S" },
-  { id: 4, date: "07/05/2025", itemNo: "2567834", itemName: "Ladies Jogger", dept: "1111", category: "CHA", upc: "34556", oh: "Y", quantity: 222, changeReason: "Price change", signSize: "M" },
-  { id: 5, date: "07/05/2025", itemNo: "2567834", itemName: "Whole Young Turkey", dept: "234", category: "AMB", upc: "90856", oh: "Y", quantity: 987, changeReason: "Price change", signSize: "L" },
-  { id: 6, date: "07/05/2025", itemNo: "7681204", itemName: "Frozen Yogurt", dept: "234", category: "AMB", upc: "90856", oh: "Y", quantity: 34, changeReason: "Price change", signSize: "S" },
+  { id: 1, date: "07/05/2025", itemNo: "2345678", itemName: "Frozen Yogurt", dept: "023", category: "OBD", upc: "16456", oh: "Y", quantity: 12, changeReason: "Rebate change", signSize: "M", printStatus: "Pending" },
+  { id: 2, date: "07/05/2025", itemNo: "3456278", itemName: "Potato Fish Sticks", dept: "112", category: "OSS", upc: "29996", oh: "Y", quantity: 34, changeReason: "Price change", signSize: "L", printStatus: "Pending" },
+  { id: 3, date: "07/05/2025", itemNo: "4562378", itemName: "Smoked Black Pepper Jerky...", dept: "1234", category: "AAE", upc: "23765", oh: "Y", quantity: 543, changeReason: "Rebate change", signSize: "S", printStatus: "Pending" },
+  { id: 4, date: "07/05/2025", itemNo: "2567834", itemName: "Ladies Jogger", dept: "1111", category: "CHA", upc: "34556", oh: "Y", quantity: 222, changeReason: "Price change", signSize: "M", printStatus: "Pending" },
+  { id: 5, date: "07/05/2025", itemNo: "2567834", itemName: "Whole Young Turkey", dept: "234", category: "AMB", upc: "90856", oh: "Y", quantity: 987, changeReason: "Price change", signSize: "L", printStatus: "Pending" },
+  { id: 6, date: "07/05/2025", itemNo: "7681204", itemName: "Frozen Yogurt", dept: "234", category: "AMB", upc: "90856", oh: "Y", quantity: 34, changeReason: "Price change", signSize: "S", printStatus: "Pending" },
 ];
 
-type SortKey = "date" | "itemNo" | "itemName" | "dept" | "category" | "upc" | "oh" | "quantity" | "changeReason" | "size" | "printStatus";
+type SortKey = "date" | "itemNo" | "itemName" | "dept" | "category" | "upc" | "oh" | "quantity" | "changeReason" | "signSize" | "printStatus";
 type SortOrder = "asc" | "desc";
 
 /**
@@ -270,7 +270,7 @@ export default function EmergencyPriceChange(): JSX.Element {
               <th>
                 <div className={styles.thContent}>
                   <span>Sign Size</span>
-                  <i className={styles.sortIcon} onClick={() => handleSort("size")}>{getSortIcon("size")}</i>
+                  <i className={styles.sortIcon} onClick={() => handleSort("signSize")}>{getSortIcon("signSize")}</i>
                 </div>
                 <div className={styles.filterWrap}>
                   <ThemeProvider theme={tableFilterTheme}>

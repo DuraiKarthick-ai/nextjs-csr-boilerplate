@@ -79,3 +79,5 @@ eg: /**
 19.Whenever code change happen in a file, ensure that all related unit tests are updated to reflect the changes, maintaining test coverage and ensuring that all tests pass successfully before merging.
 
 20.Whenever new functions or components are added, ensure that corresponding unit tests are created to cover the new code, following the arrange-act-assert pattern and providing comprehensive test coverage for all new functionality.
+
+21.Make all the static values in const, enum, or configuration files, and avoid hardcoding values directly in the code to improve maintainability and readability.

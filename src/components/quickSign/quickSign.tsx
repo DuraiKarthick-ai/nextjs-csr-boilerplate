@@ -75,14 +75,6 @@ export default function QuickSign() {
                   By Department & Category
                 </button>
               </li>
-              <li>
-                <button
-                  className={`${styles.tab} ${active === "endcap" ? styles.active : ""}`}
-                  onClick={() => setActive("endcap")}
-                >
-                  By Endcap
-                </button>
-              </li>
             </ul>
           </div>
 

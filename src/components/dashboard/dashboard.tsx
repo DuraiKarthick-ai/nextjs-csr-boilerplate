@@ -6,7 +6,11 @@ import styles from "./dashboard.module.scss";
 import ContentWrapper from "../contentWrapper/contentWrapper";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useTableScroll } from "@/hooks/useTableScroll";
-import { Dialog } from "@mui/material";
+import PrintSuccessDialog from "../printSuccessDialog/printSuccessDialog";
+
+const PRINT_SUCCESS_TITLE = "Printed Successfully";
+const PRINT_SUCCESS_MESSAGE = "5 pages Printed successfully in Xerox Phaser 6510 81 ED D4";
+const PRINT_SUCCESS_CONFIRM_LABEL = "OK";
 
 /**
  * Dashboard component — Sign Management Dashboard.
@@ -45,28 +49,6 @@ export default function Dashboard() {
       <path d="M20.6616 4.71204C21.1166 4.25704 21.1166 3.52204 20.6616 3.06704L17.9316 0.33704C17.3833 -0.211294 16.6249 -0.00129366 16.2866 0.33704L14.1516 2.47204L18.5266 6.84704L20.6616 4.71204Z" fill="#005DAB"/>
     </svg>
   )
-
-  const dialogCloseIcon = (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <g clip-path="url(#clip0_54627_16206)">
-        <path
-          d="M19 6.41L17.59 5L12 10.59L6.41 5L5 6.41L10.59 12L5 17.59L6.41 19L12 13.41L17.59 19L19 17.59L13.41 12L19 6.41Z"
-          fill="#64686C"
-        />
-      </g>
-      <defs>
-        <clipPath id="clip0_54627_16206">
-          <rect width="24" height="24" fill="white" />
-        </clipPath>
-      </defs>
-    </svg>
-  );
 
   return (
     <ContentWrapper
@@ -117,7 +99,7 @@ export default function Dashboard() {
               <tbody>
 
                 {isLoading && rows.map((row) => (
-                  <tr>
+                  <tr key={`skeleton-${row}`}>
                     <td>
                       <div className="shimmer md"></div>
                     </td>
@@ -167,18 +149,13 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
-        <div className={styles.successfullDialog}>
-          <div className={styles.dialogClose} onClick={handleClose}>
-            <i>{dialogCloseIcon}</i>
-          </div>
-          <h1>Printed Successfully</h1>
-          <p>5 pages Printed successfully in Xerox Phaser 6510 81 ED D4</p>
-          <button className="primaryButton" onClick={handleClose}>
-            ok
-          </button>
-        </div>
-      </Dialog>
+      <PrintSuccessDialog
+        open={open}
+        onClose={handleClose}
+        title={PRINT_SUCCESS_TITLE}
+        message={PRINT_SUCCESS_MESSAGE}
+        confirmLabel={PRINT_SUCCESS_CONFIRM_LABEL}
+      />
 
     </ContentWrapper>
   );

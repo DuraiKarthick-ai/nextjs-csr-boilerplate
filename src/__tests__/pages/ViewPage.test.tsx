@@ -1,5 +1,6 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import SignsViewPage from "@/pages/[view]";
 
 /* ── Mock next/router ─────────────────────────────────────────────── */
@@ -18,7 +19,7 @@ jest.mock("next/router", () => ({
 }));
 
 /* ── Mock child components to isolate page logic ──────────────────── */
-jest.mock("@/components/auth/AuthGate", () => {
+jest.mock("@/components/auth/authGate", () => {
   const MockAuthGate = ({ children }: { children: React.ReactNode }) => (
     <div data-testid="auth-gate">{children}</div>
   );
@@ -26,7 +27,7 @@ jest.mock("@/components/auth/AuthGate", () => {
   return MockAuthGate;
 });
 
-jest.mock("@/components/header/header", () => {
+jest.mock("@/components/header/Header", () => {
   const MockHeader = () => <header data-testid="header" />;
   MockHeader.displayName = "MockHeader";
   return MockHeader;
@@ -50,12 +51,9 @@ jest.mock("@/components/layout/layout", () => {
 
 /* ── Disable dynamic() SSR wrapper so the mock resolves synchronously ── */
 jest.mock("next/dynamic", () => {
-  return (loader: () => Promise<{ default: React.ComponentType }>) => {
-    const LazyComponent = React.lazy(loader);
-    const DynamicMock = (props: Record<string, unknown>) => (
-      <React.Suspense fallback={null}>
-        <LazyComponent {...props} />
-      </React.Suspense>
+  return () => {
+    const DynamicMock = ({ children }: { children: React.ReactNode }) => (
+      <div data-testid="auth-gate">{children}</div>
     );
     DynamicMock.displayName = "DynamicMock";
     return DynamicMock;
@@ -117,7 +115,7 @@ describe("[view] page", () => {
    */
   it("calls router.push when onNavigate is triggered", async () => {
     // Arrange
-    const user = (await import("@testing-library/user-event")).default.setup();
+    const user = userEvent.setup();
     render(<SignsViewPage />);
 
     // Act

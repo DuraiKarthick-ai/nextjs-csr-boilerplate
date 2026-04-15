@@ -126,8 +126,10 @@ describe("Layout", () => {
 
     // Act
     const sidebar = screen.getByRole("complementary");
+    const layoutShell = sidebar.parentElement;
 
     // Assert
-    expect(sidebar.className).toMatch(/closed/);
+    expect(layoutShell).not.toBeNull();
+    expect(layoutShell?.className).toMatch(/navFolded/);
   });
 });

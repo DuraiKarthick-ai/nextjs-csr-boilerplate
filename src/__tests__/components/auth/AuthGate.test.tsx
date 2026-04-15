@@ -1,7 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import AuthGate from "@/components/auth/AuthGate";
+import AuthGate from "@/components/auth/authGate";
 import type { PortalAuthResult } from "@/hooks/usePortalAuth";
 
 jest.mock("@/hooks/usePortalAuth", () => ({
