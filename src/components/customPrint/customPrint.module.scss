@@ -219,3 +219,19 @@
     }
   }
 }
+
+.formActions {
+  @include flex();
+  @include justify-content(end);
+  @include align-items(center);
+  gap: 16px;
+  padding-top: 24px;
+  width: 100%;
+  @include container(680px);
+}
+
+.errorText {
+  color: red;
+  @include font-size(14px);
+  margin-right: auto;
+}

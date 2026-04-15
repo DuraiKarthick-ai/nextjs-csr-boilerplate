@@ -1,12 +1,110 @@
 import { useState } from "react";
 import { ThemeProvider } from "@emotion/react";
 import { FormControl, MenuItem, Select, TextField } from "@mui/material";
+import type { SelectChangeEvent } from "@mui/material";
 import theme from "@/theme/customizeTheme";
 import ContentWrapper from "../contentWrapper/contentWrapper";
+import PrintSuccessDialog from "../printSuccessDialog/printSuccessDialog";
+import { usePrint } from "@/hooks/usePrint";
+import type { SignSize } from "@/types/print";
 import styles from "./customPrint.module.scss";
 
-export default function CustomPrint() {
+const DEFAULT_STORE_ID = "1234";
+const DEFAULT_REQUESTED_BY = "g197511";
+
+const INITIAL_SIGN_CONTENT = {
+  line1: "KIRKLAND SIGNATURE",
+  line2: "ALLER-FEX 180MG TABLET",
+  line3: "180 COUNT",
+  badge1: "COMPARE TO ALLEGRA",
+  badge2: "FSA ELIGIBLE",
+  badge3: "",
+  badge4: "",
+  badge5: "",
+  badge6: "",
+  badge7: "",
+  pricePerEach: "0.186",
+  sellPrice: "33.49",
+};
+
+/**
+ * CustomPrint — Custom Sign creation screen.
+ *
+ * Allows users to enter item details, edit sign content inline,
+ * preview the sign, and submit a CUSTOM_SIGN print request.
+ *
+ * @returns {JSX.Element} The rendered Custom Sign view.
+ */
+export default function CustomPrint(): JSX.Element {
   const [isEdit, setIsEdit] = useState(false);
+  const [itemNumber, setItemNumber] = useState("");
+  const [size, setSize] = useState<SignSize | "">("");
+  const [quantity, setQuantity] = useState("");
+  const [signContent, setSignContent] = useState({ ...INITIAL_SIGN_CONTENT });
+  const { isPrinting, printResult, printError, submitPrint, resetPrint } = usePrint();
+
+  /**
+   * Updates a single field in the sign content state.
+   *
+   * @param {string} field - The field key to update.
+   * @param {string} value - The new value for the field.
+   */
+  const handleContentChange = (field: string, value: string): void => {
+    setSignContent((prev) => ({ ...prev, [field]: value }));
+  };
+
+  /**
+   * Resets all form fields and sign content to initial values.
+   */
+  const handleReset = (): void => {
+    setItemNumber("");
+    setSize("");
+    setQuantity("");
+    setSignContent({ ...INITIAL_SIGN_CONTENT });
+    setIsEdit(false);
+  };
+
+  /**
+   * Builds the CUSTOM_SIGN payload and submits the print request.
+   */
+  const handlePrint = async (): Promise<void> => {
+    if (!itemNumber || !size || !quantity) return;
+
+    const badges = [
+      signContent.badge1,
+      signContent.badge2,
+      signContent.badge3,
+      signContent.badge4,
+      signContent.badge5,
+      signContent.badge6,
+      signContent.badge7,
+    ].filter(Boolean);
+
+    await submitPrint({
+      storeId: DEFAULT_STORE_ID,
+      requestedBy: DEFAULT_REQUESTED_BY,
+      printRequests: [
+        {
+          type: "CUSTOM_SIGN",
+          entries: [
+            {
+              itemNumberOrUpc: itemNumber,
+              size: size as SignSize,
+              quantity: Number(quantity),
+              signContent: {
+                line1: signContent.line1,
+                line2: signContent.line2,
+                line3: signContent.line3,
+                badges,
+                pricePerEach: signContent.pricePerEach,
+                sellPrice: signContent.sellPrice,
+              },
+            },
+          ],
+        },
+      ],
+    });
+  };
 
       const zoomInIcon = (
         <svg
@@ -82,7 +180,14 @@ export default function CustomPrint() {
                   <div className="inputLabelWrap">
                     <label className="label">Item # / UPC</label>
                     <ThemeProvider theme={theme}>
-                      <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Department #" variant="outlined" />
+                      <TextField
+                        fullWidth
+                        size="small"
+                        placeholder="Enter Item # / UPC"
+                        variant="outlined"
+                        value={itemNumber}
+                        onChange={(e) => setItemNumber(e.target.value)}
+                      />
                     </ThemeProvider>
                   </div>
                 </li>
@@ -93,15 +198,16 @@ export default function CustomPrint() {
                         <FormControl fullWidth size="small">
                           <Select
                             displayEmpty
-                            defaultValue=""
+                            value={size}
+                            onChange={(e: SelectChangeEvent) => setSize(e.target.value as SignSize | "")}
                             inputProps={{ 'aria-label': 'Select Size' }}
                           >
                             <MenuItem value="" disabled>
                               Select Size
                             </MenuItem>
-                            <MenuItem value={10}>S-Small</MenuItem>
-                            <MenuItem value={20}>M-Medium</MenuItem>
-                            <MenuItem value={30}>L-Large</MenuItem>
+                            <MenuItem value="SMALL">S-Small</MenuItem>
+                            <MenuItem value="MEDIUM">M-Medium</MenuItem>
+                            <MenuItem value="LARGE">L-Large</MenuItem>
                           </Select>
                         </FormControl>
                       </ThemeProvider>
@@ -111,7 +217,14 @@ export default function CustomPrint() {
                   <div className="inputLabelWrap">
                     <label className="label">Quantity</label>
                     <ThemeProvider theme={theme}>
-                      <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Quantity" variant="outlined" />
+                      <TextField
+                        fullWidth
+                        size="small"
+                        placeholder="Enter Quantity"
+                        variant="outlined"
+                        value={quantity}
+                        onChange={(e) => setQuantity(e.target.value)}
+                      />
                     </ThemeProvider>
                   </div>
                 </li>
@@ -127,41 +240,41 @@ export default function CustomPrint() {
                   <div className={styles.signHeader}>
                     <ul>
                       <li>
-                        <h1>987677</h1>
+                        <h1>{itemNumber || "987677"}</h1>
                       </li>
                       <li>
                         {!isEdit && (
                           <div className={styles.editableField}>
-                            <h1>KIRKLAND SIGNATURE</h1>
+                            <h1>{signContent.line1}</h1>
                           </div>
                         )}
                         {isEdit && (
                           <div className={styles.editableField}>
-                            <input type="text" defaultValue="KIRKLAND SIGNATURE" />
-                          </div>
-                        )}
-                      </li>
-                      <li>
-                        {!isEdit && (
-                          <div className={styles.editableField}>
-                            <h1>ALLER-FEX 180MG TABLET</h1>
-                          </div>
-                        )}
-                        {isEdit && (
-                          <div className={styles.editableField}>
-                            <input type="text" defaultValue="ALLER-FEX 180MG TABLET" />
+                            <input type="text" value={signContent.line1} onChange={(e) => handleContentChange("line1", e.target.value)} />
                           </div>
                         )}
                       </li>
                       <li>
                         {!isEdit && (
                           <div className={styles.editableField}>
-                            <h1>180 COUNT</h1>
+                            <h1>{signContent.line2}</h1>
                           </div>
                         )}
                         {isEdit && (
                           <div className={styles.editableField}>
-                            <input type="text" defaultValue="180 COUNT" />
+                            <input type="text" value={signContent.line2} onChange={(e) => handleContentChange("line2", e.target.value)} />
+                          </div>
+                        )}
+                      </li>
+                      <li>
+                        {!isEdit && (
+                          <div className={styles.editableField}>
+                            <h1>{signContent.line3}</h1>
+                          </div>
+                        )}
+                        {isEdit && (
+                          <div className={styles.editableField}>
+                            <input type="text" value={signContent.line3} onChange={(e) => handleContentChange("line3", e.target.value)} />
                           </div>
                         )}
                       </li>
@@ -170,90 +283,25 @@ export default function CustomPrint() {
                   
                   <div className={styles.productInfo}>
                     <ul>
-                      <li>
-                        {!isEdit && (
-                          <div className={styles.editableField}>
-                            <h2>COMPARE TO ALLEGRA</h2>
-                          </div>
-                        )}
-                        {isEdit && (
-                          <div className={styles.editableField}>
-                            <input type="text" defaultValue="COMPARE TO ALLEGRA" />
-                          </div>
-                        )}
-                      </li>
-                      <li>
-                        {!isEdit && (
-                          <div className={styles.editableField}>
-                            <h2>FSA ELIGIBLE</h2>
-                          </div>
-                        )}
-                        {isEdit && (
-                          <div className={styles.editableField}>
-                            <input type="text" defaultValue="FSA ELIGIBLE" />
-                          </div>
-                        )}
-                      </li>
-                      <li>
-                        {!isEdit && (
-                          <div className={styles.editableField}>
-                            <h2>Enter Here</h2>
-                          </div>
-                        )}
-                        {isEdit && (
-                          <div className={styles.editableField}>
-                            <input type="text" defaultValue="Enter Here" />
-                          </div>
-                        )}
-                      </li>
-                      <li>
-                        {!isEdit && (
-                          <div className={styles.editableField}>
-                            <h2>Enter Here</h2>
-                          </div>
-                        )}
-                        {isEdit && (
-                          <div className={styles.editableField}>
-                            <input type="text" defaultValue="Enter Here" />
-                          </div>
-                        )}
-                      </li>
-                      <li>
-                        {!isEdit && (
-                          <div className={styles.editableField}>
-                            <h2>Enter Here</h2>
-                          </div>
-                        )}
-                        {isEdit && (
-                          <div className={styles.editableField}>
-                            <input type="text" defaultValue="Enter Here" />
-                          </div>
-                        )}
-                      </li>
-                      <li>
-                        {!isEdit && (
-                          <div className={styles.editableField}>
-                            <h2>Enter Here</h2>
-                          </div>
-                        )}
-                        {isEdit && (
-                          <div className={styles.editableField}>
-                            <input type="text" defaultValue="Enter Here" />
-                          </div>
-                        )}
-                      </li>
-                      <li>
-                        {!isEdit && (
-                          <div className={styles.editableField}>
-                            <h2>Enter Here</h2>
-                          </div>
-                        )}
-                        {isEdit && (
-                          <div className={styles.editableField}>
-                            <input type="text" defaultValue="Enter Here" />
-                          </div>
-                        )}
-                      </li>
+                      {(["badge1", "badge2", "badge3", "badge4", "badge5", "badge6", "badge7"] as const).map((key) => (
+                        <li key={key}>
+                          {!isEdit && (
+                            <div className={styles.editableField}>
+                              <h2>{signContent[key] || "Enter Here"}</h2>
+                            </div>
+                          )}
+                          {isEdit && (
+                            <div className={styles.editableField}>
+                              <input
+                                type="text"
+                                value={signContent[key]}
+                                placeholder="Enter Here"
+                                onChange={(e) => handleContentChange(key, e.target.value)}
+                              />
+                            </div>
+                          )}
+                        </li>
+                      ))}
                     </ul>
                   </div>
 
@@ -263,7 +311,14 @@ export default function CustomPrint() {
                         <h2>PRICE PER EACH</h2>
                       </div>
                       <div className={styles.priceValue}>
-                        <h2>0.186</h2>
+                        {!isEdit && <h2>{signContent.pricePerEach}</h2>}
+                        {isEdit && (
+                          <input
+                            type="text"
+                            value={signContent.pricePerEach}
+                            onChange={(e) => handleContentChange("pricePerEach", e.target.value)}
+                          />
+                        )}
                       </div>
                     </div>
                     <div className={`${styles.grid} ${styles.sellPrice}`}>
@@ -274,12 +329,16 @@ export default function CustomPrint() {
                         
                         {!isEdit && (
                           <div className={styles.editableField}>
-                            <h1>33.49</h1>
+                            <h1>{signContent.sellPrice}</h1>
                           </div>
                         )}
                         {isEdit && (
                           <div className={styles.editableField}>
-                            <input type="text" defaultValue="33.49" />
+                            <input
+                              type="text"
+                              value={signContent.sellPrice}
+                              onChange={(e) => handleContentChange("sellPrice", e.target.value)}
+                            />
                           </div>
                         )}
                       </div>
@@ -323,10 +382,38 @@ export default function CustomPrint() {
                     </li>
                   </ul>        
                 </div>
+
+                <div className={styles.formActions}>
+                  {printError && <p className={styles.errorText}>{printError}</p>}
+                  <button type="button" className="secondaryButton" onClick={handleReset}>
+                    Reset
+                  </button>
+                  <button
+                    type="button"
+                    className="primaryButton"
+                    onClick={handlePrint}
+                    disabled={isPrinting || !itemNumber || !size || !quantity}
+                  >
+                    {isPrinting ? "Printing…" : "Print"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
+
+        <PrintSuccessDialog
+          open={printResult !== null}
+          onClose={resetPrint}
+          title="Printed Successfully"
+          message={
+            printResult
+              ? `${printResult.responseMessage} — ${printResult.printerName}`
+              : ""
+          }
+          confirmLabel="OK"
+        />
+
     </ContentWrapper>
   );
 }

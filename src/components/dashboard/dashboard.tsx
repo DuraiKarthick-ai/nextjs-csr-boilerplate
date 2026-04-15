@@ -4,13 +4,15 @@ import React from "react";
 import Link from "next/link";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useTableScroll } from "@/hooks/useTableScroll";
+import { usePrint } from "@/hooks/usePrint";
 import ContentWrapper from "../contentWrapper/contentWrapper";
 import PrintSuccessDialog from "../printSuccessDialog/printSuccessDialog";
+import type { PrintRequestPayload } from "@/types/print";
+import type { DashboardActivity } from "@/types/dashboard";
 import styles from "./dashboard.module.scss";
 
-const PRINT_SUCCESS_TITLE = "Printed Successfully";
-const PRINT_SUCCESS_MESSAGE = "5 pages Printed successfully in Xerox Phaser 6510 81 ED D4";
-const PRINT_SUCCESS_CONFIRM_LABEL = "OK";
+const DEFAULT_STORE_ID = "1234";
+const DEFAULT_REQUESTED_BY = "g197511";
 
 /**
  * Dashboard component — Sign Management Dashboard.
@@ -24,16 +26,29 @@ export default function Dashboard() {
 
   const rows = [1, 2, 3];
 
-  const [open, setOpen] = React.useState(false);
+  const { isPrinting, printResult, printError, submitPrint, resetPrint } = usePrint();
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setOpen(false);
-  };
   const { data, isLoading, error } = useDashboard();
+
+  const handleDashboardPrint = async (activity: DashboardActivity) => {
+    const payload: PrintRequestPayload = {
+      storeId: DEFAULT_STORE_ID,
+      requestedBy: DEFAULT_REQUESTED_BY,
+      printRequests: [
+        {
+          type: "BY_ITEM",
+          entries: [
+            {
+              itemNumberOrUpc: String(activity.id),
+              size: "SMALL",
+              quantity: activity.printCount,
+            },
+          ],
+        },
+      ],
+    };
+    await submitPrint(payload);
+  };
   const { visibleCount, scrollRef } = useTableScroll(data.activities.length);
   const visibleActivities = data.activities.slice(0, visibleCount);
 
@@ -136,8 +151,12 @@ export default function Dashboard() {
                         </div>
                       </td>
                       <td>
-                        <button className="printButton" onClick={handleClickOpen}>
-                          Print ({activity.printCount})
+                        <button
+                          className="printButton"
+                          disabled={isPrinting}
+                          onClick={() => handleDashboardPrint(activity)}
+                        >
+                          {isPrinting ? "Printing…" : `Print (${activity.printCount})`}
                         </button>
                       </td>
                     </tr>
@@ -150,11 +169,15 @@ export default function Dashboard() {
       </div>
 
       <PrintSuccessDialog
-        open={open}
-        onClose={handleClose}
-        title={PRINT_SUCCESS_TITLE}
-        message={PRINT_SUCCESS_MESSAGE}
-        confirmLabel={PRINT_SUCCESS_CONFIRM_LABEL}
+        open={printResult !== null}
+        onClose={resetPrint}
+        title="Printed Successfully"
+        message={
+          printResult
+            ? `${printResult.responseMessage} — Printer: ${printResult.printerName}`
+            : ""
+        }
+        confirmLabel="OK"
       />
 
     </ContentWrapper>
