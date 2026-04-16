@@ -2,11 +2,12 @@
 
 import React from "react";
 import Link from "next/link";
+import Snackbar from "@mui/material/Snackbar";
+import Alert from "@mui/material/Alert";
 import { useDashboard } from "@/hooks/useDashboard";
 import { useTableScroll } from "@/hooks/useTableScroll";
 import { usePrint } from "@/hooks/usePrint";
 import ContentWrapper from "../contentWrapper/contentWrapper";
-import PrintSuccessDialog from "../printSuccessDialog/printSuccessDialog";
 import type { PrintRequestPayload } from "@/types/print";
 import type { DashboardActivity } from "@/types/dashboard";
 import styles from "./dashboard.module.scss";
@@ -35,10 +36,14 @@ export default function Dashboard() {
   const rows = [1, 2, 3];
 
   const { isPrinting, printResult, printError, submitPrint, resetPrint } = usePrint();
+  const [printingActivityId, setPrintingActivityId] = React.useState<number | null>(null);
+  const [printedCount, setPrintedCount] = React.useState<number>(0);
 
   const { data, isLoading, error } = useDashboard();
 
   const handleDashboardPrint = async (activity: DashboardActivity) => {
+    setPrintingActivityId(activity.id);
+    setPrintedCount(activity.printCount);
     const payload: PrintRequestPayload = {
       storeId: DEFAULT_STORE_ID,
       requestedBy: DEFAULT_REQUESTED_BY,
@@ -56,6 +61,7 @@ export default function Dashboard() {
       ],
     };
     await submitPrint(payload);
+    setPrintingActivityId(null);
   };
   const { visibleCount, scrollRef } = useTableScroll(data.activities.length);
   const visibleActivities = data.activities.slice(0, visibleCount);
@@ -167,10 +173,10 @@ export default function Dashboard() {
                       <td>
                         <button
                           className="printButton"
-                          disabled={isPrinting}
+                          disabled={printingActivityId !== null}
                           onClick={() => handleDashboardPrint(activity)}
                         >
-                          {isPrinting ? "Printing…" : `Print (${activity.printCount})`}
+                          {printingActivityId === activity.id ? "Printing…" : `Print (${activity.printCount})`}
                         </button>
                       </td>
                     </tr>
@@ -182,17 +188,41 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <PrintSuccessDialog
+      <Snackbar
         open={printResult !== null}
+        autoHideDuration={5000}
         onClose={resetPrint}
-        title="Printed Successfully"
-        message={
-          printResult
-            ? `${printResult.responseMessage} — Printer: ${printResult.printerName}`
-            : ""
-        }
-        confirmLabel="OK"
-      />
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        sx={{
+          position: "absolute",
+          top: "10px",
+          right: "10px",
+        }}
+      >
+        <Alert
+          onClose={resetPrint}
+          severity="success"
+          variant="standard"
+          icon={
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L3 10L4.41 8.59L8 12.17L15.59 4.58L17 6L8 15Z" fill="#2e7d32"/>
+            </svg>
+          }
+          sx={{
+            backgroundColor: "#edf7ed",
+            color: "#1e4620",
+            border: "1px solid #c6e6c6",
+            borderRadius: "4px",
+            fontSize: "14px",
+            maxWidth: "320px",
+            "& .MuiAlert-message": { whiteSpace: "normal", wordBreak: "break-word" },
+          }}
+        >
+          {printResult
+            ? `${printedCount} pages Printed successfully in ${printResult.printerName}`
+            : ""}
+        </Alert>
+      </Snackbar>
 
     </ContentWrapper>
   );

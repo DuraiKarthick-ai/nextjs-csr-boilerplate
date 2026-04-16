@@ -27,6 +27,12 @@ jest.mock("@/components/customPrint/customPrint", () => {
   return MockCustomPrint;
 });
 
+jest.mock("@/components/signWorklist/signWorklist", () => {
+  const MockSignWorklist = () => <div data-testid="sign-worklist" />;
+  MockSignWorklist.displayName = "MockSignWorklist";
+  return MockSignWorklist;
+});
+
 describe("Layout", () => {
   const mockOnNavigate = jest.fn();
 

@@ -2,10 +2,9 @@
 import { useState } from "react";
 import TextField from "@mui/material/TextField";
 import { ThemeProvider } from "@mui/material/styles";
-import { Autocomplete, CircularProgress, FormControl, MenuItem, Select, Switch } from "@mui/material";
+import { Autocomplete, CircularProgress, FormControl, MenuItem, Select, Switch, Snackbar, Alert } from "@mui/material";
 import theme from "@/theme/customizeTheme";
 import ContentWrapper from "../contentWrapper/contentWrapper";
-import PrintSuccessDialog from "../printSuccessDialog/printSuccessDialog";
 import { usePrint } from "@/hooks/usePrint";
 import type { ByItemEntry, ByDepartmentCategoryEntry, PrintRequestPayload } from "@/types/print";
 import { useItemSearch } from "./hooks/useItemSearch";
@@ -114,9 +113,11 @@ export default function QuickSign(): JSX.Element {
   const allRowsFilled = (): boolean => itemRows.every((r) => r.itemNumberOrUpc.trim() !== "");
 
   /**
-   * Adds a new blank item row.
+   * Adds a new blank item row if the last row is filled.
    */
   const addItemRow = (): void => {
+    const lastRow = itemRows[itemRows.length - 1];
+    if (lastRow && lastRow.itemNumberOrUpc.trim() === "") return;
     setItemRows((prev) => [...prev, { itemNumberOrUpc: "", quantity: "1", selectedItem: null }]);
   };
 
@@ -239,7 +240,10 @@ export default function QuickSign(): JSX.Element {
     });
 
     if (result) {
-      handleReset();
+      setItemSize("");
+      setItemRows([...INITIAL_ITEM_ROWS]);
+      setDeptForm({ ...INITIAL_DEPT_FORM });
+      resetSearch();
     }
   };
 
@@ -388,7 +392,7 @@ export default function QuickSign(): JSX.Element {
                           />
                         </ThemeProvider>
                       </div>
-                      {index === itemRows.length - 1 && allRowsFilled() && (
+                      {index === itemRows.length - 1 && (
                         <div className={styles.addField}>
                           <i onClick={addItemRow}><AddFieldIcon /></i>
                         </div>
@@ -513,12 +517,35 @@ export default function QuickSign(): JSX.Element {
 
         </div>
 
-        <PrintSuccessDialog
+        <Snackbar
           open={printResult !== null}
+          autoHideDuration={5000}
           onClose={resetPrint}
-          title="Printed Successfully"
-          message={successMessage}
-        />
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          sx={{ position: "absolute", top: "10px", right: "10px" }}
+        >
+          <Alert
+            onClose={resetPrint}
+            severity="success"
+            variant="standard"
+            icon={
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L3 10L4.41 8.59L8 12.17L15.59 4.58L17 6L8 15Z" fill="#2e7d32"/>
+              </svg>
+            }
+            sx={{
+              backgroundColor: "#edf7ed",
+              color: "#1e4620",
+              border: "1px solid #c6e6c6",
+              borderRadius: "4px",
+              fontSize: "14px",
+              maxWidth: "320px",
+              "& .MuiAlert-message": { whiteSpace: "normal", wordBreak: "break-word" },
+            }}
+          >
+            {successMessage}
+          </Alert>
+        </Snackbar>
 
     </ContentWrapper>
   );
