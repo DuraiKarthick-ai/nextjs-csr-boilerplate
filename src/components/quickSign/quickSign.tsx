@@ -114,6 +114,61 @@ export default function QuickSign(): JSX.Element {
   const allRowsFilled = (): boolean => itemRows.every((r) => r.itemNumberOrUpc.trim() !== "");
 
   /**
+   * Handles paste events on item input fields.
+   * Parses clipboard data (tab-separated, comma-separated, or one-per-line)
+   * and populates rows starting from the pasted row index.
+   * Adds new rows as needed up to MAX_ROW_COUNT.
+   *
+   * @param {React.ClipboardEvent} e - The paste event.
+   * @param {number} startIndex - The row index where paste was triggered.
+   */
+  const handlePaste = (e: React.ClipboardEvent, startIndex: number): void => {
+    const text = e.clipboardData.getData("text/plain").trim();
+    if (!text) return;
+
+    const lines = text.split(/\r?\n/).filter((line) => line.trim() !== "");
+    if (lines.length <= 1 && !lines[0]?.includes("\t") && !lines[0]?.includes(",")) return;
+
+    e.preventDefault();
+
+    const parsed: { item: string; qty: string }[] = lines.map((line) => {
+      const parts = line.includes("\t") ? line.split("\t") : line.split(",");
+      const rawItem = (parts[0] || "").trim().replace(/\D/g, "").slice(0, MAX_ITEM_DIGITS);
+      const rawQty = (parts[1] || "").trim();
+      const qty = /^\d+$/.test(rawQty) && Number(rawQty) > 0 ? rawQty : "1";
+      return { item: rawItem, qty };
+    }).filter((p) => p.item.length > 0);
+
+    if (parsed.length === 0) return;
+
+    setItemRows((prev) => {
+      const updated = [...prev];
+      let rowIdx = startIndex;
+
+      for (const { item, qty } of parsed) {
+        if (rowIdx >= MAX_ROW_COUNT) break;
+
+        if (rowIdx >= updated.length) {
+          updated.push({ itemNumberOrUpc: "", quantity: "1", selectedItem: null });
+        }
+
+        updated[rowIdx] = { itemNumberOrUpc: item, quantity: qty, selectedItem: null };
+        rowIdx++;
+      }
+
+      return updated;
+    });
+
+    // Trigger search for each pasted item that meets the minimum length
+    parsed.forEach((p, i) => {
+      const rowIdx = startIndex + i;
+      if (rowIdx < MAX_ROW_COUNT && p.item.length >= MIN_SEARCH_LENGTH) {
+        triggerSearch(rowIdx, p.item);
+      }
+    });
+  };
+
+  /**
    * Adds one blank item row when all current rows are filled, up to MAX_ROW_COUNT.
    */
   const addItemRow = (): void => {
@@ -364,6 +419,7 @@ export default function QuickSign(): JSX.Element {
                                 helperText={getItemHelperText(index)}
                                 color={printedRows.has(index) ? "success" : undefined}
                                 FormHelperTextProps={printedRows.has(index) ? { sx: { color: "green" } } : undefined}
+                                onPaste={(e) => handlePaste(e, index)}
                                 InputProps={{
                                   ...params.InputProps,
                                   endAdornment: (
