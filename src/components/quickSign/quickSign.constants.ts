@@ -25,6 +25,9 @@ export const SIZE_MAP: Record<number, SignSize> = {
 /** Number of item rows shown by default. */
 export const DEFAULT_ROW_COUNT = 6;
 
+/** Maximum number of item rows allowed. */
+export const MAX_ROW_COUNT = 20;
+
 /** Minimum number of digits required before triggering an item search. */
 export const MIN_SEARCH_LENGTH = 5;
 

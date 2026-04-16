@@ -15,6 +15,7 @@ import {
   SIZE_MAP,
   MAX_ITEM_DIGITS,
   MIN_SEARCH_LENGTH,
+  MAX_ROW_COUNT,
   INITIAL_ITEM_ROWS,
   INITIAL_DEPT_FORM,
 } from "./quickSign.constants";
@@ -113,11 +114,10 @@ export default function QuickSign(): JSX.Element {
   const allRowsFilled = (): boolean => itemRows.every((r) => r.itemNumberOrUpc.trim() !== "");
 
   /**
-   * Adds a new blank item row if the last row is filled.
+   * Adds one blank item row when all current rows are filled, up to MAX_ROW_COUNT.
    */
   const addItemRow = (): void => {
-    const lastRow = itemRows[itemRows.length - 1];
-    if (lastRow && lastRow.itemNumberOrUpc.trim() === "") return;
+    if (!allRowsFilled() || itemRows.length >= MAX_ROW_COUNT) return;
     setItemRows((prev) => [...prev, { itemNumberOrUpc: "", quantity: "1", selectedItem: null }]);
   };
 
@@ -392,7 +392,7 @@ export default function QuickSign(): JSX.Element {
                           />
                         </ThemeProvider>
                       </div>
-                      {index === itemRows.length - 1 && (
+                      {index === itemRows.length - 1 && allRowsFilled() && itemRows.length < MAX_ROW_COUNT && (
                         <div className={styles.addField}>
                           <i onClick={addItemRow}><AddFieldIcon /></i>
                         </div>
