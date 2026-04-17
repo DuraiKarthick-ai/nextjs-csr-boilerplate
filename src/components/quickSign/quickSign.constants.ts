@@ -5,12 +5,6 @@
 import type { SignSize } from "@/types/print";
 import type { DeptForm, ItemRow } from "./quickSign.types";
 
-/** Default store ID for print requests. */
-export const DEFAULT_STORE_ID = "1234";
-
-/** Default user ID for print requests. */
-export const DEFAULT_REQUESTED_BY = "g197511";
-
 /** Item search API URL. */
 export const ITEM_SEARCH_URL =
   "https://69ce482633a09f831b7d3ab9.mockapi.io/api/v1/dashboard/itemSearch";

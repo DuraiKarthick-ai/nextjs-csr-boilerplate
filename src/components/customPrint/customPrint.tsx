@@ -1,15 +1,14 @@
 import { useState } from "react";
 import { ThemeProvider } from "@emotion/react";
-import { FormControl, MenuItem, Select, TextField, Snackbar, Alert } from "@mui/material";
+import { FormControl, MenuItem, Select, TextField } from "@mui/material";
 import type { SelectChangeEvent } from "@mui/material";
 import theme from "@/theme/customizeTheme";
 import ContentWrapper from "../contentWrapper/contentWrapper";
+import SuccessToast from "../shared/SuccessToast";
 import { usePrint } from "@/hooks/usePrint";
+import { DEFAULT_STORE_ID, DEFAULT_REQUESTED_BY } from "@/constants/print";
 import type { SignSize } from "@/types/print";
 import styles from "./customPrint.module.scss";
-
-const DEFAULT_STORE_ID = "1234";
-const DEFAULT_REQUESTED_BY = "g197511";
 
 const INITIAL_SIGN_CONTENT = {
   line1: "KIRKLAND SIGNATURE",
@@ -406,37 +405,15 @@ export default function CustomPrint(): JSX.Element {
           </div>
         </div>
 
-        <Snackbar
+        <SuccessToast
           open={printResult !== null}
-          autoHideDuration={5000}
           onClose={resetPrint}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          sx={{ position: "absolute", top: "10px", right: "10px" }}
-        >
-          <Alert
-            onClose={resetPrint}
-            severity="success"
-            variant="standard"
-            icon={
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L3 10L4.41 8.59L8 12.17L15.59 4.58L17 6L8 15Z" fill="#2e7d32"/>
-              </svg>
-            }
-            sx={{
-              backgroundColor: "#edf7ed",
-              color: "#1e4620",
-              border: "1px solid #c6e6c6",
-              borderRadius: "4px",
-              fontSize: "14px",
-              maxWidth: "320px",
-              "& .MuiAlert-message": { whiteSpace: "normal", wordBreak: "break-word" },
-            }}
-          >
-            {printResult
+          message={
+            printResult
               ? `Printed successfully in ${printResult.printerName}`
-              : ""}
-          </Alert>
-        </Snackbar>
+              : ""
+          }
+        />
 
     </ContentWrapper>
   );

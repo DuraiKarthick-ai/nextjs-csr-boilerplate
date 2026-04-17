@@ -3,7 +3,7 @@
  *
  * Manages loading / success / error state around the print API call.
  * Any screen (Quick Sign, Dashboard, Custom Sign) can use this hook
- * to trigger a print and display the result via PrintSuccessDialog.
+ * to trigger a print and display the result via SuccessToast.
  */
 
 import { useCallback, useState } from "react";

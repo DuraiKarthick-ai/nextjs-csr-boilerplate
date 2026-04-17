@@ -2,16 +2,17 @@
 import { useState } from "react";
 import TextField from "@mui/material/TextField";
 import { ThemeProvider } from "@mui/material/styles";
-import { Autocomplete, CircularProgress, FormControl, MenuItem, Select, Switch, Snackbar, Alert } from "@mui/material";
+import { Autocomplete, CircularProgress, FormControl, MenuItem, Select, Switch } from "@mui/material";
 import theme from "@/theme/customizeTheme";
 import ContentWrapper from "../contentWrapper/contentWrapper";
+import SuccessToast from "../shared/SuccessToast";
+import { AddFieldIcon } from "../shared/icons";
 import { usePrint } from "@/hooks/usePrint";
+import { DEFAULT_STORE_ID, DEFAULT_REQUESTED_BY } from "@/constants/print";
 import type { ByItemEntry, ByDepartmentCategoryEntry, PrintRequestPayload } from "@/types/print";
 import { useItemSearch } from "./hooks/useItemSearch";
 import type { ItemRow, ItemSearchResult, QuickSignTab, DeptForm } from "./quickSign.types";
 import {
-  DEFAULT_STORE_ID,
-  DEFAULT_REQUESTED_BY,
   SIZE_MAP,
   MAX_ITEM_DIGITS,
   MIN_SEARCH_LENGTH,
@@ -23,13 +24,6 @@ import styles from "./quickSign.module.scss";
 
 /** Regex pattern to validate numeric-only input up to MAX_ITEM_DIGITS. */
 const ITEM_INPUT_PATTERN = new RegExp(`^\\d{0,${MAX_ITEM_DIGITS}}$`);
-
-/** SVG icon for the "add row" button. */
-const AddFieldIcon = (): JSX.Element => (
-  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M14 8H8V14H6V8H0V6H6V0H8V6H14V8Z" fill="#64686C" />
-  </svg>
-);
 
 /**
  * QuickSign component — Quick Sign Print screen.
@@ -573,35 +567,11 @@ export default function QuickSign(): JSX.Element {
 
         </div>
 
-        <Snackbar
+        <SuccessToast
           open={printResult !== null}
-          autoHideDuration={5000}
           onClose={resetPrint}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          sx={{ position: "absolute", top: "10px", right: "10px" }}
-        >
-          <Alert
-            onClose={resetPrint}
-            severity="success"
-            variant="standard"
-            icon={
-              <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M10 0C4.48 0 0 4.48 0 10C0 15.52 4.48 20 10 20C15.52 20 20 15.52 20 10C20 4.48 15.52 0 10 0ZM8 15L3 10L4.41 8.59L8 12.17L15.59 4.58L17 6L8 15Z" fill="#2e7d32"/>
-              </svg>
-            }
-            sx={{
-              backgroundColor: "#edf7ed",
-              color: "#1e4620",
-              border: "1px solid #c6e6c6",
-              borderRadius: "4px",
-              fontSize: "14px",
-              maxWidth: "320px",
-              "& .MuiAlert-message": { whiteSpace: "normal", wordBreak: "break-word" },
-            }}
-          >
-            {successMessage}
-          </Alert>
-        </Snackbar>
+          message={successMessage}
+        />
 
     </ContentWrapper>
   );
