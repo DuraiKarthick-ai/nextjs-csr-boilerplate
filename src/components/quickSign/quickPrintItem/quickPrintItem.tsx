@@ -381,7 +381,7 @@ export default function QuickPrintItem(): JSX.Element {
                           {...params}
                           fullWidth
                           size="small"
-                          placeholder="Enter Item # (min 5 digits)"
+                          placeholder="Enter or Scan Item # / UPC"
                           variant="outlined"
                           error={invalidRows.has(index)}
                           helperText={getItemHelperText(index)}
