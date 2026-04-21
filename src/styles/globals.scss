@@ -122,8 +122,9 @@ label.label {
   }
 
   &:disabled {
-    opacity: 0.5;
     cursor: not-allowed;
+    background-color: $gray;
+    border-color: $gray
   }
 }
 
@@ -149,6 +150,12 @@ label.label {
     outline: 2px solid $primary-color;
     outline-offset: 2px;
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    border-color: $gray;
+    color: $gray;
+  }
 }
 
 .printButton {
@@ -173,6 +180,11 @@ label.label {
   &:focus-visible {
     outline: 2px solid $primary-color;
     outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    background-color: $gray;
   }
 }
 
