@@ -26,8 +26,8 @@ interface LayoutProps {
  */
 export default function Layout({ open, children, activeView, onNavigate }: LayoutProps) {
   return (
-    <div className="container">
-      <div className={`${styles.layout} ${!open ? styles.navFolded : ""}`}>
+    <div className={`${styles.layout} ${!open ? styles.navFolded : ""}`}>
+      <div className={`container ${styles.contentWrapper}`}>
         <aside className={styles.sidebar}>
           <SideNav activeView={activeView} onNavigate={onNavigate} />
         </aside>
