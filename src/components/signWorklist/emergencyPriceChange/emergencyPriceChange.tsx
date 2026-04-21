@@ -350,6 +350,16 @@ export default function EmergencyPriceChange(): JSX.Element {
       <div className={styles.pagination}>
         <p>Total Rows: {data.length}</p>
       </div>
+      <div className={styles.buttonWrap}>
+        <ul>
+          <li>
+            <button className="primaryButtonOutline">Preview</button>
+          </li>
+          <li>
+            <button className="primaryButton">Print</button>
+          </li>
+        </ul>
+      </div>
     </div>
   );
 }

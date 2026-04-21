@@ -386,20 +386,21 @@ export default function CustomPrint(): JSX.Element {
                   </ul>        
                 </div>
 
-                <div className={styles.formActions}>
-                  {printError && <p className={styles.errorText}>{printError}</p>}
-                  <button type="button" className="secondaryButton" onClick={handleReset}>
-                    Reset
-                  </button>
-                  <button
-                    type="button"
-                    className="primaryButton"
-                    onClick={handlePrint}
-                    disabled={isPrinting || !itemNumber || !size || !quantity}
-                  >
-                    {isPrinting ? "Printing…" : "Print"}
-                  </button>
-                </div>
+              </div>
+
+              <div className={styles.formActions}>
+                {printError && <p className={styles.errorText}>{printError}</p>}
+                <button type="button" className="secondaryButton" onClick={handleReset}>
+                  Reset
+                </button>
+                <button
+                  type="button"
+                  className="primaryButton"
+                  onClick={handlePrint}
+                  disabled={isPrinting || !itemNumber || !size || !quantity}
+                >
+                  {isPrinting ? "Printing…" : "Print"}
+                </button>
               </div>
             </div>
           </div>
