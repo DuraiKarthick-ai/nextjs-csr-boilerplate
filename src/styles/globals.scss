@@ -37,9 +37,7 @@ body {
 /* ── Form elements ──────────────────────────────────────────────── */
 .inputLabelWrap {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  width: 100%;
 }
 
 label.label {

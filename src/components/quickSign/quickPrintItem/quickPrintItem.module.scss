@@ -1,0 +1,93 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
+@use "../../../styles/breakpoint" as *;
+
+.quickPrintItem {
+  .subTitle {
+    padding-bottom: 26px;
+
+    p {
+      @include font-size(22px);
+      line-height: 24px;
+    }
+  }
+
+  .gridWrap {
+    margin-left: -16px;
+    margin-right: -16px;
+    max-width: 95%;
+
+    &.gridPrintItem {
+      ul {
+        li {
+          @include flex();
+          gap: 32px;
+        }
+      }
+    }
+
+    .grid {
+      padding: 0 16px;
+      flex: 1;
+
+      &.gridSize {
+        max-width: 30%;
+      }
+
+      ul {
+        li {
+          padding-bottom: 20px;
+          position: relative;
+
+          .qtyField {
+            max-width: 400px;
+          }
+
+          &:last-child {
+            padding-bottom: 0;
+          }
+
+          .addField {
+            position: absolute;
+            top: 50%;
+            right: -52px;
+            transform: translateX(-50%);
+            padding: 6px;
+            border-radius: 16px;
+            cursor: pointer;
+          }
+        }
+      }
+    }
+  }
+
+  .buttonWrap {
+    max-width: 95%;
+    padding: 30px 16px;
+    margin-left: -16px;
+    margin-right: -16px;
+
+    ul {
+      @include flex();
+      @include justify-content(end);
+
+      li {
+        padding: 0 6px;
+
+        &:last-child {
+          padding-right: 0;
+        }
+      }
+    }
+  }
+}
+
+.printError {
+  max-width: 95%;
+  padding: 12px 16px;
+
+  p {
+    color: $red-color;
+    @include font-size(14px);
+  }
+}

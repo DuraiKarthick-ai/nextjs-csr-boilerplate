@@ -132,6 +132,77 @@ const theme = createTheme({
         },
       },
     },
+    MuiAutocomplete: {
+      styleOverrides: {
+        root: {
+          "& .MuiOutlinedInput-root": {
+            backgroundColor: "#F4F5F5",
+            borderRadius: 0,
+            padding: "0 40px 0 0 !important",
+            
+            "& .MuiOutlinedInput-notchedOutline": {
+              border: "none",
+              borderBottom: "2px solid #d1d1d1",
+              borderRadius: 0,
+            },
+
+            "&:hover .MuiOutlinedInput-notchedOutline": {
+              border: "none",
+              borderBottom: "2px solid #005DAB",
+            },
+
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              border: "none",
+              borderBottom: "2px solid #005DAB",
+            },
+
+            "& .MuiAutocomplete-input": {
+              fontSize: "16px",
+              lineHeight: "20px",
+              fontWeight: "400",
+              color: "#666666",
+              padding: "12px 8px !important",
+
+              "&::placeholder": {
+                color: "#999999",
+                opacity: 1,
+              },
+            },
+          },
+        },
+        endAdornment: {
+          position: "absolute",
+          right: "8px !important",
+          top: "50%",
+          transform: "translateY(-50%)",
+          display: "flex",
+          alignItems: "center",
+          gap: "4px",
+        },
+        popupIndicator: {
+          color: "#005DAB",
+          padding: "2px",
+        },
+        clearIndicator: {
+          color: "#666666",
+          padding: "2px",
+        },
+        option: {
+          fontSize: "16px",
+          lineHeight: "20px",
+          fontWeight: "400",
+          "&:hover": {
+            backgroundColor: "#f5f5f5",
+          },
+          '&[aria-selected="true"]': {
+            backgroundColor: "#e3f2fd",
+            "&:hover": {
+              backgroundColor: "#e3f2fd",
+            },
+          },
+        },
+      },
+    },
   }
 });
 

@@ -3,100 +3,50 @@
 @use "../../styles/breakpoint" as *;
 
 .groupBox {
-	padding: 30px 24px;
-	border: 1px solid $medium-gray;
-	border-radius: 10px;
+  padding: 30px 24px;
+  border: 1px solid $medium-gray;
+  border-radius: 10px;
 
-	.subTitle {
-		padding-bottom: 26px;
+  .subTitle {
+    padding-bottom: 26px;
 
-		p {
-			@include font-size(22px);
-			line-height: 24px;
-		}
-	}
+    p {
+      @include font-size(22px);
+      line-height: 24px;
+    }
+  }
 
-	.gridWrap {
-		margin-left: -16px;
-		margin-right: -16px;
-		max-width: 95%;
+  .gridWrap {
+    margin-left: -16px;
+    margin-right: -16px;
+    max-width: 95%;
 
-		.grid {
-			padding: 0 16px;
-			flex: 1;
+    &.itemCategory {
+      ul {
+        li {
+          &:first-child {
+            padding-bottom: 0;
+          }
+        }
+      }
+    }
 
-			ul {
-				li {
-					padding-bottom: 20px;
-					position: relative;
+    .grid {
+      padding: 0 16px;
+      flex: 1;
 
-					&:last-child {
-						padding-bottom: 0;
-					}
+      ul {
+        li {
+          padding-bottom: 20px;
+          position: relative;
 
-					.addField {
-						position: absolute;
-						top: 50%;
-						right: -52px;
-						transform: translateX(-50%);
-						padding: 6px;
-						border-radius: 16px;
-						cursor: pointer;
-					}
-				}
-			}
-
-			&.gridItemRows {
-				flex: 3;
-
-				ul {
-					li.itemRow {
-						@include flex();
-						gap: 16px;
-
-						.itemField {
-							flex: 2;
-						}
-
-						.qtyField {
-							flex: 1;
-							max-width: 200px;
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-.buttonWrap {
-	max-width: 95%;
-	padding: 30px 16px;
-	margin-left: -16px;
-	margin-right: -16px;
-
-	ul {
-		@include flex();
-		@include justify-content(end);
-
-		li {
-			padding: 0 6px;
-
-			&:last-child {
-				padding-right: 0;
-			}
-		}
-	}
-}
-
-.printError {
-	max-width: 95%;
-	padding: 12px 16px;
-
-	p {
-		color: $red-color;
-		@include font-size(14px);
-	}
+          &:last-child {
+            padding-bottom: 0;
+          }
+        }
+      }
+    }
+  }
 }
 
 .tabsHeading {
@@ -106,9 +56,9 @@
     @include flex();
     @include align-items(center);
 
-    li{
+    li {
       padding-right: 16px;
-      
+
       &:last-child {
         padding-right: 0;
       }
@@ -125,7 +75,7 @@
         border-radius: 2px;
         transition: all 0.2s ease;
         border-bottom: 2px solid transparent;
-          
+
         &.active {
           border-color: $primary-btn-color;
           color: $primary-btn-color;
@@ -134,69 +84,6 @@
         &:not(.active):hover {
           background-color: $extra-light-color;
         }
-      }
-    }
-  }
-
-}
-
-// Toggle Switch Styles
-.toggleWrap {
-  @include flex();
-  @include align-items(center);
-  padding: 12px 0;
-
-  label {
-    padding-bottom: 0;
-    padding-right: 12px;
-  }
-
-  .toggle {
-    position: relative;
-    display: inline-block;
-    width: 44px;
-    height: 24px;
-
-    input {
-      opacity: 0;
-      width: 0;
-      height: 0;
-
-      &:checked + .slider {
-        background-color: $primary-btn-color;
-      }
-
-      &:checked + .slider:before {
-        transform: translateX(20px);
-      }
-
-      &:focus + .slider {
-        box-shadow: 0 0 2px $primary-btn-color;
-      }
-    }
-
-    .slider {
-      position: absolute;
-      cursor: pointer;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background-color: #ccc;
-      transition: 0.3s;
-      border-radius: 24px;
-
-      &:before {
-        position: absolute;
-        content: "";
-        height: 18px;
-        width: 18px;
-        left: 3px;
-        bottom: 3px;
-        background-color: $white-color;
-        transition: 0.3s;
-        border-radius: 50%;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       }
     }
   }
