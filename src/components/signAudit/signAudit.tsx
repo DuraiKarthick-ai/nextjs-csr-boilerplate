@@ -1,26 +1,65 @@
 import { ThemeProvider } from "@emotion/react";
 import { Checkbox, FormControl, MenuItem, Select } from "@mui/material";
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import Link from "next/link";
 import { datePickerTheme, tableFilterTheme } from "@/theme/customizeTheme";
+import { signAuditService } from "@/services/signAuditService";
+import type {
+  SignAuditRequestPayload,
+  SignAuditResponseItem,
+  SignAuditSortField,
+  SignAuditSortOrder,
+} from "@/types/signAudit";
 import ContentWrapper from "../contentWrapper/contentWrapper";
 import styles from "./signAudit.module.scss";
 
-// Static table data
-const initialData = [
-  { id: 1, date: "07/05/2025", dept: "023", itemNo: "2345678", itemName: "Frozen Yogurt", upc: "16456", regularPrice: "$1.69", salePrice: "$0.69", operator: "232323" },
-  { id: 2, date: "07/05/2025", dept: "023", itemNo: "1345678", itemName: "Yogurt Frozen Yogurt", upc: "16456", regularPrice: "$1.69", salePrice: "$0.69", operator: "232323" },
-  { id: 3, date: "07/05/2025", dept: "023", itemNo: "3345678", itemName: "Frozen Strwberry Yogurt", upc: "16456", regularPrice: "$1.69", salePrice: "$0.69", operator: "232323" },
-  { id: 4, date: "07/05/2025", dept: "023", itemNo: "4345678", itemName: "Frozen Mango Yogurt", upc: "16456", regularPrice: "$1.69", salePrice: "$0.69", operator: "232323" },
-  { id: 5, date: "07/05/2025", dept: "023", itemNo: "1145678", itemName: "Frozen Apple Yogurt", upc: "16456", regularPrice: "$1.69", salePrice: "$0.69", operator: "232323" },
-  { id: 6, date: "07/05/2025", dept: "023", itemNo: "2245678", itemName: "Frozen Orange Yogurt", upc: "16456", regularPrice: "$1.69", salePrice: "$0.69", operator: "232323" },
-];
+const DEFAULT_DATE = "2026-04-07";
+const DEFAULT_OPERATOR = "ALL";
+const DEFAULT_PAGE = 1;
+const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_SORT_FIELD: SignAuditSortField = "itemNumber";
+const DEFAULT_SORT_ORDER: SignAuditSortOrder = "ASC";
 
-type SortKey = "itemNo" | "itemName" ;
-type SortOrder = "asc" | "desc";
+interface SignAuditTableRow {
+  auditDate: string;
+  itemNumber: string;
+  itemName: string;
+  department: string;
+  upc: string;
+  regularPrice: string;
+  salePrice: string;
+  operatorId: string;
+}
+
+/**
+ * Converts a numeric price to display currency.
+ * @param {number} value - Raw numeric price from API.
+ * @returns {string} Display string like "$1.69".
+ */
+function formatPrice(value: number): string {
+  return `$${value.toFixed(2)}`;
+}
+
+/**
+ * Maps API rows to table display rows.
+ * @param {SignAuditResponseItem[]} items - Raw API response rows.
+ * @returns {SignAuditTableRow[]} Display-ready rows.
+ */
+function mapSignAuditRows(items: SignAuditResponseItem[]): SignAuditTableRow[] {
+  return items.map((item) => ({
+    auditDate: dayjs(item.auditDate).format("MM/DD/YYYY"),
+    itemNumber: item.itemNumber,
+    itemName: item.itemName,
+    department: item.department,
+    upc: item.upc,
+    regularPrice: formatPrice(item.regularPrice),
+    salePrice: formatPrice(item.salePrice),
+    operatorId: item.operatorId,
+  }));
+}
 
 export default function SignAudit() {
 
@@ -54,39 +93,73 @@ export default function SignAudit() {
      </svg>
    );
 
-   const [active, setActive] = useState("price");
-   const [sortKey, setSortKey] = useState<SortKey | null>(null);
-   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
-   const [data, setData] = useState(initialData);
-   const [dateFilter, setDateFilter] = useState<Dayjs | null>(dayjs("2026-04-07"));
+   const [sortField, setSortField] = useState<SignAuditSortField>(DEFAULT_SORT_FIELD);
+   const [sortOrder, setSortOrder] = useState<SignAuditSortOrder>(DEFAULT_SORT_ORDER);
+   const [data, setData] = useState<SignAuditTableRow[]>([]);
+   const [dateFilter, setDateFilter] = useState<Dayjs | null>(dayjs(DEFAULT_DATE));
+   const [operatorFilter, setOperatorFilter] = useState<string>(DEFAULT_OPERATOR);
+   const [isLoading, setIsLoading] = useState<boolean>(false);
+   const [errorMessage, setErrorMessage] = useState<string>("");
 
-   const handleSort = (key: SortKey) => {
-     const newOrder = sortKey === key && sortOrder === "asc" ? "desc" : "asc";
-     setSortKey(key);
-     setSortOrder(newOrder);
+   const fetchSignAuditData = useCallback(async (): Promise<void> => {
+     setIsLoading(true);
+     setErrorMessage("");
 
-     const sortedData = [...initialData].sort((a, b) => {
-       const valA = a[key];
-       const valB = b[key];
+     try {
+       const payload: SignAuditRequestPayload = {
+         filters: {
+           date: (dateFilter ?? dayjs(DEFAULT_DATE)).format("YYYY-MM-DD"),
+           operator: operatorFilter,
+         },
+         sort: {
+           field: sortField,
+           order: sortOrder,
+         },
+         pagination: {
+           page: DEFAULT_PAGE,
+           pageSize: DEFAULT_PAGE_SIZE,
+         },
+       };
 
-       if (typeof valA === "number" && typeof valB === "number") {
-         return newOrder === "asc" ? valA - valB : valB - valA;
-       }
+       const response = await signAuditService.getSignAuditData(payload);
+       setData(mapSignAuditRows(response));
+     } catch {
+       setData([]);
+       setErrorMessage("Unable to load sign audit data. Please try again.");
+     } finally {
+       setIsLoading(false);
+     }
+   }, [dateFilter, operatorFilter, sortField, sortOrder]);
 
-       const strA = String(valA).toLowerCase();
-       const strB = String(valB).toLowerCase();
-       if (newOrder === "asc") {
-         return strA < strB ? -1 : strA > strB ? 1 : 0;
-       }
-       return strA > strB ? -1 : strA < strB ? 1 : 0;
-     });
+   useEffect(() => {
+     void fetchSignAuditData();
+   }, [fetchSignAuditData]);
 
-     setData(sortedData);
+   const operatorOptions = useMemo(() => {
+     const uniqueOperators = Array.from(new Set(data.map((row) => row.operatorId))).sort();
+     return [DEFAULT_OPERATOR, ...uniqueOperators];
+   }, [data]);
+
+   const handleSort = (field: SignAuditSortField): void => {
+     if (sortField === field) {
+       setSortOrder((prev) => (prev === "ASC" ? "DESC" : "ASC"));
+       return;
+     }
+     setSortField(field);
+     setSortOrder("ASC");
    };
 
-   const getSortIcon = (key: SortKey) => {
-     if (sortKey !== key) return sortArrowDown;
-     return sortOrder === "asc" ? sortArrowUp : sortArrowDown;
+   const getSortIcon = (field: SignAuditSortField) => {
+     if (sortField !== field) return sortArrowDown;
+     return sortOrder === "ASC" ? sortArrowUp : sortArrowDown;
+   };
+
+   const handleResetFilters = (event: React.MouseEvent<HTMLAnchorElement>): void => {
+     event.preventDefault();
+     setDateFilter(dayjs(DEFAULT_DATE));
+     setOperatorFilter(DEFAULT_OPERATOR);
+     setSortField(DEFAULT_SORT_FIELD);
+     setSortOrder(DEFAULT_SORT_ORDER);
    };
 
   return (
@@ -125,18 +198,23 @@ export default function SignAudit() {
               <div className={styles.dropdownWrap}>
                 <ThemeProvider theme={tableFilterTheme}>
                   <FormControl fullWidth size="small">
-                    <Select displayEmpty defaultValue="">
-                      <MenuItem value="">Operator</MenuItem>
-                      <MenuItem value="2345678">2345678</MenuItem>
-                      <MenuItem value="3456278">3456278</MenuItem>
-                      <MenuItem value="4562378">4562378</MenuItem>
+                    <Select
+                      displayEmpty
+                      value={operatorFilter}
+                      onChange={(event) => setOperatorFilter(event.target.value)}
+                    >
+                      {operatorOptions.map((operator) => (
+                        <MenuItem key={operator} value={operator}>
+                          {operator === DEFAULT_OPERATOR ? "Operator (ALL)" : operator}
+                        </MenuItem>
+                      ))}
                     </Select>
                   </FormControl>
                 </ThemeProvider>
               </div>
             </li>
             <li>
-              <Link href={"#"}>Reset Filters</Link>
+              <Link href={"#"} onClick={handleResetFilters}>Reset Filters</Link>
             </li>
           </ul>
         </div>
@@ -161,7 +239,7 @@ export default function SignAudit() {
                 <th>
                   <div className={styles.thContent}>
                     <span>Item #</span>
-                    <i className={styles.sortIcon} onClick={() => handleSort("itemNo")}>{getSortIcon("itemNo")}</i>
+                    <i className={styles.sortIcon} onClick={() => handleSort("itemNumber")}>{getSortIcon("itemNumber")}</i>
                   </div>
                 </th>
                 <th>
@@ -199,21 +277,31 @@ export default function SignAudit() {
               </tr>
             </thead>
             <tbody>
-              {data.map((row) => (
-                <tr key={row.id}>
+              {isLoading && (
+                <tr>
+                  <td colSpan={9}><p>Loading...</p></td>
+                </tr>
+              )}
+              {!isLoading && errorMessage && (
+                <tr>
+                  <td colSpan={9}><p>{errorMessage}</p></td>
+                </tr>
+              )}
+              {!isLoading && !errorMessage && data.map((row, index) => (
+                <tr key={`${row.itemNumber}-${row.auditDate}-${index}`}>
                   <td className={styles.checkboxCell}>
                     <ThemeProvider theme={tableFilterTheme}>
                       <Checkbox size="small" />
                     </ThemeProvider>
                   </td>
-                  <td><p>{row.date}</p></td>
-                  <td><p>{row.itemNo}</p></td>
+                  <td><p>{row.auditDate}</p></td>
+                  <td><p>{row.itemNumber}</p></td>
                   <td><p>{row.itemName}</p></td>
-                  <td><p>{row.dept}</p></td>
+                  <td><p>{row.department}</p></td>
                   <td><p>{row.upc}</p></td>
                   <td><p>{row.regularPrice}</p></td>
                   <td><p>{row.salePrice}</p></td>
-                  <td><p>{row.operator}</p></td>
+                  <td><p>{row.operatorId}</p></td>
                 </tr>
               ))}
             </tbody>
