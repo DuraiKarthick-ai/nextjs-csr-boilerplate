@@ -90,6 +90,8 @@ function getRowKey(row: SignAuditTableRow): string {
 
 export default function SignAuditSection() {
 
+  const rows = [1, 2, 3, 4, 5];
+
    const sortArrowUp = (
      <svg
        width="10"
@@ -400,11 +402,11 @@ export default function SignAuditSection() {
         </div>
 
         <div className={styles.tableWrap} onScroll={handleTableScroll}>
-            <table className={styles.dataTable}>
+          <table className={styles.dataTable}>
             <thead>
-                <tr>
+              <tr>
                 <th className={styles.checkboxCell}>
-                    <div className={styles.thContent}>
+                  <div className={styles.thContent}>
                     <span>Select All</span>
                     <ThemeProvider theme={tableFilterTheme}>
                         <Checkbox
@@ -413,7 +415,7 @@ export default function SignAuditSection() {
                           onChange={(event) => handleSelectAllVisible(event.target.checked)}
                         />
                     </ThemeProvider>
-                    </div>
+                  </div>
                 </th>
                 <th>
                     <div className={styles.thContent}>
@@ -458,25 +460,61 @@ export default function SignAuditSection() {
                       <span>Operator</span>
                     </div>
                 </th>
-                </tr>
+              </tr>
             </thead>
             <tbody>
-                {isLoading && allRows.length === 0 && (
-                <tr>
-                  <td colSpan={9}><p>Loading...</p></td>
+              {isLoading  && allRows.length === 0 && rows.map((row) => (
+                <tr key={row}>
+                  <td>
+                    <div className="shimmer checkbox m-auto"></div>
+                  </td>
+                  <td>
+                    <div className="shimmer lg"></div>
+                  </td>
+                  <td>
+                    <div className="shimmer md"></div>
+                  </td>
+                  <td>
+                    <div className="shimmer md"></div>
+                  </td>
+                  <td>
+                    <div className="shimmer sm"></div>
+                  </td>
+                  <td>
+                    <div className="shimmer sm"></div>
+                  </td>
+                  <td>
+                    <div className="shimmer sm"></div>
+                  </td>
+                  <td>
+                    <div className="shimmer sm"></div>
+                  </td>
+                  <td>
+                    <div className="shimmer md"></div>
+                  </td>
                 </tr>
-                )}
-                {!isLoading && errorMessage && allRows.length === 0 && (
+              ))}
+              {!isLoading && errorMessage && allRows.length === 0 && (
                 <tr>
-                  <td colSpan={9}><p>{errorMessage}</p></td>
+                  <td colSpan={9}>
+                    <div className={`${styles.noDatafound} noDataContent`}>
+                      <h4>Error</h4>
+                      <label>{errorMessage}</label>
+                    </div>
+                  </td>
                 </tr>
-                )}
-                {!isLoading && !errorMessage && visibleRows.length === 0 && (
+              )}
+              {!isLoading && !errorMessage && visibleRows.length === 0 && (
                 <tr>
-                  <td colSpan={9}><p>No rows found for selected filters.</p></td>
+                  <td colSpan={9}>
+                    <div className={`${styles.noDatafound} noDataContent`}>
+                      <h4>No records found</h4>
+                      <label>No rows found for selected filters.</label>
+                    </div>
+                  </td>
                 </tr>
-                )}
-                {!errorMessage && visibleRows.map((row, index) => (
+              )}
+              {!errorMessage && visibleRows.map((row, index) => (
                 <tr key={`${row.itemNumber}-${row.auditDate}-${index}`}>
                     <td className={styles.checkboxCell}>
                     <ThemeProvider theme={tableFilterTheme}>
@@ -496,14 +534,14 @@ export default function SignAuditSection() {
                     <td><p>{row.salePrice}</p></td>
                     <td><p>{row.operatorId}</p></td>
                 </tr>
-                ))}
-                {isLoading && allRows.length > 0 && (
+              ))}
+              {isLoading && allRows.length > 0 && (
                 <tr>
                   <td colSpan={9}><p>Loading more...</p></td>
                 </tr>
-                )}
+              )}
             </tbody>
-            </table>
+          </table>
         </div>
         <div className={styles.pagination}>
           <p>Total Rows: {visibleRows.length}</p>

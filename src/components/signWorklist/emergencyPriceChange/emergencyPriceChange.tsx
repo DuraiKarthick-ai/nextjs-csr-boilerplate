@@ -7,7 +7,8 @@ import {
   useState,
   type UIEvent,
 } from "react";
-import { Checkbox, FormControl, MenuItem, Select, ThemeProvider } from "@mui/material";
+import theme from "@/theme/customizeTheme";
+import { TextField, Checkbox, FormControl, MenuItem, Select, ThemeProvider } from "@mui/material";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -120,6 +121,8 @@ export default function EmergencyPriceChange(): JSX.Element {
   const isFetchingRef = useRef<boolean>(false);
   const hasMoreRef = useRef<boolean>(true);
   const { isPrinting, printResult, printError, submitPrint, resetPrint } = usePrint();
+
+  const rows = [1, 2, 3, 4, 5];
 
   const sortArrowUp = (
     <svg width="10" height="10" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -405,337 +408,389 @@ export default function EmergencyPriceChange(): JSX.Element {
                 <div className={styles.thContent}>
                   <span>Select All</span>
                 </div>
+                <div className={styles.filterWrap}>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <Checkbox
+                      size="small"
+                      checked={isAllVisibleSelected}
+                      onChange={(e) => handleSelectAllVisible(e.target.checked)}
+                    />
+                  </ThemeProvider>
+                </div>
               </th>
-              <th onClick={() => handleSort("auditDate")}>
+              <th className={styles.thDatePicker}>
                 <div className={styles.thContent}>
                   <span>Date</span>
-                  <i className={styles.sortIcon}>{getSortIcon("auditDate")}</i>
+                  <i className={styles.sortIcon} onClick={() => handleSort("auditDate")}>{getSortIcon("auditDate")}</i>
                 </div>
-              </th>
-              <th onClick={() => handleSort("itemNumber")}>
-                <div className={styles.thContent}>
-                  <span>Item #</span>
-                  <i className={styles.sortIcon}>{getSortIcon("itemNumber")}</i>
-                </div>
-              </th>
-              <th onClick={() => handleSort("itemName")}>
-                <div className={styles.thContent}>
-                  <span>Item Name</span>
-                  <i className={styles.sortIcon}>{getSortIcon("itemName")}</i>
-                </div>
-              </th>
-              <th onClick={() => handleSort("department")}>
-                <div className={styles.thContent}>
-                  <span>Dept</span>
-                  <i className={styles.sortIcon}>{getSortIcon("department")}</i>
-                </div>
-              </th>
-              <th onClick={() => handleSort("category")}>
-                <div className={styles.thContent}>
-                  <span>Category</span>
-                  <i className={styles.sortIcon}>{getSortIcon("category")}</i>
-                </div>
-              </th>
-              <th onClick={() => handleSort("upc")}>
-                <div className={styles.thContent}>
-                  <span>UPC</span>
-                  <i className={styles.sortIcon}>{getSortIcon("upc")}</i>
-                </div>
-              </th>
-              <th onClick={() => handleSort("onHand")}>
-                <div className={styles.thContent}>
-                  <span>O/H</span>
-                  <i className={styles.sortIcon}>{getSortIcon("onHand")}</i>
-                </div>
-              </th>
-              <th onClick={() => handleSort("quantity")}>
-                <div className={styles.thContent}>
-                  <span>Quantity</span>
-                  <i className={styles.sortIcon}>{getSortIcon("quantity")}</i>
-                </div>
-              </th>
-              <th onClick={() => handleSort("changeReason")}>
-                <div className={styles.thContent}>
-                  <span>Change Re...</span>
-                  <i className={styles.sortIcon}>{getSortIcon("changeReason")}</i>
-                </div>
-              </th>
-              <th onClick={() => handleSort("signSize")}>
-                <div className={styles.thContent}>
-                  <span>Sign Size</span>
-                  <i className={styles.sortIcon}>{getSortIcon("signSize")}</i>
+                <div className={styles.filterWrap}>
+                  <ThemeProvider theme={datePickerTheme}>
+                    <DatePicker
+                      value={dateFilter}
+                      onChange={setDateFilter}
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          placeholder: "Date",
+                          fullWidth: true,
+                        },
+                      }}
+                    />
+                  </ThemeProvider>
                 </div>
               </th>
               <th>
+                <div className={styles.thContent}>
+                  <span>Item #</span>
+                  <i className={styles.sortIcon} onClick={() => handleSort("itemNumber")}>{getSortIcon("itemNumber")}</i>
+                </div>
+                <div className={styles.filterWrap}>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={itemNumberFilter}
+                        onChange={(e) => setItemNumberFilter(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {itemNumberOptions.map((opt) => (
+                          <MenuItem key={opt} value={opt}>
+                            {opt}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </ThemeProvider>
+                </div>
+              </th>
+              <th>
+                <div className={styles.thContent}>
+                  <span>Item Name</span>
+                  <i className={styles.sortIcon} onClick={() => handleSort("itemName")}>{getSortIcon("itemName")}</i>
+                </div>
+                <div className={styles.filterWrap}>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={itemNameFilter}
+                        onChange={(e) => setItemNameFilter(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {itemNameOptions.map((opt) => (
+                          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </ThemeProvider>
+                </div>
+              </th>
+              <th>
+                <div className={styles.thContent}>
+                  <span>Dept</span>
+                  <i className={styles.sortIcon} onClick={() => handleSort("department")}>{getSortIcon("department")}</i>
+                </div>
+                <div className={styles.filterWrap}>
+                   <ThemeProvider theme={tableFilterTheme}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={departmentFilter}
+                        onChange={(e) => setDepartmentFilter(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {departmentOptions.map((opt) => (
+                          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </ThemeProvider>
+                </div>
+              </th>
+              <th>
+                <div className={styles.thContent}>
+                  <span>Category</span>
+                  <i className={styles.sortIcon} onClick={() => handleSort("category")}>{getSortIcon("category")}</i>
+                </div>
+                <div className={styles.filterWrap}>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={categoryFilter}
+                        onChange={(e) => setCategoryFilter(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {categoryOptions.map((opt) => (
+                          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </ThemeProvider>
+                </div>
+              </th>
+              <th>
+                <div className={styles.thContent}>
+                  <span>UPC</span>
+                  <i className={styles.sortIcon} onClick={() => handleSort("upc")}>{getSortIcon("upc")}</i>
+                </div>
+                <div className={styles.filterWrap}>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={upcFilter}
+                        onChange={(e) => setUpcFilter(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {upcOptions.map((opt) => (
+                          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </ThemeProvider>
+                </div>
+              </th>
+              <th>
+                <div className={styles.thContent}>
+                  <span>O/H</span>
+                  <i className={styles.sortIcon} onClick={() => handleSort("onHand")}>{getSortIcon("onHand")}</i>
+                </div>
+                <div className={styles.filterWrap}>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={onHandFilter}
+                        onChange={(e) => setOnHandFilter(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {onHandOptions.map((opt) => (
+                          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </ThemeProvider>
+                </div>
+              </th>
+              <th>
+                <div className={styles.thContent}>
+                  <span>Quantity</span>
+                  <i className={styles.sortIcon} onClick={() => handleSort("quantity")}>{getSortIcon("quantity")}</i>
+                </div>
+                <div className={styles.filterWrap}>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={quantityFilter}
+                        onChange={(e) => setQuantityFilter(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {quantityOptions.map((opt) => (
+                          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </ThemeProvider>
+                </div>
+              </th>
+              <th>
+                <div className={styles.thContent}>
+                  <span>Change Reason</span>
+                  <i className={styles.sortIcon} onClick={() => handleSort("changeReason")}>{getSortIcon("changeReason")}</i>
+                </div>
+                <div className={styles.filterWrap}>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={changeReasonFilter}
+                        onChange={(e) => setChangeReasonFilter(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {changeReasonOptions.map((opt) => (
+                          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </ThemeProvider>
+                </div>
+              </th>
+              <th>
+                <div className={styles.thContent}>
+                  <span>Sign Size</span>
+                  <i className={styles.sortIcon} onClick={() => handleSort("signSize")}>{getSortIcon("signSize")}</i>
+                </div>
+                <div className={styles.filterWrap}>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={signSizeFilter}
+                        onChange={(e) => setSignSizeFilter(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {signSizeOptions.map((opt) => (
+                          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </ThemeProvider>
+                </div>
+              </th>
+              <th className={styles.thCopies}>
                 <div className={styles.thContent}>
                   <span>Copies</span>
                 </div>
-              </th>
-              <th onClick={() => handleSort("printStatus")}>
-                <div className={styles.thContent}>
-                  <span>Print Sta...</span>
-                  <i className={styles.sortIcon}>{getSortIcon("printStatus")}</i>
+                <div className={styles.filterWrap}>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={copiesFilter}
+                        onChange={(e) => setCopiesFilter(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {copiesOptions.map((opt) => (
+                          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </ThemeProvider>
                 </div>
               </th>
-            </tr>
-            <tr className={styles.filterRow}>
-              <th className={styles.checkboxCell}>
-                <ThemeProvider theme={tableFilterTheme}>
-                  <Checkbox
-                    size="small"
-                    checked={isAllVisibleSelected}
-                    onChange={(e) => handleSelectAllVisible(e.target.checked)}
-                  />
-                </ThemeProvider>
-              </th>
               <th>
-                <ThemeProvider theme={datePickerTheme}>
-                  <DatePicker
-                    value={dateFilter}
-                    onChange={setDateFilter}
-                    slotProps={{
-                      textField: {
-                        size: "small",
-                        placeholder: "Date",
-                      },
-                    }}
-                  />
-                </ThemeProvider>
-              </th>
-              <th>
-                <ThemeProvider theme={tableFilterTheme}>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={itemNumberFilter}
-                      onChange={(e) => setItemNumberFilter(e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {itemNumberOptions.map((opt) => (
-                        <MenuItem key={opt} value={opt}>
-                          {opt}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </ThemeProvider>
-              </th>
-              <th>
-                <ThemeProvider theme={tableFilterTheme}>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={itemNameFilter}
-                      onChange={(e) => setItemNameFilter(e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {itemNameOptions.map((opt) => (
-                        <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </ThemeProvider>
-              </th>
-              <th>
-                <ThemeProvider theme={tableFilterTheme}>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={departmentFilter}
-                      onChange={(e) => setDepartmentFilter(e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {departmentOptions.map((opt) => (
-                        <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </ThemeProvider>
-              </th>
-              <th>
-                <ThemeProvider theme={tableFilterTheme}>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={categoryFilter}
-                      onChange={(e) => setCategoryFilter(e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {categoryOptions.map((opt) => (
-                        <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </ThemeProvider>
-              </th>
-              <th>
-                <ThemeProvider theme={tableFilterTheme}>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={upcFilter}
-                      onChange={(e) => setUpcFilter(e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {upcOptions.map((opt) => (
-                        <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </ThemeProvider>
-              </th>
-              <th>
-                <ThemeProvider theme={tableFilterTheme}>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={onHandFilter}
-                      onChange={(e) => setOnHandFilter(e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {onHandOptions.map((opt) => (
-                        <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </ThemeProvider>
-              </th>
-              <th>
-                <ThemeProvider theme={tableFilterTheme}>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={quantityFilter}
-                      onChange={(e) => setQuantityFilter(e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {quantityOptions.map((opt) => (
-                        <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </ThemeProvider>
-              </th>
-              <th>
-                <ThemeProvider theme={tableFilterTheme}>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={changeReasonFilter}
-                      onChange={(e) => setChangeReasonFilter(e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {changeReasonOptions.map((opt) => (
-                        <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </ThemeProvider>
-              </th>
-              <th>
-                <ThemeProvider theme={tableFilterTheme}>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={signSizeFilter}
-                      onChange={(e) => setSignSizeFilter(e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {signSizeOptions.map((opt) => (
-                        <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </ThemeProvider>
-              </th>
-              <th>
-                <ThemeProvider theme={tableFilterTheme}>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={copiesFilter}
-                      onChange={(e) => setCopiesFilter(e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {copiesOptions.map((opt) => (
-                        <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </ThemeProvider>
-              </th>
-              <th>
-                <ThemeProvider theme={tableFilterTheme}>
-                  <FormControl fullWidth size="small">
-                    <Select
-                      value={printStatusFilter}
-                      onChange={(e) => setPrintStatusFilter(e.target.value)}
-                      displayEmpty
-                    >
-                      <MenuItem value="">All</MenuItem>
-                      {printStatusOptions.map((opt) => (
-                        <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </ThemeProvider>
+                <div className={styles.thContent}>
+                  <span>Print Status</span>
+                  <i className={styles.sortIcon} onClick={() => handleSort("printStatus")}>{getSortIcon("printStatus")}</i>
+                </div>
+                <div className={styles.filterWrap}>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={printStatusFilter}
+                        onChange={(e) => setPrintStatusFilter(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">All</MenuItem>
+                        {printStatusOptions.map((opt) => (
+                          <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </ThemeProvider>
+                </div>
               </th>
             </tr>
           </thead>
           <tbody>
-            {visibleRows.length === 0 ? (
-              <tr>
-                <td colSpan={13} style={{ textAlign: "center", padding: "20px" }}>
-                  No rows found for selected filters.
+
+            {isLoading  && visibleRows.length === 0 && rows.map((row) => (
+              <tr key={row}>
+                <td>
+                  <div className="shimmer checkbox m-auto"></div>
+                </td>
+                <td>
+                  <div className="shimmer lg"></div>
+                </td>
+                <td>
+                  <div className="shimmer md"></div>
+                </td>
+                <td>
+                  <div className="shimmer md"></div>
+                </td>
+                <td>
+                  <div className="shimmer sm"></div>
+                </td>
+                <td>
+                  <div className="shimmer sm"></div>
+                </td>
+                <td>
+                  <div className="shimmer sm"></div>
+                </td>
+                <td>
+                  <div className="shimmer sm"></div>
+                </td>
+                <td>
+                  <div className="shimmer md"></div>
+                </td>
+                <td>
+                  <div className="shimmer md"></div>
+                </td>
+                <td>
+                  <div className="shimmer md"></div>
+                </td>
+                <td>
+                  <div className="shimmer md"></div>
+                </td>
+                <td>
+                  <div className="shimmer sm"></div>
                 </td>
               </tr>
-            ) : (
-              visibleRows.map((row) => (
-                <tr key={getRowKey(row)}>
-                  <td style={{ width: "40px", textAlign: "center" }}>
-                    <ThemeProvider theme={tableFilterTheme}>
-                      <Checkbox
-                        size="small"
-                        checked={selectedRows[getRowKey(row)] === true}
-                        onChange={(e) => handleRowSelection(row, e.target.checked)}
-                      />
-                    </ThemeProvider>
-                  </td>
-                  <td><p>{row.auditDate}</p></td>
-                  <td><p>{row.itemNumber}</p></td>
-                  <td><p>{row.itemName}</p></td>
-                  <td><p>{row.department}</p></td>
-                  <td><p>{row.category}</p></td>
-                  <td><p>{row.upc}</p></td>
-                  <td><p>{row.onHand}</p></td>
-                  <td><p>{row.quantity}</p></td>
-                  <td><p>{row.changeReason}</p></td>
-                  <td>
-                    <ThemeProvider theme={tableFilterTheme}>
-                      <FormControl fullWidth size="small">
-                        <Select
-                          value={rowSignSizes[getRowKey(row)] ?? row.signSize ?? ""}
-                          onChange={(e) =>
-                            setRowSignSizes((prev) => ({
-                              ...prev,
-                              [getRowKey(row)]: e.target.value,
-                            }))
-                          }
-                          displayEmpty
-                          inputProps={{ "aria-label": "Select Size" }}
-                        >
-                          <MenuItem value="" disabled>Select Size</MenuItem>
-                          <MenuItem value="S">S-Small</MenuItem>
-                          <MenuItem value="M">M-Medium</MenuItem>
-                          <MenuItem value="L">L-Large</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </ThemeProvider>
-                  </td>
-                  <td>
-                    <input
+            ))}
+
+            {!isLoading && !errorMessage && visibleRows.length === 0 && (
+              <tr>
+                <td colSpan={13}>
+                  <div className={`${styles.noDatafound} noDataContent`}>
+                    <h4>No records found</h4>
+                    <label>No rows found for selected filters.</label>
+                  </div>
+                </td>
+              </tr>
+            )}
+
+            {!errorMessage && visibleRows.map((row) => (
+              <tr key={getRowKey(row)}>
+                <td style={{ width: "40px", textAlign: "center" }}>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <Checkbox
+                      size="small"
+                      checked={selectedRows[getRowKey(row)] === true}
+                      onChange={(e) => handleRowSelection(row, e.target.checked)}
+                    />
+                  </ThemeProvider>
+                </td>
+                <td><p>{row.auditDate}</p></td>
+                <td><p>{row.itemNumber}</p></td>
+                <td><p>{row.itemName}</p></td>
+                <td><p>{row.department}</p></td>
+                <td><p>{row.category}</p></td>
+                <td><p>{row.upc}</p></td>
+                <td><p>{row.onHand}</p></td>
+                <td><p>{row.quantity}</p></td>
+                <td><p>{row.changeReason}</p></td>
+                <td>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <FormControl fullWidth size="small">
+                      <Select
+                        value={rowSignSizes[getRowKey(row)] ?? row.signSize ?? ""}
+                        onChange={(e) =>
+                          setRowSignSizes((prev) => ({
+                            ...prev,
+                            [getRowKey(row)]: e.target.value,
+                          }))
+                        }
+                        displayEmpty
+                        inputProps={{ "aria-label": "Select Size" }}
+                      >
+                        <MenuItem value="" disabled>Select Size</MenuItem>
+                        <MenuItem value="S">S-Small</MenuItem>
+                        <MenuItem value="M">M-Medium</MenuItem>
+                        <MenuItem value="L">L-Large</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </ThemeProvider>
+                </td>
+                <td>
+                  <ThemeProvider theme={tableFilterTheme}>
+                    <TextField
+                      fullWidth
+                      size="small"
+                      placeholder="1"
+                      variant="outlined"
                       type="number"
-                      min={1}
                       value={rowCopies[getRowKey(row)] ?? 1}
                       onChange={(e) =>
                         setRowCopies((prev) => ({
@@ -743,34 +798,32 @@ export default function EmergencyPriceChange(): JSX.Element {
                           [getRowKey(row)]: Math.max(1, Number(e.target.value)),
                         }))
                       }
-                      style={{ width: "60px" }}
                     />
-                  </td>
-                  <td>
-                    <span
-                      style={{
-                        display: "inline-block",
-                        width: "32px",
-                        height: "20px",
-                        backgroundColor:
-                          row.printStatus?.toLowerCase() === "printed" ? "#2e7d32" :
-                          row.printStatus?.toLowerCase() === "pending" ? "#ed6c02" :
-                          row.printStatus?.toLowerCase() === "failed" ? "#c62828" : "#2e7d32",
-                        borderRadius: "3px",
-                      }}
-                    />
-                  </td>
-                </tr>
-              ))
-            )}
+                  </ThemeProvider>
+                </td>
+                <td>
+                  <span
+                    style={{
+                      display: "inline-block",
+                      width: "32px",
+                      height: "20px",
+                      backgroundColor:
+                        row.printStatus?.toLowerCase() === "printed" ? "#2e7d32" :
+                        row.printStatus?.toLowerCase() === "pending" ? "#ed6c02" :
+                        row.printStatus?.toLowerCase() === "failed" ? "#c62828" : "#2e7d32",
+                      borderRadius: "3px",
+                    }}
+                  />
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
+
       <div className={styles.pagination}>
-        <span>Total Rows: {visibleRows.length}</span>
-        <span>
-          Selected: <strong>{selectedCount}</strong>
-        </span>
+        <p>Total Rows: {visibleRows.length}</p>
+        <p>Selected: {selectedCount}</p>
       </div>
 
       <div className={styles.buttonWrap}>

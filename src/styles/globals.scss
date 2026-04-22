@@ -122,8 +122,9 @@ label.label {
   }
 
   &:disabled {
-    opacity: 0.5;
     cursor: not-allowed;
+    background-color: $gray;
+    border-color: $gray
   }
 }
 
@@ -148,6 +149,12 @@ label.label {
   &:focus-visible {
     outline: 2px solid $primary-color;
     outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    border-color: $gray;
+    color: $gray;
   }
 }
 
@@ -174,6 +181,11 @@ label.label {
     outline: 2px solid $primary-color;
     outline-offset: 2px;
   }
+
+  &:disabled {
+    cursor: not-allowed;
+    background-color: $gray;
+  }
 }
 
 /* ── Status tags ────────────────────────────────────────────────── */
@@ -189,7 +201,7 @@ label.label {
     @include font-size(14px);
     line-height: 16px;
     font-weight: 500;
-    min-width: 200px;
+    min-width: 262px;
     text-align: center;
   }
 }
@@ -220,6 +232,10 @@ label.label {
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
 
+  &.checkbox {
+    width: 20px;
+  }
+
   &.xs {
     width: 25%;
   }
@@ -233,7 +249,11 @@ label.label {
   }
 
   &.lg {
-    width: 75%;
+    width: 90%;
+  }
+
+  &.m-auto {
+    margin: auto;
   }
 }
 
