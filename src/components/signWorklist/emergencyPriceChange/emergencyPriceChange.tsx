@@ -400,6 +400,9 @@ export default function EmergencyPriceChange(): JSX.Element {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <div className={styles.emergencyPriceChangeSection}>
+        <div className={styles.subTitle}>
+          <p>Worklist - Emergency Price Change</p>
+        </div>
       <div className={styles.tableWrap} onScroll={handleTableScroll}>
         <table className={styles.dataTable}>
           <thead>
