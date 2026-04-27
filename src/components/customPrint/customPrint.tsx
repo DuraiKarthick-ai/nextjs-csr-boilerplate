@@ -226,17 +226,18 @@ export default function CustomPrint(): JSX.Element {
                         placeholder="Enter Quantity"
                         variant="outlined"
                         value={quantity}
+                        onBlur={() => setInitialLoad(!initialLoad)}
                         onChange={(e) => setQuantity(e.target.value)}
                       />
                     </ThemeProvider>
                   </div>
                 </li>
-                <li>
+                {/* <li>
                   <button className="primaryButton" onClick={() => setInitialLoad(!initialLoad)}>Load Data</button>
                 </li>
                 <li>
                   <button className="primaryButton" onClick={() => setIsEdit(!isEdit)}>Edit</button>
-                </li>
+                </li> */}
               </ul>
             </div>
             <div className={`${styles.grid} ${styles.gridBig}`}>

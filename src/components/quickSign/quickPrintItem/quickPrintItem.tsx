@@ -313,7 +313,7 @@ export default function QuickPrintItem(): JSX.Element {
    * @returns {string | undefined} Helper text to display, or undefined.
    */
   const getItemHelperText = (index: number): string | undefined => {
-    if (invalidRows.has(index)) return "Item not available";
+    if (invalidRows.has(index)) return "Item # / UPC not found";
     if (printedRows.has(index) && printedMessage) return printedMessage;
     return undefined;
   };
