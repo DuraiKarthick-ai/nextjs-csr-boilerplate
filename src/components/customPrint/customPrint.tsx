@@ -320,46 +320,52 @@ export default function CustomPrint(): JSX.Element {
                   </div>
 
                   <div className={styles.priceDetails}>
-                    <div className={`${styles.grid} ${styles.pricePerEach}`}>
-                      <div className={styles.priceLabel}>
-                        <h2>PRICE PER EACH</h2>
-                      </div>
-                      <div className={styles.priceValue}>
-                        {initialLoad ? (
-                          <div className={`${styles.emptyField} ${styles.emptyPricePerField}`}></div>
-                        ) : isEdit ? (
-                          <input
-                            type="text"
-                            value={signContent.pricePerEach}
-                            onChange={(e) => handleContentChange("pricePerEach", e.target.value)}
-                          />
-                        ) : (
-                          <h2>{signContent.pricePerEach}</h2>
-                        )}
-                      </div>
-                    </div>
-                    <div className={`${styles.grid} ${styles.sellPrice}`}>
-                      <div className={styles.priceLabel}>
-                        <h2>SELL PRICE</h2>
-                      </div>
-                      <div className={styles.priceValue}>
-                        {initialLoad ? (
-                          <div className={`${styles.emptyField} ${styles.emptySellPriceField}`}></div>
-                        ) : isEdit ? (
-                          <div className={styles.editableField}>
-                            <input
-                              type="text"
-                              value={signContent.sellPrice}
-                              onChange={(e) => handleContentChange("sellPrice", e.target.value)}
-                            />
+                    <ul>
+                      <li>
+                        <div className={styles.pricePerEach}>
+                          <div className={styles.priceLabel}>
+                            <h2>PRICE PER EACH</h2>
                           </div>
-                        ) : (
-                          <div className={styles.editableField}>
-                            <h1>{signContent.sellPrice}</h1>
+                          <div className={styles.priceValue}>
+                            {initialLoad ? (
+                              <div className={`${styles.emptyField} ${styles.emptyPricePerField}`}></div>
+                            ) : isEdit ? (
+                              <input
+                                type="text"
+                                value={signContent.pricePerEach}
+                                onChange={(e) => handleContentChange("pricePerEach", e.target.value)}
+                              />
+                            ) : (
+                              <h2>{signContent.pricePerEach}</h2>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    </div>
+                        </div>
+                      </li>
+                      <li>
+                        <div className={styles.sellPrice}>
+                          <div className={styles.priceLabel}>
+                            <h2>SELL PRICE</h2>
+                          </div>
+                          <div className={styles.priceValue}>
+                            {initialLoad ? (
+                              <div className={`${styles.emptyField} ${styles.emptySellPriceField}`}></div>
+                            ) : isEdit ? (
+                              <div className={styles.editableField}>
+                                <input
+                                  type="text"
+                                  value={signContent.sellPrice}
+                                  onChange={(e) => handleContentChange("sellPrice", e.target.value)}
+                                />
+                              </div>
+                            ) : (
+                              <div className={styles.editableField}>
+                                <h1>{signContent.sellPrice}</h1>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </li>
+                    </ul>
                   </div>
                 </div>
 
