@@ -193,6 +193,10 @@ label.label {
   display: inline-flex;
   align-items: center;
 
+  &.minWidth {
+    min-width: 262px;
+  }
+
   span {
     padding: 8px 10px;
     background-color: #e8f5e9;
@@ -201,7 +205,6 @@ label.label {
     @include font-size(14px);
     line-height: 16px;
     font-weight: 500;
-    min-width: 262px;
     text-align: center;
   }
 }
@@ -265,3 +268,11 @@ label.label {
     background-position: -100% 0;
   }
 }
+
+
+.tableData {
+  max-height: 326px;   /* ✅ table body height */
+  overflow-y: auto;    /* ✅ vertical scroll */
+  margin-right: -16px;
+}
+

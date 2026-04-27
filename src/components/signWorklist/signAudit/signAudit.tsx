@@ -125,18 +125,19 @@ export default function SignAuditSection() {
    const [sortField, setSortField] = useState<SignAuditSortField>(DEFAULT_SORT_FIELD);
    const [sortOrder, setSortOrder] = useState<SignAuditSortOrder>(DEFAULT_SORT_ORDER);
    const [allRows, setAllRows] = useState<SignAuditTableRow[]>([]);
-  const [dateFilter, setDateFilter] = useState<Dayjs | null>(null);
+   const [dateFilter, setDateFilter] = useState<Dayjs | null>(null);
    const [operatorFilter, setOperatorFilter] = useState<string>(DEFAULT_OPERATOR);
    const [isLoading, setIsLoading] = useState<boolean>(false);
    const [hasMore, setHasMore] = useState<boolean>(true);
    const [errorMessage, setErrorMessage] = useState<string>("");
-  const [selectedRows, setSelectedRows] = useState<RowSelectionMap>({});
-  const [printSelectionError, setPrintSelectionError] = useState<string>("");
-  const [lastPrintedCount, setLastPrintedCount] = useState<number>(0);
+   const [selectedRows, setSelectedRows] = useState<RowSelectionMap>({});
+   const [printSelectionError, setPrintSelectionError] = useState<string>("");
+   const [lastPrintedCount, setLastPrintedCount] = useState<number>(0);
    const currentPageRef = useRef<number>(0);
    const isFetchingRef = useRef<boolean>(false);
    const hasMoreRef = useRef<boolean>(true);
-  const { isPrinting, printResult, printError, submitPrint, resetPrint } = usePrint();
+   const { isPrinting, printResult, printError, submitPrint, resetPrint } = usePrint();
+   const [hasMaxHeight, setHasMaxHeight] = useState(false);
 
    /**
     * Loads a single API page and appends it to the existing table dataset.
@@ -186,6 +187,22 @@ export default function SignAuditSection() {
 
    useEffect(() => {
     void loadPage(FIRST_PAGE);
+    
+    const element = document.getElementById("tableBody");
+    if (!element) return;
+
+    const checkHeight = () => {
+      // max-height = 326px
+      setHasMaxHeight(element.scrollHeight > 326);
+    };
+
+    checkHeight();
+
+    const observer = new ResizeObserver(checkHeight);
+    observer.observe(element);
+
+    return () => observer.disconnect();
+
    }, [loadPage]);
 
    /**
@@ -401,147 +418,155 @@ export default function SignAuditSection() {
             </ul>
         </div>
 
-        <div className={styles.tableWrap} onScroll={handleTableScroll}>
-          <table className={styles.dataTable}>
-            <thead>
-              <tr>
-                <th className={styles.checkboxCell}>
-                  <div className={styles.thContent}>
-                    <span>Select All</span>
-                    <ThemeProvider theme={tableFilterTheme}>
-                        <Checkbox
-                          size="small"
-                          checked={isAllVisibleSelected}
-                          onChange={(event) => handleSelectAllVisible(event.target.checked)}
-                        />
-                    </ThemeProvider>
-                  </div>
-                </th>
-                <th>
-                    <div className={styles.thContent}>
-                      <span>Date</span>
-                    </div>
-                </th>
-                <th>
-                    <div className={styles.thContent}>
-                      <span>Item #</span>
-                      <i className={styles.sortIcon} onClick={() => handleSort("itemNumber")}>{getSortIcon("itemNumber")}</i>
-                    </div>
-                </th>
-                <th>
-                    <div className={styles.thContent}>
-                      <span>Item Name</span>
-                      <i className={styles.sortIcon} onClick={() => handleSort("itemName")}>{getSortIcon("itemName")}</i>
-                    </div>
-                </th>
-                <th>
-                    <div className={styles.thContent}>
-                      <span>Dept</span>
-                    </div>
-                </th>
-                <th>
-                    <div className={styles.thContent}>
-                      <span>UPC</span>
-                    </div>
-                </th>
-                <th>
-                    <div className={styles.thContent}>
-                      <span>Regular Price</span>
-                    </div>
-                </th>
-                
-                <th>
-                    <div className={styles.thContent}>
-                      <span>Sale Price</span>
-                    </div>
-                </th>
-                <th>
-                    <div className={styles.thContent}>
-                      <span>Operator</span>
-                    </div>
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading  && allRows.length === 0 && rows.map((row) => (
-                <tr key={row}>
-                  <td>
-                    <div className="shimmer checkbox m-auto"></div>
-                  </td>
-                  <td>
-                    <div className="shimmer lg"></div>
-                  </td>
-                  <td>
-                    <div className="shimmer md"></div>
-                  </td>
-                  <td>
-                    <div className="shimmer md"></div>
-                  </td>
-                  <td>
-                    <div className="shimmer sm"></div>
-                  </td>
-                  <td>
-                    <div className="shimmer sm"></div>
-                  </td>
-                  <td>
-                    <div className="shimmer sm"></div>
-                  </td>
-                  <td>
-                    <div className="shimmer sm"></div>
-                  </td>
-                  <td>
-                    <div className="shimmer md"></div>
-                  </td>
-                </tr>
-              ))}
-              {!isLoading && errorMessage && allRows.length === 0 && (
+        <div className={`${styles.tableWrap} ${hasMaxHeight ? styles.activeScroll : ""}`} onScroll={handleTableScroll}>
+          <div className={styles.tableHeader}>
+            <table className={styles.dataTable}>
+              <thead>
                 <tr>
-                  <td colSpan={9}>
-                    <div className={`${styles.noDatafound} noDataContent`}>
-                      <h4>Error</h4>
-                      <label>{errorMessage}</label>
+                  <th className={styles.checkboxCell}>
+                    <div className={styles.thContent}>
+                      <span>Select All</span>
+                      <ThemeProvider theme={tableFilterTheme}>
+                          <Checkbox
+                            size="small"
+                            checked={isAllVisibleSelected}
+                            onChange={(event) => handleSelectAllVisible(event.target.checked)}
+                          />
+                      </ThemeProvider>
                     </div>
-                  </td>
+                  </th>
+                  <th>
+                      <div className={styles.thContent}>
+                        <span>Date</span>
+                      </div>
+                  </th>
+                  <th>
+                      <div className={styles.thContent}>
+                        <span>Item #</span>
+                        <i className={styles.sortIcon} onClick={() => handleSort("itemNumber")}>{getSortIcon("itemNumber")}</i>
+                      </div>
+                  </th>
+                  <th>
+                      <div className={styles.thContent}>
+                        <span>Item Name</span>
+                        <i className={styles.sortIcon} onClick={() => handleSort("itemName")}>{getSortIcon("itemName")}</i>
+                      </div>
+                  </th>
+                  <th>
+                      <div className={styles.thContent}>
+                        <span>Dept</span>
+                      </div>
+                  </th>
+                  <th>
+                      <div className={styles.thContent}>
+                        <span>UPC</span>
+                      </div>
+                  </th>
+                  <th>
+                      <div className={styles.thContent}>
+                        <span>Regular Price</span>
+                      </div>
+                  </th>
+                  
+                  <th>
+                      <div className={styles.thContent}>
+                        <span>Sale Price</span>
+                      </div>
+                  </th>
+                  <th>
+                      <div className={styles.thContent}>
+                        <span>Operator</span>
+                      </div>
+                  </th>
                 </tr>
-              )}
-              {!isLoading && !errorMessage && visibleRows.length === 0 && (
-                <tr>
-                  <td colSpan={9}>
-                    <div className={`${styles.noDatafound} noDataContent`}>
-                      <h4>No records found</h4>
-                      <label>No rows found for selected filters.</label>
-                    </div>
-                  </td>
-                </tr>
-              )}
-              {!errorMessage && visibleRows.map((row, index) => (
-                <tr key={`${row.itemNumber}-${row.auditDate}-${index}`}>
+              </thead>
+            </table>
+          </div>
+          
+          <div className={hasMaxHeight ? "tableData" : ""} id="tableBody">
+            <table className={styles.dataTable}>
+              <tbody>
+                {isLoading  && allRows.length === 0 && rows.map((row) => (
+                  <tr key={row}>
                     <td className={styles.checkboxCell}>
-                    <ThemeProvider theme={tableFilterTheme}>
-                        <Checkbox
-                          size="small"
-                          checked={selectedRows[getRowKey(row)] === true}
-                          onChange={(event) => handleRowSelection(row, event.target.checked)}
-                        />
-                    </ThemeProvider>
+                      <div className="shimmer checkbox m-auto"></div>
                     </td>
-                    <td><p>{row.auditDate}</p></td>
-                    <td><p>{row.itemNumber}</p></td>
-                    <td><p>{row.itemName}</p></td>
-                    <td><p>{row.department}</p></td>
-                    <td><p>{row.upc}</p></td>
-                    <td><p>{row.regularPrice}</p></td>
-                    <td><p>{row.salePrice}</p></td>
-                    <td><p>{row.operatorId}</p></td>
-                </tr>
-              ))}
-              {isLoading && allRows.length > 0 && (
-                <tr>
-                  <td colSpan={9}><p>Loading more...</p></td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                    <td>
+                      <div className="shimmer lg"></div>
+                    </td>
+                    <td>
+                      <div className="shimmer md"></div>
+                    </td>
+                    <td>
+                      <div className="shimmer md"></div>
+                    </td>
+                    <td>
+                      <div className="shimmer sm"></div>
+                    </td>
+                    <td>
+                      <div className="shimmer sm"></div>
+                    </td>
+                    <td>
+                      <div className="shimmer sm"></div>
+                    </td>
+                    <td>
+                      <div className="shimmer sm"></div>
+                    </td>
+                    <td>
+                      <div className="shimmer md"></div>
+                    </td>
+                  </tr>
+                ))}
+                {!isLoading && errorMessage && allRows.length === 0 && (
+                  <tr>
+                    <td colSpan={9}>
+                      <div className={`${styles.noDatafound} noDataContent`}>
+                        <h4>Error</h4>
+                        <label>{errorMessage}</label>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                {!isLoading && !errorMessage && visibleRows.length === 0 && (
+                  <tr>
+                    <td colSpan={9}>
+                      <div className={`${styles.noDatafound} noDataContent`}>
+                        <h4>No records found</h4>
+                        <label>No rows found for selected filters.</label>
+                      </div>
+                    </td>
+                  </tr>
+                )}
+                {!errorMessage && visibleRows.map((row, index) => (
+                  <tr key={`${row.itemNumber}-${row.auditDate}-${index}`}>
+                      <td className={styles.checkboxCell}>
+                      <ThemeProvider theme={tableFilterTheme}>
+                          <Checkbox
+                            size="small"
+                            checked={selectedRows[getRowKey(row)] === true}
+                            onChange={(event) => handleRowSelection(row, event.target.checked)}
+                          />
+                      </ThemeProvider>
+                      </td>
+                      <td><p>{row.auditDate}</p></td>
+                      <td><p>{row.itemNumber}</p></td>
+                      <td><p>{row.itemName}</p></td>
+                      <td><p>{row.department}</p></td>
+                      <td><p>{row.upc}</p></td>
+                      <td><p>{row.regularPrice}</p></td>
+                      <td><p>{row.salePrice}</p></td>
+                      <td><p>{row.operatorId}</p></td>
+                  </tr>
+                ))}
+                {isLoading && allRows.length > 0 && (
+                  <tr>
+                    <td colSpan={9}><p>Loading more...</p></td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
         </div>
         <div className={styles.pagination}>
           <p>Total Rows: {visibleRows.length}</p>
