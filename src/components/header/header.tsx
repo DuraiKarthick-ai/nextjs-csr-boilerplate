@@ -59,7 +59,7 @@ export default function Header({ toggle, open }: HeaderProps) {
                     <Image src={logo} alt="web logo" width={160} height={40} priority loading="eager" />
                   </div>
                 </Link>
-                <h4>Replatform ERP</h4>
+                <h4>IBMi Replatforming</h4>
               </div>
               <div className={styles.userHelpInfoWrap}>
                 <ul className="d-flex flex-align-center">
