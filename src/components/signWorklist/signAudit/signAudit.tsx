@@ -419,152 +419,167 @@ export default function SignAuditSection() {
         </div>
 
         <div className={`${styles.tableWrap} ${hasMaxHeight ? styles.activeScroll : ""}`} onScroll={handleTableScroll}>
-          <div className={styles.tableHeader}>
-            <table className={styles.dataTable}>
-              <thead>
-                <tr>
-                  <th className={styles.checkboxCell}>
-                    <div className={styles.thContent}>
-                      <span>Select All</span>
-                      <ThemeProvider theme={tableFilterTheme}>
-                          <Checkbox
-                            size="small"
-                            checked={isAllVisibleSelected}
-                            onChange={(event) => handleSelectAllVisible(event.target.checked)}
-                          />
-                      </ThemeProvider>
-                    </div>
-                  </th>
-                  <th>
-                      <div className={styles.thContent}>
-                        <span>Date</span>
-                      </div>
-                  </th>
-                  <th>
-                      <div className={styles.thContent}>
-                        <span>Item #</span>
-                        <i className={styles.sortIcon} onClick={() => handleSort("itemNumber")}>{getSortIcon("itemNumber")}</i>
-                      </div>
-                  </th>
-                  <th>
-                      <div className={styles.thContent}>
-                        <span>Item Name</span>
-                        <i className={styles.sortIcon} onClick={() => handleSort("itemName")}>{getSortIcon("itemName")}</i>
-                      </div>
-                  </th>
-                  <th>
-                      <div className={styles.thContent}>
-                        <span>Dept</span>
-                      </div>
-                  </th>
-                  <th>
-                      <div className={styles.thContent}>
-                        <span>UPC</span>
-                      </div>
-                  </th>
-                  <th>
-                      <div className={styles.thContent}>
-                        <span>Regular Price</span>
-                      </div>
-                  </th>
-                  
-                  <th>
-                      <div className={styles.thContent}>
-                        <span>Sale Price</span>
-                      </div>
-                  </th>
-                  <th>
-                      <div className={styles.thContent}>
-                        <span>Operator</span>
-                      </div>
-                  </th>
-                </tr>
-              </thead>
-            </table>
-          </div>
-          
-          <div className={hasMaxHeight ? "tableData" : ""} id="tableBody">
-            <table className={styles.dataTable}>
-              <tbody>
-                {isLoading  && allRows.length === 0 && rows.map((row) => (
-                  <tr key={row}>
-                    <td className={styles.checkboxCell}>
-                      <div className="shimmer checkbox m-auto"></div>
-                    </td>
-                    <td>
-                      <div className="shimmer lg"></div>
-                    </td>
-                    <td>
-                      <div className="shimmer md"></div>
-                    </td>
-                    <td>
-                      <div className="shimmer md"></div>
-                    </td>
-                    <td>
-                      <div className="shimmer sm"></div>
-                    </td>
-                    <td>
-                      <div className="shimmer sm"></div>
-                    </td>
-                    <td>
-                      <div className="shimmer sm"></div>
-                    </td>
-                    <td>
-                      <div className="shimmer sm"></div>
-                    </td>
-                    <td>
-                      <div className="shimmer md"></div>
-                    </td>
-                  </tr>
-                ))}
-                {!isLoading && errorMessage && allRows.length === 0 && (
+          <div className={styles.auditTable}>
+            <div className={styles.tableWrap}>
+              <table className={styles.dataTable}>
+                <thead>
                   <tr>
-                    <td colSpan={9}>
-                      <div className={`${styles.noDatafound} noDataContent`}>
-                        <h4>Error</h4>
-                        <label>{errorMessage}</label>
+                    <th className={styles.checkboxCell}>
+                      <div className={styles.thContent}>
+                        <div className={styles.labelWrap}>
+                          <span>Select All</span>
+                          <ThemeProvider theme={tableFilterTheme}>
+                              <Checkbox
+                                size="small"
+                                checked={isAllVisibleSelected}
+                                onChange={(event) => handleSelectAllVisible(event.target.checked)}
+                              />
+                          </ThemeProvider>
+                        </div>
                       </div>
-                    </td>
-                  </tr>
-                )}
-                {!isLoading && !errorMessage && visibleRows.length === 0 && (
-                  <tr>
-                    <td colSpan={9}>
-                      <div className={`${styles.noDatafound} noDataContent`}>
-                        <h4>No records found</h4>
-                        <label>No rows found for selected filters.</label>
+                    </th>
+                    <th>
+                      <div className={styles.thContent}>
+                        <div className={styles.labelWrap}>
+                          <span>Date</span>
+                        </div>
                       </div>
-                    </td>
+                    </th>
+                    <th>
+                      <div className={styles.thContent}>
+                        <div className={styles.labelWrap}>
+                          <span>Item #</span>
+                          <i className={styles.sortIcon} onClick={() => handleSort("itemNumber")}>{getSortIcon("itemNumber")}</i>
+                        </div>
+                      </div>
+                    </th>
+                    <th>
+                      <div className={styles.thContent}>
+                        <div className={styles.labelWrap}>
+                          <span>Item Name</span>
+                          <i className={styles.sortIcon} onClick={() => handleSort("itemName")}>{getSortIcon("itemName")}</i>
+                        </div>
+                      </div>
+                    </th>
+                    <th>
+                      <div className={styles.thContent}>
+                        <div className={styles.labelWrap}>
+                          <span>Dept</span>
+                        </div>
+                      </div>
+                    </th>
+                    <th>
+                      <div className={styles.thContent}>
+                        <div className={styles.labelWrap}>
+                          <span>UPC</span>
+                        </div>
+                      </div>
+                    </th>
+                    <th>
+                      <div className={styles.thContent}>
+                        <div className={styles.labelWrap}>
+                          <span>Regular Price</span>
+                        </div>
+                      </div>
+                    </th>
+                    
+                    <th>
+                      <div className={styles.thContent}>
+                        <div className={styles.labelWrap}>
+                          <span>Sale Price</span>
+                        </div>
+                      </div>
+                    </th>
+                    <th>
+                      <div className={styles.thContent}>
+                        <div className={styles.labelWrap}>
+                          <span>Operator</span>
+                        </div>
+                      </div>
+                    </th>
                   </tr>
-                )}
-                {!errorMessage && visibleRows.map((row, index) => (
-                  <tr key={`${row.itemNumber}-${row.auditDate}-${index}`}>
+                </thead>
+                <tbody>
+                  {isLoading  && allRows.length === 0 && rows.map((row) => (
+                    <tr key={row}>
                       <td className={styles.checkboxCell}>
-                      <ThemeProvider theme={tableFilterTheme}>
-                          <Checkbox
-                            size="small"
-                            checked={selectedRows[getRowKey(row)] === true}
-                            onChange={(event) => handleRowSelection(row, event.target.checked)}
-                          />
-                      </ThemeProvider>
+                        <div className="shimmer checkbox m-auto"></div>
                       </td>
-                      <td><p>{row.auditDate}</p></td>
-                      <td><p>{row.itemNumber}</p></td>
-                      <td><p>{row.itemName}</p></td>
-                      <td><p>{row.department}</p></td>
-                      <td><p>{row.upc}</p></td>
-                      <td><p>{row.regularPrice}</p></td>
-                      <td><p>{row.salePrice}</p></td>
-                      <td><p>{row.operatorId}</p></td>
-                  </tr>
-                ))}
-                {isLoading && allRows.length > 0 && (
-                  <tr>
-                    <td colSpan={9}><p>Loading more...</p></td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                      <td>
+                        <div className="shimmer lg"></div>
+                      </td>
+                      <td>
+                        <div className="shimmer md"></div>
+                      </td>
+                      <td>
+                        <div className="shimmer md"></div>
+                      </td>
+                      <td>
+                        <div className="shimmer sm"></div>
+                      </td>
+                      <td>
+                        <div className="shimmer sm"></div>
+                      </td>
+                      <td>
+                        <div className="shimmer sm"></div>
+                      </td>
+                      <td>
+                        <div className="shimmer sm"></div>
+                      </td>
+                      <td>
+                        <div className="shimmer md"></div>
+                      </td>
+                    </tr>
+                  ))}
+                  {!isLoading && errorMessage && allRows.length === 0 && (
+                    <tr>
+                      <td colSpan={9}>
+                        <div className={`${styles.noDatafound} noDataContent`}>
+                          <h4>Error</h4>
+                          <label>{errorMessage}</label>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  {!isLoading && !errorMessage && visibleRows.length === 0 && (
+                    <tr>
+                      <td colSpan={9}>
+                        <div className={`${styles.noDatafound} noDataContent`}>
+                          <h4>No records found</h4>
+                          <label>No rows found for selected filters.</label>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                  {!errorMessage && visibleRows.map((row, index) => (
+                    <tr key={`${row.itemNumber}-${row.auditDate}-${index}`}>
+                        <td className={styles.checkboxCell}>
+                        <ThemeProvider theme={tableFilterTheme}>
+                            <Checkbox
+                              size="small"
+                              checked={selectedRows[getRowKey(row)] === true}
+                              onChange={(event) => handleRowSelection(row, event.target.checked)}
+                            />
+                        </ThemeProvider>
+                        </td>
+                        <td><p>{row.auditDate}</p></td>
+                        <td><p>{row.itemNumber}</p></td>
+                        <td><p>{row.itemName}</p></td>
+                        <td><p>{row.department}</p></td>
+                        <td><p>{row.upc}</p></td>
+                        <td><p>{row.regularPrice}</p></td>
+                        <td><p>{row.salePrice}</p></td>
+                        <td><p>{row.operatorId}</p></td>
+                    </tr>
+                  ))}
+                  {isLoading && allRows.length > 0 && (
+                    <tr>
+                      <td colSpan={9}><p>Loading more...</p></td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
 
         </div>
