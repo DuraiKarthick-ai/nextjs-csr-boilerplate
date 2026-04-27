@@ -151,7 +151,7 @@ export default function Dashboard() {
                         )}
                       </td>
                       <td>
-                        <div className="statusTag">
+                        <div className="statusTag minWidth">
                           <span>{activity.status}</span>
                         </div>
                       </td>
