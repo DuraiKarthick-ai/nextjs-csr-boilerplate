@@ -14,33 +14,15 @@
   
   .tableWrap {
     width: 100%;
-    // bottom fade effect
-
-    &.activeScroll {
-      position: relative;
-      &::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        height: 22px; // fade height
-        pointer-events: none;
-        background: linear-gradient(
-          to bottom,
-          rgba(255, 255, 255, 0),
-          rgba(255, 255, 255, 1)
-        );
-      }
-    }
+    max-height: 368px;
+    overflow: auto;
+    scrollbar-gutter: stable;
   }
 
   .dataTable {
     width: 100%;
-    min-width: 1200px;
     border-collapse: collapse;
     background-color: $white-color;
-    table-layout: fixed;
 
     thead {
       position: sticky;
@@ -53,17 +35,24 @@
           @include font-size(14px);
           font-weight: 500;
           color: $text-color;
-          padding: 12px 8px;
           text-align: left;
-          border: 1px solid $medium-gray;
           vertical-align: top;
           white-space: nowrap;
+
+          .thContent {
+            padding: 12px 8px;
+            border: 1px solid $medium-gray;
+          }
 
           &.checkboxCell {
             text-align: center;
 
-            .thContent {
+            .labelWrap {
               @include justify-content(center);
+            }
+
+            .thContent {
+              padding-bottom: 16px;
             }
           }
 
@@ -75,7 +64,7 @@
             width: 110px;
           }
 
-          .thContent {
+          .labelWrap {
             @include flex();
             @include align-items(center);
             margin-bottom: 8px;
@@ -153,14 +142,6 @@
             width: 50px;
             border-radius: 4px;
             background-color: $green-color;
-          }
-
-          &.tdDatePicker {
-            width: 140px;
-          }
-
-          &.tdCopies {
-            width: 110px;
           }
 
           .noDatafound {
