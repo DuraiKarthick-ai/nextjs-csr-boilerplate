@@ -1,7 +1,9 @@
 import Snackbar from "@mui/material/Snackbar";
 import Alert from "@mui/material/Alert";
-import { CheckCircleIcon } from "./icons";
+import { ThemeProvider } from "@mui/material/styles";
+import CheckIcon from '@mui/icons-material/Check';
 import { TOAST_AUTO_HIDE_MS } from "@/constants/print";
+import theme from "@/theme/customizeTheme";
 
 interface SuccessToastProps {
   /** Whether the toast is visible. */
@@ -21,30 +23,22 @@ interface SuccessToastProps {
  */
 export default function SuccessToast({ open, onClose, message }: SuccessToastProps): JSX.Element {
   return (
-    <Snackbar
-      open={open}
-      autoHideDuration={TOAST_AUTO_HIDE_MS}
-      onClose={onClose}
-      anchorOrigin={{ vertical: "top", horizontal: "right" }}
-      sx={{ position: "absolute", top: "10px", right: "10px" }}
-    >
-      <Alert
+    <ThemeProvider theme={theme}>
+      <Snackbar
+        open={open}
+        autoHideDuration={TOAST_AUTO_HIDE_MS}
         onClose={onClose}
-        severity="success"
-        variant="standard"
-        icon={<CheckCircleIcon />}
-        sx={{
-          backgroundColor: "#edf7ed",
-          color: "#1e4620",
-          border: "1px solid #c6e6c6",
-          borderRadius: "4px",
-          fontSize: "14px",
-          maxWidth: "320px",
-          "& .MuiAlert-message": { whiteSpace: "normal", wordBreak: "break-word" },
-        }}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
       >
-        {message}
-      </Alert>
-    </Snackbar>
+        <Alert
+          onClose={onClose}
+          severity="success"
+          variant="standard"
+          icon={<CheckIcon fontSize="inherit" />}
+        >
+          {message}
+        </Alert>
+      </Snackbar>
+    </ThemeProvider>
   );
 }
