@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import IndexRedirect from "@/pages/index";
 
 const mockReplace = jest.fn();
@@ -24,7 +24,9 @@ describe("Index page", () => {
    * Verifies that landing on / triggers a redirect to /dashboard.
    */
   it("redirects to /dashboard on mount", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     render(<IndexRedirect />);
 
     // Assert
@@ -32,13 +34,20 @@ describe("Index page", () => {
   });
 
   /**
-   * Verifies the redirect page renders nothing visible.
+   * Verifies the root page renders a health-check-safe response with a fallback link.
    */
-  it("renders nothing while redirecting", () => {
-    // Arrange & Act
-    const { container } = render(<IndexRedirect />);
+  it("renders fallback content while redirecting", () => {
+    // Arrange
+
+    // Act
+    render(<IndexRedirect />);
 
     // Assert
-    expect(container.innerHTML).toBe("");
+    expect(screen.getByRole("heading", { name: "Signs" })).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: "dashboard" })).toHaveAttribute(
+      "href",
+      "/dashboard",
+    );
+    expect(screen.getByText("Redirecting to the dashboard.")).toBeInTheDocument();
   });
 });
