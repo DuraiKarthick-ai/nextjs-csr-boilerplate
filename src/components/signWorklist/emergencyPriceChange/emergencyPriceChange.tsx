@@ -842,13 +842,6 @@ export default function EmergencyPriceChange(): JSX.Element {
             </tbody>
           </table>
         </div>
-
-        {/* <div className="tableData" id="tableBody">
-          <table className={styles.dataTable}>
-            
-          </table>
-        </div> */}
-
       </div>
 
       <div className={styles.pagination}>
