@@ -10,31 +10,37 @@
   ul {
     @include flex();
     @include align-items(center);
-    margin-left: -10px;
-    margin-right: -10px;
+    margin-left: -16px;
+    margin-right: -16px;
 
     li {
-      padding: 0 10px;
+      padding: 0 16px;
       width: calc(100% / 4);
     }
   }
 
   .quickLinksWrap {
-    @include flex();
-    @include align-items(center);
     padding: 36px 26px;
     border-radius: 10px;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    text-align: center;
 
-    label {
-      @include font-size(18px);
-      line-height: 22px;
-      font-weight: 500;
-      color: $dark-blue-color;
+    .icons {
+      @include flex();
+      @include justify-content(center);
+      background-color: $primary-color;
+      border-radius: 30px;
+      width: 49px;
+      margin: auto;
+      padding: 14px 0;
     }
 
-    i {
-      margin-right: 10px;
+    label {
+      @include font-size(16px);
+      line-height: 20px;
+      color: $primary-color;
+      display: block;
+      padding-top: 10px;
     }
   }
 }
