@@ -268,11 +268,3 @@ label.label {
     background-position: -100% 0;
   }
 }
-
-
-.tableData {
-  max-height: 326px;   /* ✅ table body height */
-  overflow-y: auto;    /* ✅ vertical scroll */
-  margin-right: -16px;
-}
-

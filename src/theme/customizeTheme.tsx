@@ -203,6 +203,22 @@ const theme = createTheme({
         },
       },
     },
+    MuiAlert: {
+      styleOverrides: {
+        standardSuccess: {
+          backgroundColor: "#edf7ed",
+          color: "#1e4620",
+          border: "1px solid #c6e6c6",
+          borderRadius: "4px",
+          fontSize: "14px",
+          maxWidth: "400px",
+          "& .MuiAlert-message": {
+            whiteSpace: "normal",
+            wordBreak: "break-word",
+          },
+        },
+      },
+    },
   }
 });
 
