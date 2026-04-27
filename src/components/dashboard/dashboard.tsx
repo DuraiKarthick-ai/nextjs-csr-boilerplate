@@ -74,7 +74,9 @@ export default function Dashboard() {
           <li>
             <Link href="/quickSign">
               <div className={styles.quickLinksWrap}>
-                <i><QuickPrintIcon /></i>
+                <div className={styles.icons}>
+                  <i><QuickPrintIcon /></i>
+                </div>
                 <label>Quick Print</label>
               </div>
             </Link>
@@ -82,7 +84,9 @@ export default function Dashboard() {
           <li>
             <Link href="/customSign">
               <div className={styles.quickLinksWrap}>
-                <i><CustomPrintIcon /></i>
+                <div className={styles.icons}>
+                  <i><CustomPrintIcon /></i>
+                </div>
                 <label>Custom Sign</label>
               </div>
             </Link>
