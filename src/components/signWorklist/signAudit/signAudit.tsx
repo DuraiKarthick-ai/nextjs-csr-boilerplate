@@ -1,5 +1,5 @@
 import { ThemeProvider } from "@emotion/react";
-import { Checkbox, FormControl, MenuItem, Select } from "@mui/material";
+import { Checkbox, FormControl, MenuItem, Select} from "@mui/material";
 import {
   useCallback,
   useEffect,
@@ -426,75 +426,56 @@ export default function SignAuditSection() {
                   <tr>
                     <th className={styles.checkboxCell}>
                       <div className={styles.thContent}>
-                        <div className={styles.labelWrap}>
-                          <span>Select All</span>
-                          <ThemeProvider theme={tableFilterTheme}>
-                              <Checkbox
-                                size="small"
-                                checked={isAllVisibleSelected}
-                                onChange={(event) => handleSelectAllVisible(event.target.checked)}
-                              />
-                          </ThemeProvider>
-                        </div>
+                        <span>Select All</span>
+                        <ThemeProvider theme={tableFilterTheme}>
+                            <Checkbox
+                              size="small"
+                              checked={isAllVisibleSelected}
+                              onChange={(event) => handleSelectAllVisible(event.target.checked)}
+                            />
+                        </ThemeProvider>
                       </div>
                     </th>
                     <th>
                       <div className={styles.thContent}>
-                        <div className={styles.labelWrap}>
-                          <span>Date</span>
-                        </div>
+                        <span>Date</span>
                       </div>
                     </th>
                     <th>
                       <div className={styles.thContent}>
-                        <div className={styles.labelWrap}>
-                          <span>Item #</span>
-                          <i className={styles.sortIcon} onClick={() => handleSort("itemNumber")}>{getSortIcon("itemNumber")}</i>
-                        </div>
+                        <span>Item #</span>
+                        <i className={styles.sortIcon} onClick={() => handleSort("itemNumber")}>{getSortIcon("itemNumber")}</i>
                       </div>
                     </th>
                     <th>
                       <div className={styles.thContent}>
-                        <div className={styles.labelWrap}>
-                          <span>Item Name</span>
-                          <i className={styles.sortIcon} onClick={() => handleSort("itemName")}>{getSortIcon("itemName")}</i>
-                        </div>
+                        <span>Item Name</span>
+                        <i className={styles.sortIcon} onClick={() => handleSort("itemName")}>{getSortIcon("itemName")}</i>
                       </div>
                     </th>
                     <th>
                       <div className={styles.thContent}>
-                        <div className={styles.labelWrap}>
-                          <span>Dept</span>
-                        </div>
+                        <span>Dept</span>
                       </div>
                     </th>
                     <th>
                       <div className={styles.thContent}>
-                        <div className={styles.labelWrap}>
-                          <span>UPC</span>
-                        </div>
+                        <span>UPC</span>
                       </div>
                     </th>
                     <th>
                       <div className={styles.thContent}>
-                        <div className={styles.labelWrap}>
-                          <span>Regular Price</span>
-                        </div>
-                      </div>
-                    </th>
-                    
-                    <th>
-                      <div className={styles.thContent}>
-                        <div className={styles.labelWrap}>
-                          <span>Sale Price</span>
-                        </div>
+                        <span>Regular Price</span>
                       </div>
                     </th>
                     <th>
                       <div className={styles.thContent}>
-                        <div className={styles.labelWrap}>
-                          <span>Operator</span>
-                        </div>
+                        <span>Sale Price</span>
+                      </div>
+                    </th>
+                    <th>
+                      <div className={styles.thContent}>
+                        <span>Operator</span>
                       </div>
                     </th>
                   </tr>
