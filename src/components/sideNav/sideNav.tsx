@@ -77,7 +77,7 @@ export default function SideNav({ activeView, onNavigate }: SideNavProps) {
               <span>Signs Management</span>
               <i>{downArrow}</i>
             </button>
-            {isMenuOpen && <ul className={styles.subMenu}>
+            <ul className={`${styles.subMenu} ${isMenuOpen ? styles.subMenuOpen : ""}`}>
               <li>
                 <button
                   className={activeView === "dashboard" ? styles.activeSubItem : ""}
@@ -110,7 +110,7 @@ export default function SideNav({ activeView, onNavigate }: SideNavProps) {
                   <span>Sign Worklist</span>
                 </button>
               </li>
-            </ul>}
+            </ul>
           </li>
         </ul>
       </nav>
