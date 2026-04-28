@@ -5,7 +5,6 @@ import { ThemeProvider } from "@mui/material/styles";
 import { Autocomplete, CircularProgress, FormControl, MenuItem, Select } from "@mui/material";
 import theme from "@/theme/customizeTheme";
 import SuccessToast from "../../shared/SuccessToast";
-import { AddFieldIcon } from "../../shared/icons";
 import { usePrint } from "@/hooks/usePrint";
 import { DEFAULT_STORE_ID, DEFAULT_REQUESTED_BY } from "@/constants/print";
 import type { ByItemEntry, ByDepartmentCategoryEntry, PrintRequestPayload } from "@/types/print";
@@ -165,8 +164,20 @@ export default function QuickPrintItem(): JSX.Element {
    * Adds one blank item row when all current rows are filled, up to MAX_ROW_COUNT.
    */
   const addItemRow = (): void => {
-    if (!allRowsFilled() || itemRows.length >= MAX_ROW_COUNT) return;
+    if (itemRows.length >= MAX_ROW_COUNT) return;
     setItemRows((prev) => [...prev, { itemNumberOrUpc: "", quantity: "1", selectedItem: null }]);
+  };
+
+  /**
+   * Handles focus on the last item input field.
+   * Automatically adds a new row when the user focuses on the last row.
+   *
+   * @param {number} index - Row index being focused.
+   */
+  const handleItemFocus = (index: number): void => {
+    if (index === itemRows.length - 1 && itemRows.length < MAX_ROW_COUNT) {
+      addItemRow();
+    }
   };
 
   /**
@@ -344,9 +355,9 @@ export default function QuickPrintItem(): JSX.Element {
                       inputProps={{ "aria-label": "Select Size" }}
                     >
                       <MenuItem value="" disabled>Select Any</MenuItem>
-                      <MenuItem value={10}>Small</MenuItem>
-                      <MenuItem value={20}>Medium</MenuItem>
-                      <MenuItem value={30}>Large</MenuItem>
+                      <MenuItem value="SMALL">S-Small</MenuItem>
+                      <MenuItem value="MEDIUM">M-Medium</MenuItem>
+                      <MenuItem value="LARGE">L-Large</MenuItem>
                     </Select>
                   </FormControl>
                 </ThemeProvider>
@@ -359,7 +370,7 @@ export default function QuickPrintItem(): JSX.Element {
             {itemRows.map((row, index) => (
               <li key={`item-${index}`} className={styles.itemRow}>
                 <div className={`inputLabelWrap ${styles.itemField}`}>
-                  {index === 0 && <label className="label">Item # / UPC</label>}
+                  {index === 0 && <label className={`label ${invalidRows.has(index) ? 'errorLabel' : ""}`}>Item # / UPC</label>}
                   <ThemeProvider theme={theme}>
                     <Autocomplete<ItemSearchResult>
                       options={searchOptions[index] || []}
@@ -387,6 +398,7 @@ export default function QuickPrintItem(): JSX.Element {
                           helperText={getItemHelperText(index)}
                           color={printedRows.has(index) ? "success" : undefined}
                           FormHelperTextProps={printedRows.has(index) ? { sx: { color: "green" } } : undefined}
+                          onFocus={() => handleItemFocus(index)}
                           onPaste={(e) => handlePaste(e, index)}
                           InputProps={{
                             ...params.InputProps,
@@ -416,11 +428,6 @@ export default function QuickPrintItem(): JSX.Element {
                     />
                   </ThemeProvider>
                 </div>
-                {index === itemRows.length - 1 && allRowsFilled() && itemRows.length < MAX_ROW_COUNT && (
-                  <div className={styles.addField}>
-                    <i onClick={addItemRow}><AddFieldIcon /></i>
-                  </div>
-                )}
               </li>
             ))}
           </ul>
