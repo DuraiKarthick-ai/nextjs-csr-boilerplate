@@ -9,6 +9,7 @@
    .contentWrapper {
      @include flex();
      width: 100%;
+     overflow: hidden;
    }
 }
 
@@ -16,6 +17,17 @@
   width: 290px;
   min-width: 290px;
   flex-shrink: 0;
+  transform: translateX(0);
+  opacity: 1;
+  visibility: visible;
+  margin-left: 0;
+  transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, margin-left 0.3s ease-in-out, visibility 0.3s ease-in-out;
+
+  // Prevent content from shrinking during animation
+  > * {
+    width: 290px;
+    min-width: 290px;
+  }
 }
 
 .main {
@@ -24,12 +36,17 @@
   padding: 20px;
   height: 100%;
   background-color: $white-color;
+  transition: all 0.3s ease-in-out;
 }
 
 .navFolded {
 
   .sidebar {
-    display: none;
+    transform: translateX(-290px);
+    opacity: 0;
+    visibility: hidden;
+    margin-left: -290px;
+    transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out, margin-left 0.3s ease-in-out, visibility 0.3s ease-in-out;
   }
 
   .borderTop {

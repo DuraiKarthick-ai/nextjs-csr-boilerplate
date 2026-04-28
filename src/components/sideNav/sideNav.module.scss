@@ -50,6 +50,10 @@
           }
         }
 
+        > li > button i {
+          transition: transform 0.3s ease-in-out;
+        }
+
         > button:hover {
           background-color: $sideNavActive;
           border-left: 3px solid $white-color;
@@ -57,6 +61,15 @@
       }
 
       &.subMenu {
+        max-height: 0;
+        overflow: hidden;
+        opacity: 0;
+        transition: max-height 0.3s ease-in-out, opacity 0.3s ease-in-out;
+
+        &.subMenuOpen {
+          max-height: 500px;
+          opacity: 1;
+        }
 
         button.activeSubItem {
           background-color: $sideNavActive;
