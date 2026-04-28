@@ -50,12 +50,13 @@
     width: 100%;
     max-height: 368px;
     overflow: auto;
-    scrollbar-gutter: stable;
   }
 
   .dataTable {
     width: 100%;
-    border-collapse: collapse;
+    min-width: 1440px;
+    border-collapse: separate;
+    border-spacing: 0;
     background-color: $white-color;
 
     thead {
@@ -63,6 +64,10 @@
       top: 0;
       z-index: 10;
       background-color: $white-color;
+
+      transform: translateZ(0);
+      will-change: transform;
+      backface-visibility: hidden;
 
       tr {
         th {
@@ -73,12 +78,23 @@
           vertical-align: middle;
           white-space: nowrap;
 
+          padding: 12px 8px;
+          border: 1px solid $medium-gray;
+
+          // &:first-child {
+          //   .thContent {
+          //     border-left: 1px solid $medium-gray;
+          //   }
+          // }
+
           .thContent {
-            padding: 12px 8px;
-            border: 1px solid $medium-gray;
+            // padding: 12px 8px;
+            // border-top: 1px solid $medium-gray;
+            // border-right: 1px solid $medium-gray;
+            // border-bottom: 1px solid $medium-gray;
             @include flex();
             @include align-items(center);
-            min-height: 58px;
+            // min-height: 58px;
           }
 
           &.checkboxCell {
@@ -197,6 +213,71 @@
 
     p {
       margin-top: 8px;
+    }
+  }
+}
+
+
+.UItable {
+
+  table {
+
+    thead {
+      // position: sticky;
+      // top: 0;
+      // z-index: 10;
+      // background-color: $white-color;
+
+      tr {
+        th {
+          // padding: 12px 8px;
+          // border: 1px solid $medium-gray;
+        }
+      }
+    }
+
+    tbody {
+      tr {
+        // &:nth-child(even) {
+        //   background-color: #fafafa;
+        // }
+  
+        td {
+          // padding: 12px 8px;
+          // border-bottom: 1px solid #eee;
+  
+          p {
+            @include font-size(14px);
+            font-weight: 400;
+            color: $text-color;
+          }
+        }
+      }
+    }
+  }
+
+  .labelWrap {
+    @include flex();
+    @include align-items(center);
+    @include font-size(14px);
+    font-weight: 500;
+    color: $text-color;
+    text-align: left;
+    vertical-align: middle;
+    white-space: nowrap;
+
+    &.checkboxCellWrap {
+      @include justify-content(center);
+    }
+
+    span {
+      display: block;
+    }
+
+    .sortIcon {
+      min-width: 10px;
+      cursor: pointer;
+      margin-left: 6px;
     }
   }
 }

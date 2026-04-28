@@ -219,6 +219,53 @@ const theme = createTheme({
         },
       },
     },
+    
+    MuiTable: {
+      styleOverrides: {
+        root: {
+          borderCollapse: "separate",
+          borderSpacing: 0,
+        },
+      },
+    },
+
+    MuiTableHead: {
+      styleOverrides: {
+        root: {
+          position: "sticky",
+          top: 0,
+          zIndex: 10,
+          backgroundColor: "#ffffff",
+          transform: "translateZ(0)",
+          willChange: "transform",
+          backfaceVisibility: "hidden",
+        },
+      },
+    },
+
+    MuiTableCell: {
+      styleOverrides: {
+        head: {
+          padding: "12px 8px",
+          border: "1px solid #EEEEEE",
+        },
+        body: {
+          padding: "12px 8px",
+          borderBottom: "1px solid #EEEEEE",
+        },
+      },
+    },
+
+    MuiTableBody: {
+      styleOverrides: {
+        root: {
+          "& .MuiTableRow-root:nth-of-type(even)": {
+            backgroundColor: "#fafafa",
+          },
+        },
+      },
+    },
+
   }
 });
 

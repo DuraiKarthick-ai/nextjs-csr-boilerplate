@@ -1,5 +1,6 @@
 import { ThemeProvider } from "@emotion/react";
-import { Checkbox, FormControl, MenuItem, Select } from "@mui/material";
+import theme from "@/theme/customizeTheme";
+import { Checkbox, FormControl, MenuItem, Select, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import {
   useCallback,
   useEffect,
@@ -587,6 +588,106 @@ export default function SignAuditSection() {
           <p>Total Rows: {visibleRows.length}</p>
           <p>Selected: {selectedCount}</p>
         </div>
+
+        <ThemeProvider theme={theme}>
+          <div className={styles.UItable}>
+            <TableContainer sx={{ maxHeight: 368 }}>
+
+              <Table stickyHeader sx={{ minWidth: 1440 }} aria-label="sticky table">
+
+                <TableHead>
+                  <TableRow>
+                    <TableCell align="center">
+                      <div className={`${styles.labelWrap} ${styles.checkboxCellWrap}`}>
+                        <span>Select All</span>
+                        <ThemeProvider theme={tableFilterTheme}>
+                            <Checkbox
+                              size="small"
+                              checked={isAllVisibleSelected}
+                              onChange={(event) => handleSelectAllVisible(event.target.checked)}
+                            />
+                        </ThemeProvider>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className={styles.labelWrap}>
+                        <span>Date</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className={styles.labelWrap}>
+                        <span>Item #</span>
+                        <i className={styles.sortIcon} onClick={() => handleSort("itemNumber")}>{getSortIcon("itemNumber")}</i>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className={styles.labelWrap}>
+                          <span>Item Name</span>
+                          <i className={styles.sortIcon} onClick={() => handleSort("itemName")}>{getSortIcon("itemName")}</i>
+                        </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className={styles.labelWrap}>
+                        <span>Dept</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className={styles.labelWrap}>
+                        <span>UPC</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className={styles.labelWrap}>
+                        <span>Regular Price</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className={styles.labelWrap}>
+                        <span>Sale Price</span>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className={styles.labelWrap}>
+                        <span>Operator</span>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                </TableHead>
+
+                <TableBody>
+                  {!errorMessage && visibleRows.map((row, index) => (
+                    <TableRow key={`${row.itemNumber}-${row.auditDate}-${index}`}>
+                      <TableCell align="center" component="th" scope="row">
+                        <ThemeProvider theme={tableFilterTheme}>
+                          <Checkbox
+                            size="small"
+                            checked={selectedRows[getRowKey(row)] === true}
+                            onChange={(event) => handleRowSelection(row, event.target.checked)}
+                          />
+                        </ThemeProvider>
+                      </TableCell>
+                      <TableCell><p>{row.auditDate}</p></TableCell>
+                      <TableCell><p>{row.itemNumber}</p></TableCell>
+                      <TableCell><p>{row.itemName}</p></TableCell>
+                      <TableCell><p>{row.department}</p></TableCell>
+                      <TableCell><p>{row.upc}</p></TableCell>
+                      <TableCell><p>{row.regularPrice}</p></TableCell>
+                      <TableCell><p>{row.salePrice}</p></TableCell>
+                      <TableCell><p>{row.operatorId}</p></TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+
+              </Table>
+
+            </TableContainer>
+            <div className={styles.pagination}>
+              <p>Total Rows: {visibleRows.length}</p>
+              <p>Selected: {selectedCount}</p>
+            </div>
+          </div>
+        </ThemeProvider>
+
 
         <div className={styles.buttonWrap}>
           <ul>
