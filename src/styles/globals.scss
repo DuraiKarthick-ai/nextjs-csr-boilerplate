@@ -54,11 +54,16 @@ label.label {
   line-height: 20px;
   padding-bottom: 6px;
   display: inline-block;
-
+  
+  &.errorLabel {
+    color: $red-color;
+  }
+  
   .astrik {
     color: $red-color;
     margin-left: 2px;
   }
+
 
   .mandatoryStar {
     color: $red-color;

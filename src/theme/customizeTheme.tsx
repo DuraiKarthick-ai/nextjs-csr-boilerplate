@@ -23,6 +23,22 @@ const theme = createTheme({
             border: "none",
             borderBottom: "2px solid #005DAB", // Bottom border on focus (Costco blue)
           },
+
+          // Error state - red border bottom
+          "&.Mui-error .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+            borderBottom: "2px solid #C00000", // Red border on error
+          },
+
+          "&.Mui-error:hover .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+            borderBottom: "2px solid #C00000",
+          },
+
+          "&.Mui-error.Mui-focused .MuiOutlinedInput-notchedOutline": {
+            border: "none",
+            borderBottom: "2px solid #C00000",
+          },
         },
 
         input: {
@@ -75,6 +91,26 @@ const theme = createTheme({
         icon: {
           color: "#005DAB", // Blue dropdown arrow
           right: "8px",
+        },
+      },
+    },
+    MuiFormHelperText: {
+      styleOverrides: {
+        root: {
+          marginLeft: 0,
+          marginTop: "4px",
+          "&.Mui-error": {
+            color: "#C00000",
+          },
+        },
+      },
+    },
+    MuiInputLabel: {
+      styleOverrides: {
+        root: {
+          "&.Mui-error": {
+            color: "#C00000",
+          },
         },
       },
     },
