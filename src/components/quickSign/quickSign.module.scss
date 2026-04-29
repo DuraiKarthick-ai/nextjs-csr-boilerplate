@@ -3,7 +3,7 @@
 @use "../../styles/breakpoint" as *;
 
 .groupBox {
-  padding: 30px 24px;
+  padding: 36px 24px;
   border: 1px solid $medium-gray;
   border-radius: 10px;
 
@@ -50,7 +50,7 @@
 }
 
 .tabsHeading {
-  padding-bottom: 26px;
+  padding-bottom: 16px;
 
   ul {
     @include flex();
@@ -86,5 +86,24 @@
         }
       }
     }
+  }
+}
+
+.tabsContent {
+  padding: 16px 0;
+  
+  .contentWrap {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

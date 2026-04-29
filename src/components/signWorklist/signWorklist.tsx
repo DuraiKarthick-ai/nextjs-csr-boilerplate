@@ -31,7 +31,6 @@ export default function SignWorklist(): JSX.Element {
   return (
     <ContentWrapper title="Signs Management">
       <div className={styles.signManagement}>
-
         <div className={styles.tabsHeading}>
           <ul>
             <li>
@@ -76,17 +75,33 @@ export default function SignWorklist(): JSX.Element {
         <div className={styles.tabsContent}>
 
           {/* EMERGENCY PRICE CHANGE */}
-          {active === "price" && <EmergencyPriceChange></EmergencyPriceChange>}
+          {active === "price" && (
+            <div className={styles.contentWrap}>
+              <EmergencyPriceChange></EmergencyPriceChange>
+            </div>
+          )}
 
           {/* END CAP */}
-          {active === "endcap" && <Endcap></Endcap>}
+          {active === "endcap" && (
+            <div className={styles.contentWrap}>
+              <Endcap></Endcap>
+            </div>
+          )}
 
           {/* ITEM NAME CHANGE */}
-          {active === "item" && <ItemNameChange></ItemNameChange>}
+          {active === "item" && (
+            <div className={styles.contentWrap}>
+              <ItemNameChange></ItemNameChange>
+            </div>
+          )}
 
           {/* SIGN AUDIT */}
-          {active === "audit" && <SignAuditSection></SignAuditSection>}
-
+          {active === "audit" && (
+            <div className={styles.contentWrap}>
+              <SignAuditSection></SignAuditSection>
+            </div>
+          )}
+          
         </div>
       </div>
     </ContentWrapper>
