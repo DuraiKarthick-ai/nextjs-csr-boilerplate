@@ -772,6 +772,17 @@ export default function EmergencyPriceChange(): JSX.Element {
                 </tr>
               )}
 
+              {!isLoading && errorMessage && visibleRows.length === 0 && (
+                <tr>
+                  <td colSpan={13}>
+                    <div className={`${styles.noDatafound} noDataContent`}>
+                      <h4>Error</h4>
+                      <label>{errorMessage}</label>
+                    </div>
+                  </td>
+                </tr>
+              )}
+
               {!errorMessage && visibleRows.map((row) => (
                 <tr key={getRowKey(row)}>
                   <td className={styles.checkboxCell}>
@@ -852,7 +863,12 @@ export default function EmergencyPriceChange(): JSX.Element {
       <div className={styles.buttonWrap}>
         <ul>
           <li>
-            <button className="primaryButtonOutline">Preview</button>
+            <button 
+              className="primaryButtonOutline"
+              disabled={selectedCount !== 1}
+            >
+              Preview
+            </button>
           </li>
           <li>
             <button

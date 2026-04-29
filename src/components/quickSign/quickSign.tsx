@@ -34,15 +34,23 @@ export default function QuickSign() {
           </ul>
         </div>
 
-        {/* Ouick Print Item */}
-        {active === "item" && (
-          <QuickPrintItem></QuickPrintItem>
-        )}
+        <div className={styles.tabsContent}>
 
-        {/* Ouick Print Department & Category */}
-        {active === "dept" && (
-          <QuickPrintDepartmentCategory></QuickPrintDepartmentCategory>
-        )}
+          {/* Ouick Print Item */}
+          {active === "item" && (
+            <div className={styles.contentWrap}>
+              <QuickPrintItem></QuickPrintItem>
+            </div>
+          )}
+
+          {/* Ouick Print Department & Category */}
+          {active === "dept" && (
+            <div className={styles.contentWrap}>
+              <QuickPrintDepartmentCategory></QuickPrintDepartmentCategory>
+            </div>
+          )}
+
+        </div>
 
       </div>
     </ContentWrapper>
