@@ -66,6 +66,11 @@ function validateApiUrl(url: string): string {
 
   try {
     const origin = new URL(url).origin;
+    if (!isDev && origin.includes("localhost")) {
+      console.warn("[apiClient] Ignoring localhost API base URL in production");
+      return "";
+    }
+
     if (!ALLOWED_API_ORIGINS.some((a) => origin === a || url.startsWith(a))) {
       throw new Error(`API URL not in allowlist: ${origin}`);
     }
@@ -95,6 +100,11 @@ const apiClient: AxiosInstance = axios.create({
 
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
+    // Keep Next.js internal API calls on the current host in deployed environments.
+    if (typeof config.url === "string" && config.url.startsWith("/api/")) {
+      config.baseURL = "";
+    }
+
     try {
       const getToken = await resolveGetToken();
       const token = await getToken();
