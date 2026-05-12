@@ -65,7 +65,7 @@ export default function QuickPrintDepartmentCategory() {
               </div>
             </li>
             <li>
-              <div className="inputLabelWrap">
+              <div className={`inputLabelWrap ${styles.qtyField}`}>
                 <label className="label">Quantity</label>
                 <ThemeProvider theme={theme}>
                   <TextField id="filled-basic" fullWidth size="small" placeholder="Enter Quantity" variant="outlined" />

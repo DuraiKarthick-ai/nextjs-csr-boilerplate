@@ -217,7 +217,7 @@ export default function CustomPrint(): JSX.Element {
                     </div>
                 </li>
                 <li>
-                  <div className="inputLabelWrap">
+                  <div className={`inputLabelWrap ${styles.qtyField}`}>
                     <label className="label">Quantity</label>
                     <ThemeProvider theme={theme}>
                       <TextField
