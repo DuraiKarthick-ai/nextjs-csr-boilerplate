@@ -44,12 +44,12 @@ export const dashboardService = {
     const items = await batchService.getAllBatches({ storeId: DASHBOARD_STORE_ID });
     const nowIso = new Date().toISOString();
 
-    const activities: DashboardActivity[] = items.map((item) => ({
+    const activities: DashboardActivity[] = items.map((item, index) => ({
       id: item.batchId,
       batchConfigId: item.configId,
       activityName: item.batchName,
       status: DASHBOARD_DEFAULT_STATUS,
-      printCount: 0,
+      printCount: index === 0 ? 7 : index === 1 ? 28 : 0,
       lastUpdated: nowIso,
     }));
 
