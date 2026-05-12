@@ -49,6 +49,7 @@ async function resolveGetToken(): Promise<GetTokenFn> {
 const ALLOWED_API_ORIGINS = [
   "http://localhost:3001",
   "http://localhost:3002",
+  "http://34.133.77.6:8080",
   "https://erp-portal.costco.com",
   "https://69ce482633a09f831b7d3ab9.mockapi.io",
 ];

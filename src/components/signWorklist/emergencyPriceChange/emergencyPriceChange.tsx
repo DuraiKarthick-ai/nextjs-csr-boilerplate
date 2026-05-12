@@ -22,6 +22,7 @@ import type {
   EmergencyPriceChangeRequestPayload,
   EmergencyPriceChangeResponseItem,
 } from "@/types/emergencyPriceChange";
+import type { BatchDetailItem } from "@/types/batch";
 import SuccessToast from "@/components/shared/SuccessToast";
 import styles from "./emergencyPriceChange.module.scss";
 
@@ -53,7 +54,6 @@ type SortKey =
   | "itemName"
   | "department"
   | "category"
-  | "upc"
   | "onHand"
   | "quantity"
   | "changeReason"
@@ -92,7 +92,51 @@ function mapEmergencyPriceChangeRows(
   }));
 }
 
-export default function EmergencyPriceChange(): JSX.Element {
+/**
+ * Maps batch-detail API rows to Emergency Price Change table rows.
+ */
+function mapBatchDetailRowsToEmergencyRows(
+  items: BatchDetailItem[]
+): EmergencyPriceChangeTableRow[] {
+  return items.map((item) => {
+    const validFrom = item["Valid From"];
+    const itemNumber = item["Item Number"];
+    const itemName = item["Item Name"];
+    const department = item["Dept"];
+    const category = item["Category"];
+    const changeReason = item["Change Reason"];
+    const isPrinted = item["isPrinted"];
+
+    const validFromText = typeof validFrom === "string" ? validFrom : "";
+    const parsedDate = dayjs(validFromText, ["MM/DD/YYYY", "YYYY-MM-DD"], true);
+    const normalizedDate = parsedDate.isValid()
+      ? parsedDate.format("YYYY-MM-DD")
+      : dayjs().format("YYYY-MM-DD");
+
+    return {
+      auditDate: parsedDate.isValid() ? parsedDate.format("MM/DD/YYYY") : "-",
+      auditDateRaw: normalizedDate,
+      itemNumber: itemNumber === null || itemNumber === undefined ? "-" : String(itemNumber),
+      itemName: itemName === null || itemName === undefined ? "-" : String(itemName),
+      department: department === null || department === undefined ? "-" : String(department),
+      category: category === null || category === undefined ? "-" : String(category),
+      upc: "-",
+      onHand: "-",
+      quantity: 1,
+      changeReason:
+        changeReason === null || changeReason === undefined ? "-" : String(changeReason),
+      signSize: "S",
+      copies: 1,
+      printStatus: isPrinted === true ? "Printed" : "Pending",
+    };
+  });
+}
+
+interface EmergencyPriceChangeProps {
+  batchDetailRows?: BatchDetailItem[];
+}
+
+export default function EmergencyPriceChange({ batchDetailRows }: EmergencyPriceChangeProps): JSX.Element {
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("ASC");
   const [allRows, setAllRows] = useState<EmergencyPriceChangeTableRow[]>([]);
@@ -102,7 +146,6 @@ export default function EmergencyPriceChange(): JSX.Element {
   const [departmentFilter, setDepartmentFilter] = useState<string>("");
   const [categoryFilter, setCategoryFilter] = useState<string>("");
   const [printStatusFilter, setPrintStatusFilter] = useState<string>("");
-  const [upcFilter, setUpcFilter] = useState<string>("");
   const [onHandFilter, setOnHandFilter] = useState<string>("");
   const [quantityFilter, setQuantityFilter] = useState<string>("");
   const [changeReasonFilter, setChangeReasonFilter] = useState<string>("");
@@ -147,6 +190,10 @@ export default function EmergencyPriceChange(): JSX.Element {
    * Loads a single API page and appends it to the dataset.
    */
   const loadPage = useCallback(async (pageToLoad: number): Promise<void> => {
+    if (batchDetailRows && batchDetailRows.length > 0) {
+      return;
+    }
+
     if (isFetchingRef.current || !hasMoreRef.current) return;
 
     isFetchingRef.current = true;
@@ -184,11 +231,30 @@ export default function EmergencyPriceChange(): JSX.Element {
       isFetchingRef.current = false;
       setIsLoading(false);
     }
-  }, []);
+  }, [batchDetailRows]);
 
   useEffect(() => {
+    if (batchDetailRows && batchDetailRows.length > 0) {
+      const mappedRows = mapBatchDetailRowsToEmergencyRows(batchDetailRows);
+      currentPageRef.current = FIRST_PAGE;
+      hasMoreRef.current = false;
+      setHasMore(false);
+      setErrorMessage("");
+      setAllRows(mappedRows);
+      return;
+    }
+
+    if (batchDetailRows && batchDetailRows.length === 0) {
+      setAllRows([]);
+      setHasMore(false);
+      hasMoreRef.current = false;
+      return;
+    }
+
+    hasMoreRef.current = true;
+    setHasMore(true);
     void loadPage(FIRST_PAGE);
-  }, [loadPage]);
+  }, [batchDetailRows, loadPage]);
 
   /**
    * Fetches next page on table scroll near bottom.
@@ -224,14 +290,13 @@ export default function EmergencyPriceChange(): JSX.Element {
       const deptMatches = departmentFilter ? row.department === departmentFilter : true;
       const catMatches = categoryFilter ? row.category === categoryFilter : true;
       const printMatches = printStatusFilter ? row.printStatus === printStatusFilter : true;
-      const upcMatches = upcFilter ? row.upc === upcFilter : true;
       const onHandMatches = onHandFilter ? row.onHand === onHandFilter : true;
       const quantityMatches = quantityFilter ? String(row.quantity) === quantityFilter : true;
       const changeReasonMatches = changeReasonFilter ? row.changeReason === changeReasonFilter : true;
       const signSizeMatches = signSizeFilter ? (row.signSize ?? "") === signSizeFilter : true;
       const effectiveCopies = rowCopies[getRowKey(row)] ?? row.copies;
       const copiesMatches = copiesFilter ? String(effectiveCopies) === copiesFilter : true;
-      return dateMatches && itemMatches && itemNameMatches && deptMatches && catMatches && printMatches && upcMatches && onHandMatches && quantityMatches && changeReasonMatches && signSizeMatches && copiesMatches;
+      return dateMatches && itemMatches && itemNameMatches && deptMatches && catMatches && printMatches && onHandMatches && quantityMatches && changeReasonMatches && signSizeMatches && copiesMatches;
     });
 
     if (sortKey) {
@@ -251,7 +316,7 @@ export default function EmergencyPriceChange(): JSX.Element {
     }
 
     return filteredRows;
-  }, [allRows, dateFilter, itemNumberFilter, itemNameFilter, departmentFilter, categoryFilter, printStatusFilter, upcFilter, onHandFilter, quantityFilter, changeReasonFilter, signSizeFilter, copiesFilter, rowCopies, sortKey, sortOrder]);
+  }, [allRows, dateFilter, itemNumberFilter, itemNameFilter, departmentFilter, categoryFilter, printStatusFilter, onHandFilter, quantityFilter, changeReasonFilter, signSizeFilter, copiesFilter, rowCopies, sortKey, sortOrder]);
 
   const itemNumberOptions = useMemo(() => {
     const unique = Array.from(new Set(allRows.map((row) => row.itemNumber))).sort();
@@ -276,10 +341,6 @@ export default function EmergencyPriceChange(): JSX.Element {
   const printStatusOptions = useMemo(() => {
     const unique = Array.from(new Set(allRows.map((row) => row.printStatus))).sort();
     return unique;
-  }, [allRows]);
-
-  const upcOptions = useMemo(() => {
-    return Array.from(new Set(allRows.map((row) => row.upc))).sort();
   }, [allRows]);
 
   const onHandOptions = useMemo(() => {
@@ -401,9 +462,6 @@ export default function EmergencyPriceChange(): JSX.Element {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <div className={styles.emergencyPriceChangeSection}>
-        <div className={styles.subTitle}>
-          <p>Worklist - Emergency Price Change</p>
-        </div>
       <div className={styles.priceChangeTable}>
         <div className={styles.tableWrap} onScroll={handleTableScroll}>
           <table className={styles.dataTable}>
@@ -538,30 +596,6 @@ export default function EmergencyPriceChange(): JSX.Element {
                           >
                             <MenuItem value="">All</MenuItem>
                             {categoryOptions.map((opt) => (
-                              <MenuItem key={opt} value={opt}>{opt}</MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
-                      </ThemeProvider>
-                    </div>
-                  </div>
-                </th>
-                <th>
-                  <div className={styles.thContent}>
-                    <div className={styles.labelWrap}>
-                      <span>UPC</span>
-                      <i className={styles.sortIcon} onClick={() => handleSort("upc")}>{getSortIcon("upc")}</i>
-                    </div>
-                    <div className={styles.filterWrap}>
-                      <ThemeProvider theme={tableFilterTheme}>
-                        <FormControl fullWidth size="small">
-                          <Select
-                            value={upcFilter}
-                            onChange={(e) => setUpcFilter(e.target.value)}
-                            displayEmpty
-                          >
-                            <MenuItem value="">All</MenuItem>
-                            {upcOptions.map((opt) => (
                               <MenuItem key={opt} value={opt}>{opt}</MenuItem>
                             ))}
                           </Select>
@@ -741,9 +775,6 @@ export default function EmergencyPriceChange(): JSX.Element {
                     <div className="shimmer sm"></div>
                   </td>
                   <td>
-                    <div className="shimmer sm"></div>
-                  </td>
-                  <td>
                     <div className="shimmer md"></div>
                   </td>
                   <td>
@@ -763,7 +794,7 @@ export default function EmergencyPriceChange(): JSX.Element {
 
               {!isLoading && !errorMessage && visibleRows.length === 0 && (
                 <tr>
-                  <td colSpan={13}>
+                  <td colSpan={12}>
                     <div className={`${styles.noDatafound} noDataContent`}>
                       <h4>No records found</h4>
                       <label>No rows found for selected filters.</label>
@@ -774,7 +805,7 @@ export default function EmergencyPriceChange(): JSX.Element {
 
               {!isLoading && errorMessage && visibleRows.length === 0 && (
                 <tr>
-                  <td colSpan={13}>
+                  <td colSpan={12}>
                     <div className={`${styles.noDatafound} noDataContent`}>
                       <h4>Error</h4>
                       <label>{errorMessage}</label>
@@ -799,7 +830,6 @@ export default function EmergencyPriceChange(): JSX.Element {
                   <td><p>{row.itemName}</p></td>
                   <td><p>{row.department}</p></td>
                   <td><p>{row.category}</p></td>
-                  <td><p>{row.upc}</p></td>
                   <td><p>{row.onHand}</p></td>
                   <td><p>{row.quantity}</p></td>
                   <td><p>{row.changeReason}</p></td>

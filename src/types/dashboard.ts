@@ -22,6 +22,7 @@ export interface StatCard {
  */
 export interface DashboardActivity {
   id: number;
+  batchConfigId: number;
   activityName: string;
   status: string;
   printCount: number;

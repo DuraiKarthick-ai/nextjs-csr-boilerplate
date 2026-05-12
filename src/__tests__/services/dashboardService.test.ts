@@ -1,25 +1,23 @@
-import apiClient from "@/utils/apiClient";
+import { batchService } from "@/services/batchService";
 import { dashboardService } from "@/services/dashboardService";
 
-jest.mock("@/utils/apiClient");
+jest.mock("@/services/batchService");
 
-const mockGet = apiClient.get as jest.MockedFunction<typeof apiClient.get>;
+const mockGetAllBatches = batchService.getAllBatches as jest.MockedFunction<
+  typeof batchService.getAllBatches
+>;
 
-/** Sample API response matching the MockAPI v1/dashboard shape. */
+/** Sample API response matching the get-all-batches shape. */
 const mockItems = [
   {
-    id: 1,
-    activityName: "Emergency Price Change",
-    status: "Ready to Print",
-    printCount: 10,
-    lastUpdated: "2026-04-02T09:15:00Z",
+    batchId: 11007,
+    configId: 237021,
+    batchName: "Content Change Batch",
   },
   {
-    id: 2,
-    activityName: "Endcap",
-    status: "Ready to Print",
-    printCount: 25,
-    lastUpdated: "2026-04-02T08:50:00Z",
+    batchId: 11008,
+    configId: 213020,
+    batchName: "Daily Batch",
   },
 ];
 
@@ -30,12 +28,12 @@ describe("dashboardService", () => {
 
   describe("getDashboardData", () => {
     /**
-     * Happy path: verifies that raw API items are correctly mapped
+     * Happy path: verifies that get-all-batches rows are correctly mapped
      * to the DashboardActivity domain model.
      */
     it("maps API response items to DashboardActivity array", async () => {
       // Arrange
-      mockGet.mockResolvedValueOnce({ data: mockItems });
+      mockGetAllBatches.mockResolvedValueOnce(mockItems);
 
       // Act
       const result = await dashboardService.getDashboardData();
@@ -43,13 +41,14 @@ describe("dashboardService", () => {
       // Assert
       expect(result.activities).toHaveLength(2);
       expect(result.activities[0]).toEqual({
-        id: 1,
-        activityName: "Emergency Price Change",
-        status: "Ready to Print",
-        printCount: 10,
-        lastUpdated: "2026-04-02T09:15:00Z",
+        id: 11007,
+        batchConfigId: 237021,
+        activityName: "Content Change Batch",
+        status: "Available",
+        printCount: 0,
+        lastUpdated: expect.any(String),
       });
-      expect(result.activities[1].activityName).toBe("Endcap");
+      expect(result.activities[1]?.activityName).toBe("Daily Batch");
     });
 
     /**
@@ -57,7 +56,7 @@ describe("dashboardService", () => {
      */
     it("returns the four static stat cards", async () => {
       // Arrange
-      mockGet.mockResolvedValueOnce({ data: mockItems });
+      mockGetAllBatches.mockResolvedValueOnce(mockItems);
 
       // Act
       const result = await dashboardService.getDashboardData();
@@ -73,7 +72,7 @@ describe("dashboardService", () => {
      */
     it("includes a 'Last Updated' timestamp string", async () => {
       // Arrange
-      mockGet.mockResolvedValueOnce({ data: mockItems });
+      mockGetAllBatches.mockResolvedValueOnce(mockItems);
 
       // Act
       const result = await dashboardService.getDashboardData();
@@ -87,7 +86,7 @@ describe("dashboardService", () => {
      */
     it("returns empty activities array when API returns no items", async () => {
       // Arrange
-      mockGet.mockResolvedValueOnce({ data: [] });
+      mockGetAllBatches.mockResolvedValueOnce([]);
 
       // Act
       const result = await dashboardService.getDashboardData();
@@ -98,12 +97,12 @@ describe("dashboardService", () => {
     });
 
     /**
-     * OWASP A10: Ensures API errors are propagated to the caller
+     * Ensures batch API errors are propagated to the caller
      * (useDashboard hook) rather than swallowed silently.
      */
-    it("re-throws errors from apiClient for the caller to handle", async () => {
+    it("re-throws errors from batchService for the caller to handle", async () => {
       // Arrange
-      mockGet.mockRejectedValueOnce(new Error("Network error"));
+      mockGetAllBatches.mockRejectedValueOnce(new Error("Network error"));
 
       // Act & Assert
       await expect(dashboardService.getDashboardData()).rejects.toThrow("Network error");

@@ -1,34 +1,17 @@
 /**
  * Dashboard API service layer.
  *
- * Centralizes the dashboard endpoint URL and response-to-domain mapping.
+ * Centralizes dashboard data mapping based on the batch jobs API.
  * useDashboard.ts imports from here instead of calling apiClient directly.
  *
  * OWASP A10: The API URL origin is validated against the allowlist inside apiClient.
  */
 
-import apiClient from "@/utils/apiClient";
+import { batchService } from "@/services/batchService";
 import type { DashboardActivity, SignsDashboardData, StatCard } from "@/types/dashboard";
 
-/**
- * Resolved dashboard API base URL.
- * Override at build time via NEXT_PUBLIC_DASHBOARD_API_URL.
- */
-const DASHBOARD_API_URL =
-  process.env.NEXT_PUBLIC_DASHBOARD_API_URL ??
-  "https://69ce482633a09f831b7d3ab9.mockapi.io/api/v1/dashboard/dashboard";
-
-/**
- * Raw shape returned by the MockAPI v1/dashboard endpoint.
- * @internal
- */
-interface DashboardApiItem {
-  id: number;
-  activityName: string;
-  status: string;
-  printCount: number;
-  lastUpdated: string;
-}
+const DASHBOARD_STORE_ID = process.env.NEXT_PUBLIC_BATCH_STORE_ID ?? "100";
+const DASHBOARD_DEFAULT_STATUS = "Available";
 
 /** Static stat cards — populated from known business metrics. */
 const STAT_CARDS: StatCard[] = [
@@ -51,22 +34,23 @@ function buildLastUpdated(): string {
 
 export const dashboardService = {
   /**
-   * Fetches batch activity data from the dashboard API and maps it to the domain model.
+  * Fetches batch jobs from get-all-batches and maps them to the dashboard domain model.
    *
    * @returns {Promise<SignsDashboardData>} Resolved dashboard data including activities and stat cards.
    * @throws {Error} Re-throws API or network errors for the caller (useDashboard hook) to handle.
    * @security OWASP A10: URL validated against allowlist in apiClient before the request is made.
    */
   async getDashboardData(): Promise<SignsDashboardData> {
-    const response = await apiClient.get<DashboardApiItem[]>(DASHBOARD_API_URL);
-    const items = response.data;
+    const items = await batchService.getAllBatches({ storeId: DASHBOARD_STORE_ID });
+    const nowIso = new Date().toISOString();
 
     const activities: DashboardActivity[] = items.map((item) => ({
-      id: item.id,
-      activityName: item.activityName,
-      status: item.status,
-      printCount: item.printCount,
-      lastUpdated: item.lastUpdated,
+      id: item.batchId,
+      batchConfigId: item.configId,
+      activityName: item.batchName,
+      status: DASHBOARD_DEFAULT_STATUS,
+      printCount: 0,
+      lastUpdated: nowIso,
     }));
 
     return {

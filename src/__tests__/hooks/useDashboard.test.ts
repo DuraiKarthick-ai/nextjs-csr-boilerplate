@@ -14,6 +14,7 @@ const mockData: SignsDashboardData = {
   activities: [
     {
       id: 1,
+      batchConfigId: 237020,
       activityName: "Emergency Price Change",
       status: "Ready to Print",
       printCount: 10,

@@ -13,14 +13,6 @@ import type { PrintRequestPayload } from "@/types/print";
 import type { DashboardActivity } from "@/types/dashboard";
 import styles from "./dashboard.module.scss";
 
-/** Maps Batch Activity names from the API to Sign Worklist tab keys. */
-const ACTIVITY_TAB_MAP: Record<string, string> = {
-  "Emergency Price Change": "price",
-  "Endcap": "endcap",
-  "Item Name Change": "item",
-  "Sign Audit": "audit",
-};
-
 /**
  * Dashboard component — Sign Management Dashboard.
  *
@@ -146,13 +138,11 @@ export default function Dashboard() {
                   visibleActivities.map((activity) => (
                     <tr key={activity.id}>
                       <td>
-                        {ACTIVITY_TAB_MAP[activity.activityName] ? (
-                          <Link href={`/signWorklist?tab=${ACTIVITY_TAB_MAP[activity.activityName]}`}>
-                            <p className={styles.batchLink}>{activity.activityName}</p>
-                          </Link>
-                        ) : (
-                          <p>{activity.activityName}</p>
-                        )}
+                        <Link
+                          href={`/signWorklist?batchId=${activity.id}&batchConfigId=${activity.batchConfigId}`}
+                        >
+                          <p className={styles.batchLink}>{activity.activityName}</p>
+                        </Link>
                       </td>
                       <td>
                         <div className="statusTag minWidth">
