@@ -81,9 +81,7 @@ function validateApiUrl(url: string): string {
   }
 }
 
-const SIGNS_APP_URL = validateApiUrl(
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
-);
+const SIGNS_APP_URL = validateApiUrl("");
 
 // ── Axios instance ──────────────────────────────────────────────────
 

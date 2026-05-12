@@ -11,11 +11,8 @@ import type { SignAuditRequestPayload, SignAuditResponseItem } from "@/types/sig
 
 /**
  * Sign Audit API endpoint URL.
- * Override at build time via NEXT_PUBLIC_SIGN_AUDIT_API_URL.
  */
-const SIGN_AUDIT_API_URL =
-  process.env.NEXT_PUBLIC_SIGN_AUDIT_API_URL ??
-  "https://69ce482633a09f831b7d3ab9.mockapi.io/api/v1/dashboard/signAudit";
+const SIGN_AUDIT_API_URL = "https://69ce482633a09f831b7d3ab9.mockapi.io/api/v1/dashboard/signAudit";
 
 export const signAuditService = {
   /**

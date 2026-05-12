@@ -14,10 +14,8 @@ import type {
 
 /**
  * Emergency Price Change API endpoint URL.
- * Override at build time via NEXT_PUBLIC_EMERGENCY_PRICE_CHANGE_API_URL.
  */
 const EMERGENCY_PRICE_CHANGE_API_URL =
-  process.env.NEXT_PUBLIC_EMERGENCY_PRICE_CHANGE_API_URL ??
   "https://69ce482633a09f831b7d3ab9.mockapi.io/api/v1/dashboard/emergencyPriceChange";
 
 export const emergencyPriceChangeService = {
