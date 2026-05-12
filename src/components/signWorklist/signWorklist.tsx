@@ -178,21 +178,18 @@ export default function SignWorklist(): JSX.Element {
 
         <div className={styles.tabsContent}>
           <div className={styles.contentWrap}>
-            {!isLoadingBatches && !isLoadingBatchDetail && batchDetailRows.length > 0 && (
-              <EmergencyPriceChange batchDetailRows={batchDetailRows} />
+            {(activeView === "price" || batchDetailRows.length > 0 || isLoadingBatches || isLoadingBatchDetail) && (
+              <EmergencyPriceChange
+                batchDetailRows={batchDetailRows}
+                isLoading={isLoadingBatches || isLoadingBatchDetail}
+              />
             )}
-
-            {!isLoadingBatches && !isLoadingBatchDetail && batchDetailRows.length === 0 && activeView === "price" && <EmergencyPriceChange />}
 
             {!isLoadingBatches && !isLoadingBatchDetail && batchDetailRows.length === 0 && activeView === "endcap" && <Endcap />}
 
             {!isLoadingBatches && !isLoadingBatchDetail && batchDetailRows.length === 0 && activeView === "item" && <ItemNameChange />}
 
             {!isLoadingBatches && !isLoadingBatchDetail && batchDetailRows.length === 0 && activeView === "audit" && <SignAuditSection />}
-
-            {(isLoadingBatches || isLoadingBatchDetail) && activeBatch ? (
-              <p>Loading {activeBatch.batchName}...</p>
-            ) : null}
           </div>
         </div>
       </div>

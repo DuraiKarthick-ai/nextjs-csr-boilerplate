@@ -134,9 +134,10 @@ function mapBatchDetailRowsToEmergencyRows(
 
 interface EmergencyPriceChangeProps {
   batchDetailRows?: BatchDetailItem[];
+  isLoading?: boolean;
 }
 
-export default function EmergencyPriceChange({ batchDetailRows }: EmergencyPriceChangeProps): JSX.Element {
+export default function EmergencyPriceChange({ batchDetailRows, isLoading }: EmergencyPriceChangeProps): JSX.Element {
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("ASC");
   const [allRows, setAllRows] = useState<EmergencyPriceChangeTableRow[]>([]);
@@ -153,12 +154,15 @@ export default function EmergencyPriceChange({ batchDetailRows }: EmergencyPrice
   const [rowSignSizes, setRowSignSizes] = useState<Record<string, string>>({});
   const [rowCopies, setRowCopies] = useState<Record<string, number>>({});
   const [copiesFilter, setCopiesFilter] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [internalIsLoading, setInternalIsLoading] = useState<boolean>(false);
   const [hasMore, setHasMore] = useState<boolean>(true);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [selectedRows, setSelectedRows] = useState<RowSelectionMap>({});
   const [printSelectionError, setPrintSelectionError] = useState<string>("");
   const [lastPrintedCount, setLastPrintedCount] = useState<number>(0);
+
+  // Combine prop-based loading (from parent) with internal API loading state
+  const isLoadingState = (isLoading ?? false) || internalIsLoading;
 
   const currentPageRef = useRef<number>(0);
   const isFetchingRef = useRef<boolean>(false);
@@ -197,7 +201,7 @@ export default function EmergencyPriceChange({ batchDetailRows }: EmergencyPrice
     if (isFetchingRef.current || !hasMoreRef.current) return;
 
     isFetchingRef.current = true;
-    setIsLoading(true);
+    setInternalIsLoading(true);
     setErrorMessage("");
 
     try {
@@ -229,11 +233,15 @@ export default function EmergencyPriceChange({ batchDetailRows }: EmergencyPrice
       setErrorMessage("Unable to load emergency price change data. Please try again.");
     } finally {
       isFetchingRef.current = false;
-      setIsLoading(false);
+      setInternalIsLoading(false);
     }
   }, [batchDetailRows]);
 
   useEffect(() => {
+    if (isLoading) {
+      return;
+    }
+
     if (batchDetailRows && batchDetailRows.length > 0) {
       const mappedRows = mapBatchDetailRowsToEmergencyRows(batchDetailRows);
       currentPageRef.current = FIRST_PAGE;
@@ -251,10 +259,12 @@ export default function EmergencyPriceChange({ batchDetailRows }: EmergencyPrice
       return;
     }
 
-    hasMoreRef.current = true;
-    setHasMore(true);
-    void loadPage(FIRST_PAGE);
-  }, [batchDetailRows, loadPage]);
+    if (typeof batchDetailRows === "undefined") {
+      hasMoreRef.current = true;
+      setHasMore(true);
+      void loadPage(FIRST_PAGE);
+    }
+  }, [batchDetailRows, isLoading, loadPage]);
 
   /**
    * Fetches next page on table scroll near bottom.
@@ -751,7 +761,7 @@ export default function EmergencyPriceChange({ batchDetailRows }: EmergencyPrice
             </thead>
             <tbody>
 
-              {isLoading  && visibleRows.length === 0 && rows.map((row) => (
+              {isLoadingState && rows.map((row) => (
                 <tr key={row}>
                   <td>
                     <div className="shimmer checkbox m-auto"></div>
@@ -792,7 +802,7 @@ export default function EmergencyPriceChange({ batchDetailRows }: EmergencyPrice
                 </tr>
               ))}
 
-              {!isLoading && !errorMessage && visibleRows.length === 0 && (
+              {!isLoadingState && !errorMessage && visibleRows.length === 0 && (
                 <tr>
                   <td colSpan={12}>
                     <div className={`${styles.noDatafound} noDataContent`}>
@@ -803,7 +813,7 @@ export default function EmergencyPriceChange({ batchDetailRows }: EmergencyPrice
                 </tr>
               )}
 
-              {!isLoading && errorMessage && visibleRows.length === 0 && (
+              {!isLoadingState && errorMessage && visibleRows.length === 0 && (
                 <tr>
                   <td colSpan={12}>
                     <div className={`${styles.noDatafound} noDataContent`}>
@@ -814,7 +824,7 @@ export default function EmergencyPriceChange({ batchDetailRows }: EmergencyPrice
                 </tr>
               )}
 
-              {!errorMessage && visibleRows.map((row) => (
+              {!isLoadingState && !errorMessage && visibleRows.map((row) => (
                 <tr key={getRowKey(row)}>
                   <td className={styles.checkboxCell}>
                     <ThemeProvider theme={tableFilterTheme}>
