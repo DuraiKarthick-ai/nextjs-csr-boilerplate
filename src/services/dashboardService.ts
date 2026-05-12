@@ -11,7 +11,7 @@ import { batchService } from "@/services/batchService";
 import type { DashboardActivity, SignsDashboardData, StatCard } from "@/types/dashboard";
 
 const DASHBOARD_STORE_ID = process.env.NEXT_PUBLIC_BATCH_STORE_ID ?? "100";
-const DASHBOARD_DEFAULT_STATUS = "Available";
+const DASHBOARD_DEFAULT_STATUS = "Ready to Print";
 
 /** Static stat cards — populated from known business metrics. */
 const STAT_CARDS: StatCard[] = [

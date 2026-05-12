@@ -49,50 +49,67 @@
   padding: 20px 0;
 
   .title {
-    padding: 16px 0;
+    padding: 14px 0 16px;
 
     p {
       @include font-size(22px);
+      line-height: 30px;
+      font-weight: 500;
+      color: #0b2b4c;
     }
   }
 
   .tableScrollWrap {
-    max-height: 280px;
     overflow-y: auto;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
   }
 
   .table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     background-color: $white-color;
     text-align: left;
 
-    tr:nth-child(even) {
-      background-color: $table-bg-color;
-    }
-
     th {
-      padding: 16px;
-      border: 1px solid $medium-gray;
+      padding: 16px 18px;
+      border-right: 1px solid #d9d9d9;
+      border-bottom: 1px solid #d9d9d9;
+      background: #ffffff;
 
       p {
-        @include font-size(14px);
+        @include font-size(16px);
+        line-height: 22px;
         font-weight: 500;
+        color: #2e2e2e;
+      }
+
+      &:last-child {
+        border-right: none;
       }
     }
 
     td {
-      padding: 10px 16px;
-      border-bottom: 1px solid $table-border-color;
+      padding: 12px 18px;
+      border-right: 1px solid #d9d9d9;
+      border-bottom: 1px solid #d9d9d9;
+      background: #ffffff;
 
       p {
-        @include font-size(14px);
-        color: $primary-color;
+        @include font-size(16px);
+        line-height: 22px;
+        color: #005dab;
+      }
+
+      &:last-child {
+        border-right: none;
       }
 
       .batchLink {
-        @include font-size(14px);
-        color: $dark-blue-color;
+        @include font-size(16px);
+        line-height: 22px;
+        color: #005dab;
         cursor: pointer;
         text-decoration: none;
 
@@ -106,6 +123,41 @@
         margin-right: -16px;
       }
 
+    }
+
+    tbody tr:last-child td {
+      border-bottom: none;
+    }
+  }
+
+  .table td.statusCell :global(.statusTag.minWidth) {
+    width: 100%;
+    min-width: 0;
+
+    span {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 4px;
+      background: #e4f2df;
+      color: #1d4323;
+      @include font-size(16px);
+      line-height: 22px;
+      font-weight: 500;
+    }
+  }
+
+  .table :global(.printButton) {
+    min-width: 136px;
+    height: 40px;
+    padding: 8px 18px;
+    border-radius: 4px;
+    background-color: #2f74b0;
+    color: #ffffff;
+    @include font-size(16px);
+    line-height: 22px;
+
+    &:hover {
+      background-color: #29689f;
     }
   }
 }

@@ -144,7 +144,7 @@ export default function Dashboard() {
                           <p className={styles.batchLink}>{activity.activityName}</p>
                         </Link>
                       </td>
-                      <td>
+                      <td className={styles.statusCell}>
                         <div className="statusTag minWidth">
                           <span>{activity.status}</span>
                         </div>

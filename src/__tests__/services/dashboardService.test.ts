@@ -44,7 +44,7 @@ describe("dashboardService", () => {
         id: 11007,
         batchConfigId: 237021,
         activityName: "Content Change Batch",
-        status: "Available",
+        status: "Ready to Print",
         printCount: 0,
         lastUpdated: expect.any(String),
       });
