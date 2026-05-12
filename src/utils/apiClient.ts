@@ -55,6 +55,15 @@ const ALLOWED_API_ORIGINS = [
 ];
 
 function validateApiUrl(url: string): string {
+  if (!url) {
+    return "";
+  }
+
+  // Relative paths should resolve against the current origin in browser/runtime.
+  if (url.startsWith("/")) {
+    return "";
+  }
+
   try {
     const origin = new URL(url).origin;
     if (!ALLOWED_API_ORIGINS.some((a) => origin === a || url.startsWith(a))) {
@@ -62,13 +71,13 @@ function validateApiUrl(url: string): string {
     }
     return url;
   } catch {
-    console.error("[apiClient] Invalid API base URL — falling back to localhost");
-    return "http://localhost:3002";
+    console.error("[apiClient] Invalid API base URL — falling back to same-origin");
+    return "";
   }
 }
 
 const SIGNS_APP_URL = validateApiUrl(
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3002"
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? ""
 );
 
 // ── Axios instance ──────────────────────────────────────────────────
