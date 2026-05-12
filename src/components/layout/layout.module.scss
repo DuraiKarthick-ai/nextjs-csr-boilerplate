@@ -35,8 +35,16 @@
   min-width: 0;
   padding: 20px;
   height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   background-color: $white-color;
   transition: all 0.3s ease-in-out;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 }
 
 .navFolded {
