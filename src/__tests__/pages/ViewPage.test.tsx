@@ -1,22 +1,7 @@
 import React from "react";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import SignsViewPage from "@/pages/[view]";
-
-/* ── Mock next/router ─────────────────────────────────────────────── */
-const mockPush = jest.fn();
-let mockQuery: Record<string, string> = { view: "dashboard" };
-
-jest.mock("next/router", () => ({
-  useRouter: () => ({
-    query: mockQuery,
-    push: mockPush,
-    replace: jest.fn(),
-    pathname: "/[view]",
-    asPath: `/${mockQuery.view ?? "dashboard"}`,
-    isReady: true,
-  }),
-}));
+import SignsViewPage, { getServerSideProps } from "@/pages/[view]";
 
 /* ── Mock child components to isolate page logic ──────────────────── */
 jest.mock("@/components/auth/authGate", () => {
@@ -60,10 +45,21 @@ jest.mock("next/dynamic", () => {
   };
 });
 
+/* ── Mock next/router so useRouter() doesn't fail in jsdom ─────────── */
+const mockPush = jest.fn();
+jest.mock("next/router", () => ({
+  useRouter: () => ({
+    push: mockPush,
+    query: {},
+    pathname: "/[view]",
+    isReady: true,
+  }),
+}));
+
 describe("[view] page", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockQuery = { view: "dashboard" };
+    jest.restoreAllMocks();
   });
 
   /**
@@ -71,10 +67,9 @@ describe("[view] page", () => {
    */
   it("renders AuthGate, Header, and Layout", () => {
     // Arrange
-    mockQuery = { view: "dashboard" };
-
+    const pageProps = { initialView: "dashboard" as const };
     // Act
-    render(<SignsViewPage />);
+    render(<SignsViewPage {...pageProps} />);
 
     // Assert
     expect(screen.getByTestId("auth-gate")).toBeInTheDocument();
@@ -87,10 +82,9 @@ describe("[view] page", () => {
    */
   it("passes the URL view parameter as activeView to Layout", () => {
     // Arrange
-    mockQuery = { view: "customSign" };
-
+    const pageProps = { initialView: "customSign" as const };
     // Act
-    render(<SignsViewPage />);
+    render(<SignsViewPage {...pageProps} />);
 
     // Assert
     expect(screen.getByTestId("layout")).toHaveAttribute("data-active-view", "customSign");
@@ -99,29 +93,65 @@ describe("[view] page", () => {
   /**
    * Verifies that an invalid view parameter falls back to 'dashboard'.
    */
-  it("falls back to 'dashboard' for an invalid view parameter", () => {
+  it("returns notFound for an invalid view route parameter", async () => {
     // Arrange
-    mockQuery = { view: "nonexistent" };
+    const ctx = {
+      params: { view: "nonexistent" },
+    } as unknown as Parameters<typeof getServerSideProps>[0];
 
     // Act
-    render(<SignsViewPage />);
+    const result = await getServerSideProps(ctx);
 
     // Assert
-    expect(screen.getByTestId("layout")).toHaveAttribute("data-active-view", "dashboard");
+    expect(result).toEqual({ notFound: true });
   });
 
   /**
    * Verifies that onNavigate calls router.push with the correct path.
    */
-  it("calls router.push when onNavigate is triggered", async () => {
+  it("navigates to the selected route when onNavigate is triggered", async () => {
     // Arrange
     const user = userEvent.setup();
-    render(<SignsViewPage />);
+    const navigateTo = jest.fn();
+    render(<SignsViewPage initialView="dashboard" navigateTo={navigateTo} />);
 
     // Act
     await user.click(screen.getByTestId("nav-trigger"));
 
     // Assert
-    expect(mockPush).toHaveBeenCalledWith("/quickSign");
+    expect(navigateTo).toHaveBeenCalledWith("/quickSign");
+  });
+
+  /**
+   * Verifies shallow router.push is used for client-side nav (no full page reload).
+   */
+  it("uses shallow router.push when no navigateTo override is provided", async () => {
+    // Arrange
+    const user = userEvent.setup();
+    render(<SignsViewPage initialView="dashboard" />);
+
+    // Act
+    await user.click(screen.getByTestId("nav-trigger"));
+
+    // Assert
+    expect(mockPush).toHaveBeenCalledWith("/quickSign", undefined, { shallow: true });
+  });
+
+  /**
+   * Verifies server-side props include the validated route parameter.
+   */
+  it("returns initialView when route parameter is valid", async () => {
+    // Arrange
+    const ctx = {
+      params: { view: "quickSign" },
+    } as unknown as Parameters<typeof getServerSideProps>[0];
+
+    // Act
+    const result = await getServerSideProps(ctx);
+
+    // Assert
+    expect(result).toEqual({
+      props: { initialView: "quickSign" },
+    });
   });
 });

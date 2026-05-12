@@ -1,5 +1,5 @@
 // @ts-check
-// const { NextFederationPlugin } = require("@module-federation/nextjs-mf");
+const { NextFederationPlugin } = require("@module-federation/nextjs-mf");
 
 /**
  * OWASP A10 Fix: Validate PORTAL_REMOTE_URL against an allowlist at build time.
@@ -67,7 +67,7 @@ const nextConfig = {
               // unsafe-inline is required by Next.js CSS-in-JS / MUI
               "style-src 'self' 'unsafe-inline'",
               // Allow connections to Portal and Ping OIDC
-              `connect-src 'self' ${PORTAL_REMOTE_URL ?? "http://localhost:3000"} https://loginnp.costco.com https://69ce482633a09f831b7d3ab9.mockapi.io`,
+              `connect-src 'self' ${PORTAL_REMOTE_URL ?? "http://localhost:3000"} https://loginnp.costco.com https://69ce482633a09f831b7d3ab9.mockapi.io http://34.133.77.6:8080`,
               // Fonts served from /public/fonts
               "font-src 'self'",
               // Images from self + data URIs (Next/Image optimization)
@@ -120,27 +120,36 @@ const nextConfig = {
   webpack(config, options) {
     const { isServer } = options;
 
-    config.plugins.push(
-      // new NextFederationPlugin({
-      //   name: "signs",
-      //   filename: "static/chunks/remoteEntry.js",
-      //   remotes: {
-      //     portal: `portal@${PORTAL_REMOTE_URL}/_next/static/${isServer ? "ssr" : "chunks"}/remoteEntry.js`,
-      //   },
-      //   exposes: {
-      //     "./ProductsPage": "./src/components/products/ProductsPage.tsx",
-      //   },
-      //   shared: {
-      //     react: { singleton: true, eager: true, requiredVersion: "18.3.1" },
-      //     "react-dom": { singleton: true, eager: true, requiredVersion: "18.3.1" },
-      //   },
-      //   extraOptions: {
-      //     exposePages: false,
-      //     enableImageLoaderFix: true,
-      //     enableUrlLoaderFix: true,
-      //   },
-      // })
-    );
+    // Keep Module Federation client-only in dev to avoid SSR hook dispatcher mismatches.
+    if (!isServer) {
+      config.plugins.push(
+        new NextFederationPlugin({
+          name: "signs",
+          filename: "static/chunks/remoteEntry.js",
+          remotes: {
+            portal: `portal@${PORTAL_REMOTE_URL}/_next/static/chunks/remoteEntry.js`,
+          },
+          exposes: {
+            "./dashboard": "./src/components/dashboard/dashboard.tsx",
+            "./signWorklist": "./src/components/signWorklist/signWorklist.tsx",
+            "./emergencyPriceChange": "./src/components/signWorklist/emergencyPriceChange/emergencyPriceChange.tsx",
+            "./quickSign": "./src/components/quickSign/quickSign.tsx",
+            "./customPrint": "./src/components/customPrint/customPrint.tsx",
+          },
+          shared: {
+            react: { singleton: true, eager: true, requiredVersion: "18.3.1" },
+            "react-dom": { singleton: true, eager: true, requiredVersion: "18.3.1" },
+            "react/jsx-runtime": { singleton: true, eager: true, requiredVersion: "18.3.1" },
+            "react/jsx-dev-runtime": { singleton: true, eager: true, requiredVersion: "18.3.1" },
+          },
+          extraOptions: {
+            exposePages: false,
+            enableImageLoaderFix: true,
+            enableUrlLoaderFix: true,
+          },
+        })
+      );
+    }
 
     return config;
   },

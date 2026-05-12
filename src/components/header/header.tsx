@@ -1,8 +1,10 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import logo from "../../images/costco_wholesale.png";
 import styles from "./header.module.scss";
+
+/** Public asset path for the Costco Wholesale logo served from /public/images/. */
+const LOGO_PATH = "/images/costco_wholesale.png";
 
 interface HeaderProps {
   toggle: () => void;
@@ -56,7 +58,7 @@ export default function Header({ toggle, open }: HeaderProps) {
               <div className={styles.logoWrap}>
                 <Link href={"/"}>
                   <div className={styles.logo}>
-                    <Image src={logo} alt="web logo" width={160} height={40} priority loading="eager" />
+                    <Image src={LOGO_PATH} alt="web logo" width={160} height={40} priority loading="eager" />
                   </div>
                 </Link>
                 <h4>IBMi Replatforming</h4>
