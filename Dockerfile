@@ -17,11 +17,14 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy only dependency files first (better layer caching)
 COPY package.json package-lock.json ./
-RUN npm ci
+# --ignore-scripts because the `postinstall` hook patches node_modules/next
+# but scripts/ hasn't been COPY'd yet at this layer. We re-run the patch
+# explicitly after `COPY . .` below.
+RUN npm ci --ignore-scripts
 #--include=dev
 
 # Required for Next build in Docker
-RUN npm install next webpack --no-save
+RUN npm install next webpack --no-save --ignore-scripts
 ENV NEXT_PRIVATE_LOCAL_WEBPACK=true
 
 # Copy rest of source code
