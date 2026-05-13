@@ -95,8 +95,22 @@ jobs:
           kubectl rollout status deployment/nextjs-csr-app -n $NAMESPACE --timeout=10m
 
       - name: Debug failed deployment
-        if: failure() || success()
+        if: always()
         run: |
+          # Fetch kubeconfig defensively: this step runs `if: always()`, so it
+          # may execute before (or instead of) the dedicated "Get GKE credentials"
+          # step when an earlier step (e.g. Docker build) fails. Without this,
+          # kubectl falls back to http://localhost:8080 and emits a confusing
+          # "connection refused" error that masks the real failure.
+          if ! kubectl version --request-timeout=5s >/dev/null 2>&1; then
+            echo "kubectl has no cluster context — fetching GKE credentials..."
+            gcloud container clusters get-credentials "$CLUSTER_NAME" \
+              --region "$CLUSTER_LOCATION" \
+              --project "$PROJECT_ID" || {
+                echo "Failed to fetch GKE credentials; skipping pod debug."
+                exit 0
+              }
+          fi
           echo "=== Final Pod Status ==="
           kubectl get pods -n $NAMESPACE -l app=nextjs-csr-app -o wide
           echo ""
