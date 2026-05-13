@@ -17,6 +17,17 @@ const PORTAL_REMOTE_URL =
     ? process.env.NEXT_PUBLIC_PORTAL_REMOTE_URL_PROD
     : (process.env.NEXT_PUBLIC_PORTAL_REMOTE_URL_DEV ?? "http://localhost:3000");
 
+/**
+ * Module Federation gate.
+ *
+ * The federation plugin registers extra webpack resolver hooks that, on
+ * Windows + Next 14.2 + enhanced-resolve 5.21.x, surface a known upstream
+ * "TypeError: _resolveContext_stack.delete is not a function" during
+ * `next build`. Standalone builds don't need federation, so we make it
+ * opt-in via the ENABLE_MODULE_FEDERATION env var.
+ */
+const ENABLE_MODULE_FEDERATION = process.env.ENABLE_MODULE_FEDERATION === "true";
+
 if (
   PORTAL_REMOTE_URL &&
   !ALLOWED_PORTAL_ORIGINS.some((o) => PORTAL_REMOTE_URL.startsWith(o))
@@ -30,6 +41,18 @@ if (
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+
+  // Next 14.2 ships a default `experimental.optimizePackageImports` list that
+  // includes `@mui/material`, which routes barrel imports through the
+  // `__barrel_optimize__` virtual module and into the broken
+  // OptionalPeerDependencyResolverPlugin path (enhanced-resolve 5.21.x bug
+  // on Windows). Override to an empty list to disable the experimental
+  // optimizer for @mui/material. Source files use direct subpath imports
+  // (e.g. `import Select from "@mui/material/Select"`) to avoid barrel
+  // resolution entirely.
+  experimental: {
+    optimizePackageImports: [],
+  },
 
   // Allow Next/Image to serve from public/ (default behavior, explicit for clarity)
   images: {
@@ -120,8 +143,10 @@ const nextConfig = {
   webpack(config, options) {
     const { isServer } = options;
 
-    // Keep Module Federation client-only in dev to avoid SSR hook dispatcher mismatches.
-    if (!isServer) {
+    // Module Federation is opt-in (set ENABLE_MODULE_FEDERATION=true) because the
+    // federation plugin's resolver hooks trigger an upstream Next/enhanced-resolve
+    // bug on Windows during `next build`.
+    if (!isServer && ENABLE_MODULE_FEDERATION) {
       config.plugins.push(
         new NextFederationPlugin({
           name: "signs",

@@ -7,13 +7,16 @@
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "dev": "next dev -p 3002",
+    "predev": "node scripts/patch-next-resolver.js",
+    "prebuild": "node scripts/patch-next-resolver.js",
     "build": "next build",
     "start": "next start -p 3002",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,md}\"",
     "type-check": "tsc --noEmit",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "postinstall": "node scripts/patch-next-resolver.js"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

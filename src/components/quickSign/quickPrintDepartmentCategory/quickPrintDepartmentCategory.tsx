@@ -1,7 +1,11 @@
 import { ThemeProvider } from "@emotion/react";
 import styles from "./quickPrintDepartmentCategory.module.scss"
 import theme from "@/theme/customizeTheme";
-import { FormControl, MenuItem, Select, Switch, TextField } from "@mui/material";
+import FormControl from "@mui/material/FormControl";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import Switch from "@mui/material/Switch";
+import TextField from "@mui/material/TextField";
 
 export default function QuickPrintDepartmentCategory() {
   return (

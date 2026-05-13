@@ -2,7 +2,10 @@
 import { useState } from "react";
 import TextField from "@mui/material/TextField";
 import { ThemeProvider } from "@mui/material/styles";
-import { FormControl, MenuItem, Select, Switch } from "@mui/material";
+import FormControl from "@mui/material/FormControl";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import Switch from "@mui/material/Switch";
 import theme from "@/theme/customizeTheme";
 import ContentWrapper from "../contentWrapper/contentWrapper";
 import styles from "./signManagement.module.scss";
