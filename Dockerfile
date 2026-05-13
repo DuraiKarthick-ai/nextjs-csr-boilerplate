@@ -27,8 +27,13 @@ ENV NEXT_PRIVATE_LOCAL_WEBPACK=true
 # Copy rest of source code
 COPY . .
 
-# Build Next app
-RUN npx next build
+# Re-apply the Next resolver patch after the extra `npm install next webpack`
+# above (which overwrites node_modules/next and the postinstall patch).
+# See scripts/patch-next-resolver.js for the OWASP/build-hygiene rationale.
+RUN node scripts/patch-next-resolver.js
+
+# Build Next app via npm so the `prebuild` hook also runs as a safety net
+RUN npm run build
 
 # ========================
 # Stage 2: Runtime (GKE Safe)
