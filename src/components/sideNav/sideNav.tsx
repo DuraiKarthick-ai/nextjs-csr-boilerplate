@@ -102,14 +102,6 @@ export default function SideNav({ activeView, onNavigate }: SideNavProps) {
                   <span>Custom Sign</span>
                 </button>
               </li>
-              <li>
-                <button
-                  className={activeView === "signWorklist" ? styles.activeSubItem : ""}
-                  onClick={() => onNavigate("signWorklist")}
-                >
-                  <span>Sign Worklist</span>
-                </button>
-              </li>
             </ul>
           </li>
         </ul>

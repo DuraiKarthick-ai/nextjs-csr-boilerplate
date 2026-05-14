@@ -10,6 +10,7 @@ const ALLOWED_PORTAL_ORIGINS = [
   "http://localhost:3000",
   "http://localhost:3001",
   "http://localhost:3002",
+  "https://localhost:3001",
 ];
 
 const PORTAL_REMOTE_URL =
@@ -151,9 +152,6 @@ const nextConfig = {
         new NextFederationPlugin({
           name: "signs",
           filename: "static/chunks/remoteEntry.js",
-          remotes: {
-            portal: `portal@${PORTAL_REMOTE_URL}/_next/static/chunks/remoteEntry.js`,
-          },
           exposes: {
             "./dashboard": "./src/components/dashboard/dashboard.tsx",
             "./signWorklist": "./src/components/signWorklist/signWorklist.tsx",
