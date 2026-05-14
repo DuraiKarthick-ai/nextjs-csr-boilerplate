@@ -91,7 +91,7 @@ const nextConfig = {
               // unsafe-inline is required by Next.js CSS-in-JS / MUI
               "style-src 'self' 'unsafe-inline'",
               // Allow connections to Portal and Ping OIDC
-              `connect-src 'self' ${PORTAL_REMOTE_URL ?? "http://localhost:3000"} https://loginnp.costco.com https://69ce482633a09f831b7d3ab9.mockapi.io http://34.133.77.6:8080`,
+              `connect-src 'self' ${PORTAL_REMOTE_URL ?? "https://localhost:3001"} https://loginnp.costco.com https://69ce482633a09f831b7d3ab9.mockapi.io http://34.133.77.6:8080`,
               // Fonts served from /public/fonts
               "font-src 'self'",
               // Images from self + data URIs (Next/Image optimization)
@@ -126,7 +126,7 @@ const nextConfig = {
           // Applied globally but should be more specific per-route in production.
           {
             key: "Access-Control-Allow-Origin",
-            value: PORTAL_REMOTE_URL ?? "http://localhost:3000",
+            value: PORTAL_REMOTE_URL ?? "https://localhost:3001",
           },
           {
             key: "Access-Control-Allow-Methods",
@@ -153,11 +153,25 @@ const nextConfig = {
           name: "signs",
           filename: "static/chunks/remoteEntry.js",
           exposes: {
-            "./dashboard": "./src/components/dashboard/dashboard.tsx",
-            "./signWorklist": "./src/components/signWorklist/signWorklist.tsx",
-            "./emergencyPriceChange": "./src/components/signWorklist/emergencyPriceChange/emergencyPriceChange.tsx",
-            "./quickSign": "./src/components/quickSign/quickSign.tsx",
+            "./authGate": "./src/components/auth/authGate.tsx",
+            "./contentWrapper": "./src/components/contentWrapper/contentWrapper.tsx",
             "./customPrint": "./src/components/customPrint/customPrint.tsx",
+            "./dashboard": "./src/components/dashboard/dashboard.tsx",
+            "./layout": "./src/components/layout/layout.tsx",
+            "./printSuccessDialog": "./src/components/printSuccessDialog/printSuccessDialog.tsx",
+            "./quickSign": "./src/components/quickSign/quickSign.tsx",
+            "./quickPrintDepartmentCategory": "./src/components/quickSign/quickPrintDepartmentCategory/quickPrintDepartmentCategory.tsx",
+            "./quickPrintItem": "./src/components/quickSign/quickPrintItem/quickPrintItem.tsx",
+            "./icons": "./src/components/shared/icons.tsx",
+            "./successToast": "./src/components/shared/SuccessToast.tsx",
+            "./sideNav": "./src/components/sideNav/sideNav.tsx",
+            "./signAudit": "./src/components/signAudit/signAudit.tsx",
+            "./signManagement": "./src/components/signManagement/signManagement.tsx",
+            "./signWorklist": "./src/components/signWorklist/signWorklist.tsx",
+            "./signWorklistEmergencyPriceChange": "./src/components/signWorklist/emergencyPriceChange/emergencyPriceChange.tsx",
+            "./signWorklistEndcap": "./src/components/signWorklist/endcap/endcap.tsx",
+            "./signWorklistItemNameChange": "./src/components/signWorklist/itemNameChange/itemNameChange.tsx",
+            "./signWorklistSignAudit": "./src/components/signWorklist/signAudit/signAudit.tsx",
           },
           shared: {
             react: { singleton: true, eager: true, requiredVersion: "18.3.1" },
