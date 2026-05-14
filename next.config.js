@@ -151,9 +151,6 @@ const nextConfig = {
         new NextFederationPlugin({
           name: "signs",
           filename: "static/chunks/remoteEntry.js",
-          remotes: {
-            portal: `portal@${PORTAL_REMOTE_URL}/_next/static/chunks/remoteEntry.js`,
-          },
           exposes: {
             "./dashboard": "./src/components/dashboard/dashboard.tsx",
             "./signWorklist": "./src/components/signWorklist/signWorklist.tsx",
