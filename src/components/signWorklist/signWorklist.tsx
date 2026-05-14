@@ -148,34 +148,17 @@ export default function SignWorklist(): JSX.Element {
    * @param batch - Batch selected by the user.
    * @returns Promise resolved when selected batch detail is loaded.
    */
-  const handleDynamicTabClick = useCallback(async (batch: BatchItem): Promise<void> => {
-    setActiveBatchId(batch.batchId);
-    setActiveView(mapBatchNameToViewKey(batch.batchName));
-    await loadBatchDetail(batch);
-  }, [loadBatchDetail]);
+  // Tabs UI removed: navigation from the dashboard now passes the selected
+  // batch directly via query params, so the click handler is no longer needed.
+  // const handleDynamicTabClick = useCallback(async (batch: BatchItem): Promise<void> => {
+  //   setActiveBatchId(batch.batchId);
+  //   setActiveView(mapBatchNameToViewKey(batch.batchName));
+  //   await loadBatchDetail(batch);
+  // }, [loadBatchDetail]);
 
   return (
-    <ContentWrapper title="Signs Management">
+    <ContentWrapper title={activeBatch?.batchName ?? "Signs Management"}>
       <div className={styles.signManagement}>
-        <div className={styles.tabsHeading}>
-          <ul>
-            {batches.map((batch) => (
-              <li key={batch.batchId}>
-                <button
-                  className={`${styles.tab} ${activeBatchId === batch.batchId ? styles.active : ""}`}
-                  onClick={() => {
-                    void handleDynamicTabClick(batch);
-                  }}
-                  type="button"
-                  disabled={isLoadingBatchDetail}
-                >
-                  {batch.batchName}
-                </button>
-              </li>
-            ))}
-          </ul>
-        </div>
-
         <div className={styles.tabsContent}>
           <div className={styles.contentWrap}>
             {(activeView === "price" || batchDetailRows.length > 0 || isLoadingBatches || isLoadingBatchDetail) && (
