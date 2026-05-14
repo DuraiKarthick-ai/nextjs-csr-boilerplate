@@ -4,7 +4,7 @@ import Image from "next/image";
 import styles from "./header.module.scss";
 
 /** Public asset path for the Costco Wholesale logo served from /public/images/. */
-const LOGO_PATH = "/images/costco_wholesale.png";
+import LOGO_PATH from "../../images/costco_wholesale.png";
 
 interface HeaderProps {
   toggle: () => void;

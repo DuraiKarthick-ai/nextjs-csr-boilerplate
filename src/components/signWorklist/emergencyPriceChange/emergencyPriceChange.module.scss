@@ -44,6 +44,10 @@
             padding: 12px 8px;
             border: 1px solid $medium-gray;
 
+            &:not(:last-child) {
+              border-right: none;
+            }
+
             .labelWrap {
               @include flex();
               @include align-items(center);

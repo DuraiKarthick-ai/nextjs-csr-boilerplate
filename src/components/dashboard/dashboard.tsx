@@ -90,8 +90,8 @@ export default function Dashboard() {
             <p>Batch Activity</p>
           </div>
 
-          <div className={styles.tableScrollWrap} ref={scrollRef}>
-            <table className={styles.table}>
+          <div className={styles.tableWrap} ref={scrollRef}>
+            <table className={styles.dataTable}>
               <thead>
                 <tr>
                   <th>
