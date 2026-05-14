@@ -10,6 +10,7 @@ const ALLOWED_PORTAL_ORIGINS = [
   "http://localhost:3000",
   "http://localhost:3001",
   "http://localhost:3002",
+  "https://localhost:3001",
 ];
 
 const PORTAL_REMOTE_URL =

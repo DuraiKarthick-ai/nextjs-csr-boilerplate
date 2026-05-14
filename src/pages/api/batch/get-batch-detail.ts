@@ -7,6 +7,7 @@ const ALLOWED_BATCH_API_ORIGINS = [
   "http://34.133.77.6:8080",
   "http://localhost:3001",
   "http://localhost:3002",
+  "https://localhost:3001",
 ];
 
 /**

@@ -52,6 +52,7 @@ const ALLOWED_API_ORIGINS = [
   "http://34.133.77.6:8080",
   "https://erp-portal.costco.com",
   "https://69ce482633a09f831b7d3ab9.mockapi.io",
+  "https://localhost:3001",
 ];
 
 function validateApiUrl(url: string): string {
