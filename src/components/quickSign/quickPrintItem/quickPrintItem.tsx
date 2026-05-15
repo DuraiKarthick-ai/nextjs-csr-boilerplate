@@ -376,7 +376,7 @@ export default function QuickPrintItem(): JSX.Element {
                 <div className="inputLabelWrap">
                   {index === 0 && <label className={`label ${invalidRows.has(index) ? 'errorLabel' : ""}`}>UPC</label>}
                   <ThemeProvider theme={theme}>
-                    <TextField id="filled-basic" fullWidth size="small" placeholder="Enter or Scan Item #" variant="outlined" />
+                    <TextField id="filled-basic" fullWidth size="small" placeholder="Enter or Scan UPC" variant="outlined" />
                   </ThemeProvider>
                 </div>
                 <div className="inputLabelWrap">
@@ -402,7 +402,7 @@ export default function QuickPrintItem(): JSX.Element {
                           {...params}
                           fullWidth
                           size="small"
-                          placeholder="Enter or Scan UPC"
+                          placeholder="Enter or Scan Item #"
                           variant="outlined"
                           error={invalidRows.has(index)}
                           helperText={getItemHelperText(index)}
