@@ -1,5 +1,5 @@
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import styles from "./header.module.scss";
 
@@ -14,6 +14,52 @@ function isLoopbackHost(hostname: string): boolean {
   return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
 }
 
+function normalizeOrigin(input: string): string {
+  return input.replace(/\/$/, "");
+}
+
+function getConfiguredOrigin(): string {
+  return normalizeOrigin(
+    process.env.NEXT_PUBLIC_SIGNS_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? ""
+  );
+}
+
+function getRuntimeRemoteBase(): string {
+  if (typeof window === "undefined") {
+    return "";
+  }
+
+  const scriptSources = Array.from(document.scripts)
+    .map((script) => script.src)
+    .filter(Boolean);
+
+  for (const src of scriptSources) {
+    try {
+      const parsed = new URL(src);
+      if (!parsed.pathname.includes("/_next/")) {
+        continue;
+      }
+
+      const basePath = parsed.pathname.split("/_next/")[0] ?? "";
+      const candidateBase = `${parsed.origin}${basePath}`;
+
+      // Prefer remote bases that differ from the host page origin.
+      if (parsed.origin !== window.location.origin) {
+        return candidateBase;
+      }
+
+      // In standalone mode this still gives a valid local base.
+      if (isLoopbackHost(window.location.hostname)) {
+        return candidateBase;
+      }
+    } catch {
+      // Ignore bad script URLs.
+    }
+  }
+
+  return "";
+}
+
 /**
  * Builds logo URL that works in both standalone and federated host contexts.
  *
@@ -23,25 +69,11 @@ function isLoopbackHost(hostname: string): boolean {
  * 3) Local relative path fallback.
  */
 function resolveLogoSrc(): string {
-  const configuredOrigin =
-    process.env.NEXT_PUBLIC_SIGNS_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "";
+  const configuredOrigin = getConfiguredOrigin();
+  const runtimeRemoteBase = getRuntimeRemoteBase();
 
-  if (typeof window !== "undefined") {
-    const remoteEntryScript = Array.from(document.scripts).find((script) =>
-      script.src.includes("remoteEntry.js")
-    );
-
-    if (remoteEntryScript?.src) {
-      try {
-        const remoteUrl = new URL(remoteEntryScript.src);
-        const basePath = remoteUrl.pathname.includes("/_next/")
-          ? remoteUrl.pathname.split("/_next/")[0]
-          : "";
-        return `${remoteUrl.origin}${basePath}${LOGO_FILE}`;
-      } catch {
-        // Ignore URL parse failures and continue.
-      }
-    }
+  if (runtimeRemoteBase) {
+    return `${runtimeRemoteBase}${LOGO_FILE}`;
   }
 
   if (typeof window !== "undefined" && configuredOrigin) {
@@ -59,7 +91,7 @@ function resolveLogoSrc(): string {
         return LOGO_FILE;
       }
 
-      return `${configuredOrigin.replace(/\/$/, "")}${LOGO_FILE}`;
+      return `${configuredOrigin}${LOGO_FILE}`;
     } catch {
       // Ignore malformed env values and continue to other resolution paths.
     }
@@ -71,7 +103,7 @@ function resolveLogoSrc(): string {
       if (isLoopbackHost(configuredUrl.hostname)) {
         return LOGO_FILE;
       }
-      return `${configuredOrigin.replace(/\/$/, "")}${LOGO_FILE}`;
+      return `${configuredOrigin}${LOGO_FILE}`;
     } catch {
       // Ignore malformed env values and continue to relative fallback.
     }
@@ -80,8 +112,30 @@ function resolveLogoSrc(): string {
   return LOGO_FILE;
 }
 
+function buildLogoCandidates(): string[] {
+  const configuredOrigin = getConfiguredOrigin();
+  const runtimeRemoteBase = getRuntimeRemoteBase();
+  const candidates = [
+    runtimeRemoteBase ? `${runtimeRemoteBase}${LOGO_FILE}` : "",
+    configuredOrigin ? `${configuredOrigin}${LOGO_FILE}` : "",
+    LOGO_FILE,
+  ].filter(Boolean);
+
+  return Array.from(new Set(candidates));
+}
+
 export default function Header({ toggle, open }: HeaderProps) {
-  const logoSrc = useMemo(resolveLogoSrc, []);
+  const [logoSrc, setLogoSrc] = useState<string>(() => resolveLogoSrc());
+  const logoCandidates = useMemo(buildLogoCandidates, []);
+
+  const handleLogoError = (): void => {
+    const currentIndex = logoCandidates.indexOf(logoSrc);
+    const nextSrc = currentIndex >= 0 ? logoCandidates[currentIndex + 1] : logoCandidates[0];
+
+    if (nextSrc && nextSrc !== logoSrc) {
+      setLogoSrc(nextSrc);
+    }
+  };
 
   const handBurgMenuIcon  = (
     <svg width="23" height="16" viewBox="0 0 23 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -128,7 +182,14 @@ export default function Header({ toggle, open }: HeaderProps) {
               <div className={styles.logoWrap}>
                 <Link href={"/"}>
                   <div className={styles.logo}>
-                    <img src={logoSrc} alt="web logo" width={160} height={40} loading="eager" />
+                    <img
+                      src={logoSrc}
+                      alt="web logo"
+                      width={160}
+                      height={40}
+                      loading="eager"
+                      onError={handleLogoError}
+                    />
                   </div>
                 </Link>
                 <h4>IBMi Replatforming</h4>
