@@ -143,25 +143,9 @@ const nextConfig = {
           name: "signs",
           filename: "static/chunks/remoteEntry.js",
           exposes: {
-            "./authGate": "./src/components/auth/authGate.tsx",
-            "./contentWrapper": "./src/components/contentWrapper/contentWrapper.tsx",
-            "./customPrint": "./src/components/customPrint/customPrint.tsx",
-            "./dashboard": "./src/components/dashboard/dashboard.tsx",
-            "./layout": "./src/components/layout/layout.tsx",
-            "./printSuccessDialog": "./src/components/printSuccessDialog/printSuccessDialog.tsx",
-            "./quickSign": "./src/components/quickSign/quickSign.tsx",
-            "./quickPrintDepartmentCategory": "./src/components/quickSign/quickPrintDepartmentCategory/quickPrintDepartmentCategory.tsx",
-            "./quickPrintItem": "./src/components/quickSign/quickPrintItem/quickPrintItem.tsx",
-            "./icons": "./src/components/shared/icons.tsx",
-            "./successToast": "./src/components/shared/SuccessToast.tsx",
-            "./sideNav": "./src/components/sideNav/sideNav.tsx",
-            "./signAudit": "./src/components/signAudit/signAudit.tsx",
-            "./signManagement": "./src/components/signManagement/signManagement.tsx",
-            "./signWorklist": "./src/components/signWorklist/signWorklist.tsx",
-            "./signWorklistEmergencyPriceChange": "./src/components/signWorklist/emergencyPriceChange/emergencyPriceChange.tsx",
-            "./signWorklistEndcap": "./src/components/signWorklist/endcap/endcap.tsx",
-            "./signWorklistItemNameChange": "./src/components/signWorklist/itemNameChange/itemNameChange.tsx",
-            "./signWorklistSignAudit": "./src/components/signWorklist/signAudit/signAudit.tsx",
+            // Single entry point — the host app imports `signs/app` and receives
+            // all components, hooks, and types. No need to list each component.
+            "./app": "./src/federation/index.ts",
           },
           shared: {
             react: { singleton: true, eager: true, requiredVersion: "18.3.1" },
