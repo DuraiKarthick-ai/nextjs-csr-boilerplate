@@ -1,4 +1,5 @@
 
+import { useMemo } from "react";
 import Link from "next/link";
 import styles from "./header.module.scss";
 
@@ -7,10 +8,47 @@ interface HeaderProps {
   open: boolean;
 }
 
-// Always use local asset path for logo
-const LOGO_SRC = "/images/costco_wholesale.png";
+const LOGO_FILE = "/images/costco_wholesale.png";
+
+/**
+ * Builds logo URL that works in both standalone and federated host contexts.
+ *
+ * Priority:
+ * 1) Explicit signs app origin env vars.
+ * 2) Remote entry script origin/path when mounted by Module Federation.
+ * 3) Local relative path fallback.
+ */
+function resolveLogoSrc(): string {
+  const configuredOrigin =
+    process.env.NEXT_PUBLIC_SIGNS_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "";
+
+  if (configuredOrigin) {
+    return `${configuredOrigin.replace(/\/$/, "")}${LOGO_FILE}`;
+  }
+
+  if (typeof document !== "undefined") {
+    const remoteEntryScript = Array.from(document.scripts).find((script) =>
+      script.src.includes("remoteEntry.js")
+    );
+
+    if (remoteEntryScript?.src) {
+      try {
+        const remoteUrl = new URL(remoteEntryScript.src);
+        const basePath = remoteUrl.pathname.includes("/_next/")
+          ? remoteUrl.pathname.split("/_next/")[0]
+          : "";
+        return `${remoteUrl.origin}${basePath}${LOGO_FILE}`;
+      } catch {
+        // Ignore URL parse failures and continue to relative fallback.
+      }
+    }
+  }
+
+  return LOGO_FILE;
+}
 
 export default function Header({ toggle, open }: HeaderProps) {
+  const logoSrc = useMemo(resolveLogoSrc, []);
 
   const handBurgMenuIcon  = (
     <svg width="23" height="16" viewBox="0 0 23 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -57,7 +95,7 @@ export default function Header({ toggle, open }: HeaderProps) {
               <div className={styles.logoWrap}>
                 <Link href={"/"}>
                   <div className={styles.logo}>
-                    <img src={LOGO_SRC} alt="web logo" width={160} height={40} loading="eager" />
+                    <img src={logoSrc} alt="web logo" width={160} height={40} loading="eager" />
                   </div>
                 </Link>
                 <h4>IBMi Replatforming</h4>
