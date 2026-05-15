@@ -7,7 +7,7 @@ import {
   useState,
   type UIEvent,
 } from "react";
-import theme from "@/theme/customizeTheme";
+import { tablePagination } from "@/theme/customizeTheme";
 import TextField from "@mui/material/TextField";
 import Checkbox from "@mui/material/Checkbox";
 import FormControl from "@mui/material/FormControl";
@@ -30,6 +30,8 @@ import type {
 import type { BatchDetailItem } from "@/types/batch";
 import SuccessToast from "@/components/shared/SuccessToast";
 import styles from "./emergencyPriceChange.module.scss";
+import React from "react";
+import { TablePagination } from "@mui/material";
 
 const FIRST_PAGE = 1;
 const PAGE_SIZE = 10;
@@ -176,6 +178,23 @@ export default function EmergencyPriceChange({ batchDetailRows, isLoading }: Eme
   const [hasMaxHeight, setHasMaxHeight] = useState(false);
 
   const rows = [1, 2, 3, 4, 5];
+
+   const [page, setPage] = React.useState(2);
+  const [rowsPerPage, setRowsPerPage] = React.useState(10);
+
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    newPage: number,
+  ) => {
+    setPage(newPage);
+  };
+
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setRowsPerPage(parseInt(event.target.value, 10));
+    setPage(0);
+  };
 
   const sortArrowUp = (
     <svg width="10" height="10" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -898,12 +917,24 @@ export default function EmergencyPriceChange({ batchDetailRows, isLoading }: Eme
             </tbody>
           </table>
         </div>
+        <ThemeProvider theme={tablePagination}>
+          <TablePagination size="small"
+            component="div"
+            count={100}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+          />
+        </ThemeProvider>
       </div>
 
-      <div className={styles.pagination}>
-        <p>Total Rows: {visibleRows.length}</p>
-        <p>Selected: {selectedCount}</p>
-      </div>
+      {false &&
+        <div className={styles.pagination}>
+          <p>Total Rows: {visibleRows.length}</p>
+          <p>Selected: {selectedCount}</p>
+        </div>
+      }
 
       <div className={styles.buttonWrap}>
         <ul>

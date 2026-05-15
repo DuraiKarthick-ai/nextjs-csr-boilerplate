@@ -1,6 +1,6 @@
 import { createTheme } from "@mui/material/styles";
 
-const theme = createTheme({
+export const theme = createTheme({
   components: {
     MuiOutlinedInput: {
       styleOverrides: {
@@ -522,4 +522,27 @@ export const datePickerTheme = createTheme({
   },
 });
 
-export default theme;
+// Compact theme for Table Pagination
+export const tablePagination = createTheme({
+  components: {
+    
+    MuiMenuItem: {
+      styleOverrides: {
+        root: {
+          fontSize: "14px",
+          padding: "6px 12px",
+          "&:hover": {
+            backgroundColor: "#f5f5f5",
+          },
+          "&.Mui-selected": {
+            backgroundColor: "#e3f2fd",
+            "&:hover": {
+              backgroundColor: "#e3f2fd",
+            },
+          },
+        },
+      },
+    },
+
+  },
+});
