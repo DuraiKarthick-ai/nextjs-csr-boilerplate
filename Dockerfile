@@ -49,7 +49,7 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 # Copy runtime artifacts
 COPY --from=builder /app/.next ./.next
-#COPY --from=builder /app/public ./public
+COPY --from=builder /app/public ./public
 COPY --from=builder /app/package.json ./package.json
 #commented as config file is not present in repo
 #COPY --from=builder /app/next-i18next.config.js ./next-i18next.config.js
