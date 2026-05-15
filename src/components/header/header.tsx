@@ -22,6 +22,22 @@ function resolveLogoSrc(): string {
   const configuredOrigin =
     process.env.NEXT_PUBLIC_SIGNS_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "";
 
+  if (typeof window !== "undefined" && configuredOrigin) {
+    try {
+      const configuredUrl = new URL(configuredOrigin);
+
+      // In standalone mode, keep assets relative so local http/https mismatches
+      // in dev do not break the image URL.
+      if (configuredUrl.host === window.location.host) {
+        return LOGO_FILE;
+      }
+
+      return `${configuredOrigin.replace(/\/$/, "")}${LOGO_FILE}`;
+    } catch {
+      // Ignore malformed env values and continue to other resolution paths.
+    }
+  }
+
   if (configuredOrigin) {
     return `${configuredOrigin.replace(/\/$/, "")}${LOGO_FILE}`;
   }
