@@ -14,9 +14,15 @@ import type {
   GetAllBatchesRequestPayload,
 } from "@/types/batch";
 
-const GET_ALL_BATCHES_API_URL = "/api/batch/get-all-batches";
+const BATCH_API_BASE_URL = process.env.NEXT_PUBLIC_BATCH_API_BASE_URL;
 
-const GET_BATCH_DETAIL_API_URL = "/api/batch/get-batch-detail";
+const GET_ALL_BATCHES_API_URL = BATCH_API_BASE_URL
+  ? `${BATCH_API_BASE_URL}/get-all-batches`
+  : "/api/batch/get-all-batches";
+
+const GET_BATCH_DETAIL_API_URL = BATCH_API_BASE_URL
+  ? `${BATCH_API_BASE_URL}/get-batch-detail`
+  : "/api/batch/get-batch-detail";
 
 export const batchService = {
   /**
