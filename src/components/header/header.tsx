@@ -7,11 +7,8 @@ interface HeaderProps {
   open: boolean;
 }
 
-const APP_URL = process.env.NEXT_PUBLIC_APP_URL;
-const USE_REMOTE_LOGO = process.env.NODE_ENV === "development" && Boolean(APP_URL);
-const LOGO_SRC = USE_REMOTE_LOGO
-  ? `${APP_URL}/images/costco_wholesale.png`
-  : "/images/costco_wholesale.png";
+// Always use local asset path for logo
+const LOGO_SRC = "/images/costco_wholesale.png";
 
 export default function Header({ toggle, open }: HeaderProps) {
 
