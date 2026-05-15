@@ -407,30 +407,10 @@ export default function QuickPrintItem(): JSX.Element {
               const hasItemNumberValue = row.itemNumber.trim() !== "";
               const showUpcStatus = hasUpcValue;
               const showItemStatus = hasItemNumberValue;
+              const isItemNumberDisabled = hasUpcValue;
 
               return (
               <li key={`item-${index}`} className={styles.itemRow}>
-                <div className={`inputLabelWrap ${styles.upcField}`}>
-                  {index === 0 && <label className={`label ${invalidRows.has(index) && showUpcStatus ? 'errorLabel' : ""}`}>UPC</label>}
-                  <ThemeProvider theme={theme}>
-                    <TextField
-                      id={`upc-${index}`}
-                      fullWidth
-                      size="small"
-                      placeholder="Enter or Scan UPC"
-                      variant="outlined"
-                      value={row.upc}
-                      disabled={row.itemNumber.trim() !== ""}
-                      error={invalidRows.has(index) && showUpcStatus}
-                      helperText={showUpcStatus ? getItemHelperText(index, "upc") : undefined}
-                      color={printedRows.has(index) && showUpcStatus ? "success" : undefined}
-                      FormHelperTextProps={printedRows.has(index) && showUpcStatus ? { sx: { color: "green" } } : undefined}
-                      onChange={(e) => handleItemInputChange(index, "upc", e.target.value)}
-                      onFocus={() => handleItemFocus(index)}
-                      onPaste={(e) => handlePaste(e, index)}
-                    />
-                  </ThemeProvider>
-                </div>
                 <div className={`inputLabelWrap ${styles.itemField}`}>
                   {index === 0 && <label className={`label ${invalidRows.has(index) && showItemStatus ? 'errorLabel' : ""}`}>Item #</label>}
                   <ThemeProvider theme={theme}>
@@ -439,7 +419,8 @@ export default function QuickPrintItem(): JSX.Element {
                       loading={searchLoading[index] || false}
                       value={row.selectedItem}
                       inputValue={row.itemNumber}
-                      disabled={row.upc.trim() !== ""}
+                      disabled={isItemNumberDisabled}
+                      forcePopupIcon={!isItemNumberDisabled}
                       onInputChange={(_e, value, reason) => {
                         if (reason !== "input") return;
                         handleItemInputChange(index, "itemNumber", value);
@@ -465,15 +446,38 @@ export default function QuickPrintItem(): JSX.Element {
                           onPaste={(e) => handlePaste(e, index)}
                           InputProps={{
                             ...params.InputProps,
-                            endAdornment: (
-                              <>
-                                {searchLoading[index] ? <CircularProgress size={18} /> : null}
-                                {params.InputProps.endAdornment}
-                              </>
-                            ),
+                            endAdornment: isItemNumberDisabled
+                              ? null
+                              : (
+                                <>
+                                  {searchLoading[index] ? <CircularProgress size={18} /> : null}
+                                  {params.InputProps.endAdornment}
+                                </>
+                              ),
                           }}
                         />
                       )}
+                    />
+                  </ThemeProvider>
+                </div>
+                <div className={`inputLabelWrap ${styles.upcField}`}>
+                  {index === 0 && <label className={`label ${invalidRows.has(index) && showUpcStatus ? 'errorLabel' : ""}`}>UPC</label>}
+                  <ThemeProvider theme={theme}>
+                    <TextField
+                      id={`upc-${index}`}
+                      fullWidth
+                      size="small"
+                      placeholder="Enter or Scan UPC"
+                      variant="outlined"
+                      value={row.upc}
+                      disabled={row.itemNumber.trim() !== ""}
+                      error={invalidRows.has(index) && showUpcStatus}
+                      helperText={showUpcStatus ? getItemHelperText(index, "upc") : undefined}
+                      color={printedRows.has(index) && showUpcStatus ? "success" : undefined}
+                      FormHelperTextProps={printedRows.has(index) && showUpcStatus ? { sx: { color: "green" } } : undefined}
+                      onChange={(e) => handleItemInputChange(index, "upc", e.target.value)}
+                      onFocus={() => handleItemFocus(index)}
+                      onPaste={(e) => handlePaste(e, index)}
                     />
                   </ThemeProvider>
                 </div>

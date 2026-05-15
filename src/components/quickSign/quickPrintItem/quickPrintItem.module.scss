@@ -48,6 +48,17 @@
             flex: 1;
           }
 
+          .upcField,
+          .itemField {
+            :global(.MuiInputBase-root.Mui-disabled),
+            :global(.MuiInputBase-root.Mui-disabled:hover),
+            :global(.MuiInputBase-input.Mui-disabled),
+            :global(.MuiInputBase-input.Mui-disabled:hover),
+            :global(.MuiOutlinedInput-notchedOutline) {
+              cursor: not-allowed !important;
+            }
+          }
+
           .qtyField {
             flex: 0 0 160px;
             max-width: 160px;
