@@ -3,7 +3,6 @@
 import { useState } from "react";
 import type { ViewType } from "@/types";
 import AuthGate from "@/components/auth/authGate";
-import Header from "@/components/header/header";
 import Layout from "@/components/layout/layout";
 import styles from "./bridge.module.scss";
 
@@ -34,7 +33,6 @@ export default function FederatedApp({ initialView = "dashboard" }: FederatedApp
   return (
     <div className={styles.bridge}>
       <AuthGate>
-        <Header open={open} toggle={() => setOpen((prev) => !prev)} />
         <Layout open={open} activeView={activeView} onNavigate={handleNavigate}>
           {null}
         </Layout>
