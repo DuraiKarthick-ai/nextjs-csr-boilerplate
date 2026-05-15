@@ -15,7 +15,8 @@ export interface ItemSearchResult {
 
 /** State shape for a single "By Item" row. */
 export interface ItemRow {
-  itemNumberOrUpc: string;
+  upc: string;
+  itemNumber: string;
   quantity: string;
   selectedItem: ItemSearchResult | null;
 }

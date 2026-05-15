@@ -56,6 +56,14 @@ export default function QuickPrintItem(): JSX.Element {
   } = useItemSearch();
 
   /**
+   * Returns the active lookup value for a row, preferring item number over UPC.
+   *
+   * @param {ItemRow} row - The row to inspect.
+   * @returns {string} The lookup value used for search and print.
+   */
+  const getRowLookupValue = (row: ItemRow): string => row.itemNumber.trim() || row.upc.trim();
+
+  /**
    * Updates a single field in an item row by index.
    *
    * @param {number} index - Row index.
@@ -73,11 +81,26 @@ export default function QuickPrintItem(): JSX.Element {
    * @param {number} index - Row index.
    * @param {string} value - The new input value.
    */
-  const handleItemInputChange = (index: number, value: string): void => {
+  const handleItemInputChange = (
+    index: number,
+    field: "upc" | "itemNumber",
+    value: string,
+  ): void => {
     if (value !== "" && !ITEM_INPUT_PATTERN.test(value)) return;
 
     setItemRows((prev) =>
-      prev.map((r, i) => (i === index ? { ...r, itemNumberOrUpc: value, selectedItem: null } : r))
+      prev.map((r, i) => {
+        if (i !== index) {
+          return r;
+        }
+
+        return {
+          ...r,
+          upc: field === "upc" ? value : "",
+          itemNumber: field === "itemNumber" ? value : "",
+          selectedItem: null,
+        };
+      })
     );
 
     if (invalidRows.has(index)) clearInvalid(index);
@@ -96,7 +119,12 @@ export default function QuickPrintItem(): JSX.Element {
     setItemRows((prev) =>
       prev.map((r, i) =>
         i === index
-          ? { ...r, itemNumberOrUpc: item ? String(item.itemNumber) : "", selectedItem: item }
+          ? {
+              ...r,
+              upc: "",
+              itemNumber: item ? String(item.itemNumber) : "",
+              selectedItem: item,
+            }
           : r
       )
     );
@@ -107,7 +135,7 @@ export default function QuickPrintItem(): JSX.Element {
    *
    * @returns {boolean} True when every row has a non-empty item number.
    */
-  const allRowsFilled = (): boolean => itemRows.every((r) => r.itemNumberOrUpc.trim() !== "");
+  const allRowsFilled = (): boolean => itemRows.every((r) => getRowLookupValue(r) !== "");
 
   /**
    * Handles paste events on item input fields.
@@ -145,10 +173,10 @@ export default function QuickPrintItem(): JSX.Element {
         if (rowIdx >= MAX_ROW_COUNT) break;
 
         if (rowIdx >= updated.length) {
-          updated.push({ itemNumberOrUpc: "", quantity: "1", selectedItem: null });
+          updated.push({ upc: "", itemNumber: "", quantity: "1", selectedItem: null });
         }
 
-        updated[rowIdx] = { itemNumberOrUpc: item, quantity: qty, selectedItem: null };
+        updated[rowIdx] = { upc: item, itemNumber: "", quantity: qty, selectedItem: null };
         rowIdx++;
       }
 
@@ -169,7 +197,7 @@ export default function QuickPrintItem(): JSX.Element {
    */
   const addItemRow = (): void => {
     if (itemRows.length >= MAX_ROW_COUNT) return;
-    setItemRows((prev) => [...prev, { itemNumberOrUpc: "", quantity: "1", selectedItem: null }]);
+    setItemRows((prev) => [...prev, { upc: "", itemNumber: "", quantity: "1", selectedItem: null }]);
   };
 
   /**
@@ -191,7 +219,7 @@ export default function QuickPrintItem(): JSX.Element {
    */
   const getPrintCount = (): number => {
     if (active === "item") {
-      return itemRows.filter((r) => r.itemNumberOrUpc.trim() !== "").length;
+      return itemRows.filter((r) => getRowLookupValue(r) !== "").length;
     }
     return deptForm.departmentNumber.trim() !== "" ? 1 : 0;
   };
@@ -208,7 +236,7 @@ export default function QuickPrintItem(): JSX.Element {
     if (isPrinting) return true;
     if (active === "item") {
       const hasSize = !!itemSize;
-      const filledRows = itemRows.filter((r) => r.itemNumberOrUpc.trim() !== "");
+      const filledRows = itemRows.filter((r) => getRowLookupValue(r) !== "");
       const allHaveQuantity = filledRows.every((r) => r.quantity.trim() !== "");
       const allHaveSelection = filledRows.every((r) => r.selectedItem !== null);
       return !hasSize || filledRows.length === 0 || !allHaveQuantity || !allHaveSelection;
@@ -241,7 +269,7 @@ export default function QuickPrintItem(): JSX.Element {
     const invalid = new Set<number>();
 
     itemRows.forEach((r, i) => {
-      if (r.itemNumberOrUpc.trim() !== "") {
+      if (getRowLookupValue(r) !== "") {
         if (r.selectedItem) {
           validIndices.push(i);
         } else {
@@ -258,7 +286,7 @@ export default function QuickPrintItem(): JSX.Element {
     if (validIndices.length === 0) return;
 
     const entries: ByItemEntry[] = validIndices.map((i) => ({
-      itemNumberOrUpc: itemRows[i]!.itemNumberOrUpc.trim(),
+      itemNumberOrUpc: getRowLookupValue(itemRows[i]!),
       size,
       quantity: Number(itemRows[i]!.quantity) || 1,
     }));
@@ -376,7 +404,22 @@ export default function QuickPrintItem(): JSX.Element {
                 <div className={`inputLabelWrap ${styles.upcField}`}>
                   {index === 0 && <label className={`label ${invalidRows.has(index) ? 'errorLabel' : ""}`}>UPC</label>}
                   <ThemeProvider theme={theme}>
-                    <TextField id="filled-basic" fullWidth size="small" placeholder="Enter or Scan UPC" variant="outlined" />
+                    <TextField
+                      id={`upc-${index}`}
+                      fullWidth
+                      size="small"
+                      placeholder="Enter or Scan UPC"
+                      variant="outlined"
+                      value={row.upc}
+                      disabled={row.itemNumber.trim() !== ""}
+                      error={invalidRows.has(index)}
+                      helperText={row.upc.trim() !== "" ? getItemHelperText(index) : undefined}
+                      color={printedRows.has(index) ? "success" : undefined}
+                      FormHelperTextProps={printedRows.has(index) ? { sx: { color: "green" } } : undefined}
+                      onChange={(e) => handleItemInputChange(index, "upc", e.target.value)}
+                      onFocus={() => handleItemFocus(index)}
+                      onPaste={(e) => handlePaste(e, index)}
+                    />
                   </ThemeProvider>
                 </div>
                 <div className={`inputLabelWrap ${styles.itemField}`}>
@@ -386,16 +429,17 @@ export default function QuickPrintItem(): JSX.Element {
                       options={searchOptions[index] || []}
                       loading={searchLoading[index] || false}
                       value={row.selectedItem}
-                      inputValue={row.itemNumberOrUpc}
+                      inputValue={row.itemNumber}
+                      disabled={row.upc.trim() !== ""}
                       onInputChange={(_e, value, reason) => {
                         if (reason !== "input") return;
-                        handleItemInputChange(index, value);
+                        handleItemInputChange(index, "itemNumber", value);
                       }}
                       onChange={(_e, newValue) => handleItemSelect(index, newValue)}
                       getOptionLabel={(option) => `${option.itemNumber} - ${option.itemName}`}
                       isOptionEqualToValue={(option, val) => option.itemNumber === val.itemNumber}
                       filterOptions={(x) => x}
-                      open={row.itemNumberOrUpc.length >= MIN_SEARCH_LENGTH && !row.selectedItem && (searchOptions[index] || []).length > 0}
+                      open={row.itemNumber.length >= MIN_SEARCH_LENGTH && !row.selectedItem && (searchOptions[index] || []).length > 0}
                       noOptionsText=""
                       renderInput={(params) => (
                         <TextField

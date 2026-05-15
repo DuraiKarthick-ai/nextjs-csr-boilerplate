@@ -34,7 +34,7 @@ export const SEARCH_DEBOUNCE_MS = 300;
 /** Initial state for item rows. */
 export const INITIAL_ITEM_ROWS: ItemRow[] = Array.from(
   { length: DEFAULT_ROW_COUNT },
-  () => ({ itemNumberOrUpc: "", quantity: "1", selectedItem: null })
+  () => ({ upc: "", itemNumber: "", quantity: "1", selectedItem: null })
 );
 
 /** Initial state for the department form. */
