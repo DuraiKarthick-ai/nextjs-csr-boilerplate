@@ -82,7 +82,9 @@ function validateApiUrl(url: string): string {
   }
 }
 
-const SIGNS_APP_URL = validateApiUrl("");
+const SIGNS_APP_URL = validateApiUrl(
+  process.env.NEXT_PUBLIC_SIGNS_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? ""
+);
 
 // ── Axios instance ──────────────────────────────────────────────────
 
@@ -99,9 +101,10 @@ const apiClient: AxiosInstance = axios.create({
 
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    // Keep Next.js internal API calls on the current host in deployed environments.
+    // Route Next.js internal API calls through the signs app origin when configured.
+    // In host-mounted federation, same-origin points to the host app (wrong API route).
     if (typeof config.url === "string" && config.url.startsWith("/api/")) {
-      config.baseURL = "";
+      config.baseURL = SIGNS_APP_URL || "";
     }
 
     try {

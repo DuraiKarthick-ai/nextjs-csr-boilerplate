@@ -10,6 +10,25 @@ const ALLOWED_BATCH_API_ORIGINS = [
   "https://localhost:3001",
 ];
 
+const ALLOWED_REQUEST_ORIGINS = [
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "https://localhost:3001",
+  "https://localhost:3002",
+  "https://erp-portal.costco.com",
+];
+
+function applyCors(req: NextApiRequest, res: NextApiResponse): void {
+  const origin = req.headers.origin;
+  if (origin && ALLOWED_REQUEST_ORIGINS.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Vary", "Origin");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Authorization, Content-Type");
+  }
+}
+
 /**
  * Proxies get-all-batches server-side to avoid browser CORS preflight failures.
  */
@@ -17,6 +36,13 @@ export default async function getAllBatchesHandler(
   req: NextApiRequest,
   res: NextApiResponse,
 ): Promise<void> {
+  applyCors(req, res);
+
+  if (req.method === "OPTIONS") {
+    res.status(204).end();
+    return;
+  }
+
   if (req.method !== "POST") {
     res.setHeader("Allow", "POST");
     res.status(405).json({ success: false, message: "Method Not Allowed" });
