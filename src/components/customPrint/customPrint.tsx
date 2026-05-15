@@ -5,7 +5,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import type { SelectChangeEvent } from "@mui/material/Select";
 import TextField from "@mui/material/TextField";
-import theme from "@/theme/customizeTheme";
+import { theme } from "@/theme/customizeTheme";
 import ContentWrapper from "../contentWrapper/contentWrapper";
 import SuccessToast from "../shared/SuccessToast";
 import { usePrint } from "@/hooks/usePrint";

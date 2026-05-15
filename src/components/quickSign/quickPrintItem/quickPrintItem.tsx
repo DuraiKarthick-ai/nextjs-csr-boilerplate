@@ -7,7 +7,7 @@ import CircularProgress from "@mui/material/CircularProgress";
 import FormControl from "@mui/material/FormControl";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
-import theme from "@/theme/customizeTheme";
+import { theme } from "@/theme/customizeTheme";
 import SuccessToast from "../../shared/SuccessToast";
 import { usePrint } from "@/hooks/usePrint";
 import { DEFAULT_STORE_ID, DEFAULT_REQUESTED_BY } from "@/constants/print";

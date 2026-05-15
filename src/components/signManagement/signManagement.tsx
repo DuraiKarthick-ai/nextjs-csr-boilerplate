@@ -6,7 +6,7 @@ import FormControl from "@mui/material/FormControl";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Switch from "@mui/material/Switch";
-import theme from "@/theme/customizeTheme";
+import { theme } from "@/theme/customizeTheme";
 import ContentWrapper from "../contentWrapper/contentWrapper";
 import styles from "./signManagement.module.scss";
 

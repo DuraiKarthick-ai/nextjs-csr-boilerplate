@@ -1,6 +1,6 @@
 import { ThemeProvider } from "@emotion/react";
 import styles from "./quickPrintDepartmentCategory.module.scss"
-import theme from "@/theme/customizeTheme";
+import { theme } from "@/theme/customizeTheme";
 import FormControl from "@mui/material/FormControl";
 import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";

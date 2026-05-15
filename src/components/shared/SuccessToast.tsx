@@ -3,7 +3,7 @@ import Alert from "@mui/material/Alert";
 import { ThemeProvider } from "@mui/material/styles";
 import CheckIcon from '@mui/icons-material/Check';
 import { TOAST_AUTO_HIDE_MS } from "@/constants/print";
-import theme from "@/theme/customizeTheme";
+import { theme } from "@/theme/customizeTheme";
 
 interface SuccessToastProps {
   /** Whether the toast is visible. */
