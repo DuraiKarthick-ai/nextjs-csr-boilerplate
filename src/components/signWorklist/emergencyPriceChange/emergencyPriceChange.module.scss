@@ -145,18 +145,26 @@
     }
   }
 
-  .pagination {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    padding: 22px 8px;
-    gap: 16px;
+  .paginationRow {
+    @include flex();
+    @include align-items(center);
+    @include justify-content(space-between);
+    padding: 10px 8px;
     box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
+  }
+
+  .paginationStats {
+    @include flex();
+    @include align-items(center);
+    @include justify-content(flex-start);
+    gap: 16px;
+    margin-right: 16px;
 
     p {
       @include font-size(14px);
       color: $text-color;
       font-weight: 500;
+      white-space: nowrap;
     }
   }
 

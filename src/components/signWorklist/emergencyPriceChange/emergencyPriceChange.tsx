@@ -291,6 +291,13 @@ export default function EmergencyPriceChange({ batchDetailRows, isLoading }: Eme
   }, [batchDetailRows, isLoading, loadPage]);
 
   /**
+   * Reset pagination to first page when filters change.
+   */
+  useEffect(() => {
+    setPage(0);
+  }, [dateFilter, itemNumberFilter, itemNameFilter, departmentFilter, categoryFilter, printStatusFilter, onHandFilter, quantityFilter, changeReasonFilter, signSizeFilter, copiesFilter, sortKey, sortOrder]);
+
+  /**
    * Fetches next page on table scroll near bottom.
    */
   const handleTableScroll = (event: UIEvent<HTMLDivElement>): void => {
@@ -351,6 +358,15 @@ export default function EmergencyPriceChange({ batchDetailRows, isLoading }: Eme
 
     return filteredRows;
   }, [allRows, dateFilter, itemNumberFilter, itemNameFilter, departmentFilter, categoryFilter, printStatusFilter, onHandFilter, quantityFilter, changeReasonFilter, signSizeFilter, copiesFilter, rowCopies, sortKey, sortOrder]);
+
+  /**
+   * Applies pagination to visible rows.
+   */
+  const paginatedRows = useMemo(() => {
+    const startIndex = page * rowsPerPage;
+    const endIndex = startIndex + rowsPerPage;
+    return visibleRows.slice(startIndex, endIndex);
+  }, [visibleRows, page, rowsPerPage]);
 
   const itemNumberOptions = useMemo(() => {
     const unique = Array.from(new Set(allRows.map((row) => row.itemNumber))).sort();
@@ -848,7 +864,7 @@ export default function EmergencyPriceChange({ batchDetailRows, isLoading }: Eme
                 </tr>
               )}
 
-              {!isLoadingState && !errorMessage && visibleRows.map((row) => (
+              {!isLoadingState && !errorMessage && paginatedRows.map((row) => (
                 <tr key={getRowKey(row)}>
                   <td className={styles.checkboxCell}>
                     <ThemeProvider theme={tableFilterTheme}>
@@ -917,24 +933,24 @@ export default function EmergencyPriceChange({ batchDetailRows, isLoading }: Eme
             </tbody>
           </table>
         </div>
-        <ThemeProvider theme={tablePagination}>
-          <TablePagination size="small"
-            component="div"
-            count={100}
-            page={page}
-            onPageChange={handleChangePage}
-            rowsPerPage={rowsPerPage}
-            onRowsPerPageChange={handleChangeRowsPerPage}
-          />
-        </ThemeProvider>
-      </div>
-
-      {false &&
-        <div className={styles.pagination}>
-          <p>Total Rows: {visibleRows.length}</p>
-          <p>Selected: {selectedCount}</p>
+        <div className={styles.paginationRow}>
+          <div className={styles.paginationStats}>
+            <p>Total Rows: {visibleRows.length}</p>
+            <p>Selected: {selectedCount}</p>
+          </div>
+          <ThemeProvider theme={tablePagination}>
+            <TablePagination
+              size="small"
+              component="div"
+              count={visibleRows.length}
+              page={page}
+              onPageChange={handleChangePage}
+              rowsPerPage={rowsPerPage}
+              onRowsPerPageChange={handleChangeRowsPerPage}
+            />
+          </ThemeProvider>
         </div>
-      }
+      </div>
 
       <div className={styles.buttonWrap}>
         <ul>
