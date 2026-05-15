@@ -10,6 +10,10 @@ interface HeaderProps {
 
 const LOGO_FILE = "/images/costco_wholesale.png";
 
+function isLoopbackHost(hostname: string): boolean {
+  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+}
+
 /**
  * Builds logo URL that works in both standalone and federated host contexts.
  *
@@ -22,9 +26,32 @@ function resolveLogoSrc(): string {
   const configuredOrigin =
     process.env.NEXT_PUBLIC_SIGNS_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? "";
 
+  if (typeof window !== "undefined") {
+    const remoteEntryScript = Array.from(document.scripts).find((script) =>
+      script.src.includes("remoteEntry.js")
+    );
+
+    if (remoteEntryScript?.src) {
+      try {
+        const remoteUrl = new URL(remoteEntryScript.src);
+        const basePath = remoteUrl.pathname.includes("/_next/")
+          ? remoteUrl.pathname.split("/_next/")[0]
+          : "";
+        return `${remoteUrl.origin}${basePath}${LOGO_FILE}`;
+      } catch {
+        // Ignore URL parse failures and continue.
+      }
+    }
+  }
+
   if (typeof window !== "undefined" && configuredOrigin) {
     try {
       const configuredUrl = new URL(configuredOrigin);
+
+      // In deployed/host mode, never use loopback image origins.
+      if (!isLoopbackHost(window.location.hostname) && isLoopbackHost(configuredUrl.hostname)) {
+        return LOGO_FILE;
+      }
 
       // In standalone mode, keep assets relative so local http/https mismatches
       // in dev do not break the image URL.
@@ -39,24 +66,14 @@ function resolveLogoSrc(): string {
   }
 
   if (configuredOrigin) {
-    return `${configuredOrigin.replace(/\/$/, "")}${LOGO_FILE}`;
-  }
-
-  if (typeof document !== "undefined") {
-    const remoteEntryScript = Array.from(document.scripts).find((script) =>
-      script.src.includes("remoteEntry.js")
-    );
-
-    if (remoteEntryScript?.src) {
-      try {
-        const remoteUrl = new URL(remoteEntryScript.src);
-        const basePath = remoteUrl.pathname.includes("/_next/")
-          ? remoteUrl.pathname.split("/_next/")[0]
-          : "";
-        return `${remoteUrl.origin}${basePath}${LOGO_FILE}`;
-      } catch {
-        // Ignore URL parse failures and continue to relative fallback.
+    try {
+      const configuredUrl = new URL(configuredOrigin);
+      if (isLoopbackHost(configuredUrl.hostname)) {
+        return LOGO_FILE;
       }
+      return `${configuredOrigin.replace(/\/$/, "")}${LOGO_FILE}`;
+    } catch {
+      // Ignore malformed env values and continue to relative fallback.
     }
   }
 
