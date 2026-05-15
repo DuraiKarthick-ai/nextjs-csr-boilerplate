@@ -1,0 +1,93 @@
+.bridge :global(*),
+.bridge :global(*::before),
+.bridge :global(*::after) {
+  box-sizing: border-box;
+}
+
+.bridge :global(ul),
+.bridge :global(ol) {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.bridge :global(a) {
+  text-decoration: none;
+  color: inherit;
+}
+
+.bridge :global(button) {
+  font: inherit;
+  color: inherit;
+}
+
+.bridge :global(.container) {
+  max-width: 1920px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.bridge :global(.d-flex) {
+  display: flex;
+}
+
+.bridge :global(.flex-align-center) {
+  align-items: center;
+}
+
+.bridge :global(.inputLabelWrap) {
+  position: relative;
+  width: 100%;
+}
+
+.bridge :global(.primaryButton) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  background-color: #005dab;
+  color: #ffffff;
+  border: 1px solid #005dab;
+  border-radius: 4px;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.bridge :global(.primaryButton:disabled) {
+  cursor: not-allowed;
+  background-color: #afafaf;
+  border-color: #afafaf;
+}
+
+.bridge :global(.primaryButtonOutline) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  background-color: transparent;
+  color: #005dab;
+  border: 1px solid #005dab;
+  border-radius: 4px;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.bridge :global(.printButton) {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px;
+  background-color: #005dab;
+  color: #ffffff;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 16px;
+  font-weight: 400;
+  cursor: pointer;
+  min-width: 110px;
+}

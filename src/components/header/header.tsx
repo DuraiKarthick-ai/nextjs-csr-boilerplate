@@ -1,12 +1,15 @@
 
 import Link from "next/link";
-import Image from "next/image";
 import styles from "./header.module.scss";
 
 interface HeaderProps {
   toggle: () => void;
   open: boolean;
 }
+
+const LOGO_SRC = process.env.NEXT_PUBLIC_APP_URL
+  ? `${process.env.NEXT_PUBLIC_APP_URL}/images/costco_wholesale.png`
+  : "/images/costco_wholesale.png";
 
 export default function Header({ toggle, open }: HeaderProps) {
 
@@ -55,7 +58,7 @@ export default function Header({ toggle, open }: HeaderProps) {
               <div className={styles.logoWrap}>
                 <Link href={"/"}>
                   <div className={styles.logo}>
-                    <Image src="/images/costco_wholesale.png" alt="web logo" width={160} height={40} priority loading="eager" />
+                    <img src={LOGO_SRC} alt="web logo" width={160} height={40} loading="eager" />
                   </div>
                 </Link>
                 <h4>IBMi Replatforming</h4>
