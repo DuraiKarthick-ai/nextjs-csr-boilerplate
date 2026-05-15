@@ -373,8 +373,14 @@ export default function QuickPrintItem(): JSX.Element {
           <ul>
             {itemRows.map((row, index) => (
               <li key={`item-${index}`} className={styles.itemRow}>
-                <div className={`inputLabelWrap ${styles.itemField}`}>
-                  {index === 0 && <label className={`label ${invalidRows.has(index) ? 'errorLabel' : ""}`}>Item # / UPC</label>}
+                <div className="inputLabelWrap">
+                  {index === 0 && <label className={`label ${invalidRows.has(index) ? 'errorLabel' : ""}`}>UPC</label>}
+                  <ThemeProvider theme={theme}>
+                    <TextField id="filled-basic" fullWidth size="small" placeholder="Enter or Scan Item #" variant="outlined" />
+                  </ThemeProvider>
+                </div>
+                <div className="inputLabelWrap">
+                  {index === 0 && <label className={`label ${invalidRows.has(index) ? 'errorLabel' : ""}`}>Item #</label>}
                   <ThemeProvider theme={theme}>
                     <Autocomplete<ItemSearchResult>
                       options={searchOptions[index] || []}
@@ -396,7 +402,7 @@ export default function QuickPrintItem(): JSX.Element {
                           {...params}
                           fullWidth
                           size="small"
-                          placeholder="Enter or Scan Item # / UPC"
+                          placeholder="Enter or Scan UPC"
                           variant="outlined"
                           error={invalidRows.has(index)}
                           helperText={getItemHelperText(index)}
