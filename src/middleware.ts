@@ -27,6 +27,8 @@ const ALLOWED_PORTAL_ORIGINS = [
   "https://erp-portal.costco.com",
   "http://localhost:3000",
   "http://localhost:3001",
+  "http://localhost:3002",
+  "https://localhost:3001",
 ];
 
 function isProtectedPath(pathname: string): boolean {
@@ -55,7 +57,16 @@ export function middleware(req: NextRequest): NextResponse {
 
   // ── Only protect specific routes ─────────────────────────────────
   if (!isProtectedPath(pathname)) {
-    return NextResponse.next();
+    // Reflect the validated origin in CORS headers so all allowed origins work.
+    // Access-Control-Allow-Origin only accepts a single value, so we echo back
+    // the request Origin if it is in our allowlist (dynamic CORS reflection).
+    const res = NextResponse.next();
+    if (origin && ALLOWED_PORTAL_ORIGINS.includes(origin)) {
+      res.headers.set("Access-Control-Allow-Origin", origin);
+      res.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+      res.headers.set("Access-Control-Allow-Headers", "Authorization, Content-Type");
+    }
+    return res;
   }
 
   // ── Check for Bearer token in Authorization header ───────────────

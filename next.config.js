@@ -91,7 +91,7 @@ const nextConfig = {
               // unsafe-inline is required by Next.js CSS-in-JS / MUI
               "style-src 'self' 'unsafe-inline'",
               // Allow connections to Portal and Ping OIDC
-              `connect-src 'self' ${PORTAL_REMOTE_URL ?? "https://localhost:3001"} https://loginnp.costco.com https://69ce482633a09f831b7d3ab9.mockapi.io http://34.133.77.6:8080`,
+              `connect-src 'self' ${PORTAL_REMOTE_URL ?? "https://localhost:3001"} https://loginnp.costco.com https://69ce482633a09f831b7d3ab9.mockapi.io http://34.133.77.6:8080 http://localhost:3002`,
               // Fonts served from /public/fonts
               "font-src 'self'",
               // Images from self + data URIs (Next/Image optimization)
@@ -122,20 +122,10 @@ const nextConfig = {
           // Control referrer information sent to external sites
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
 
-          // OWASP A10 Fix: Restrict CORS to the known Portal origin only.
-          // Applied globally but should be more specific per-route in production.
-          {
-            key: "Access-Control-Allow-Origin",
-            value: PORTAL_REMOTE_URL ?? "https://localhost:3001",
-          },
-          {
-            key: "Access-Control-Allow-Methods",
-            value: "GET, POST, PUT, DELETE, OPTIONS",
-          },
-          {
-            key: "Access-Control-Allow-Headers",
-            value: "Authorization, Content-Type",
-          },
+          // OWASP A10: CORS headers are set dynamically in src/middleware.ts
+          // (dynamic origin reflection) so that all allowlisted origins work.
+          // Static Access-Control-Allow-Origin is intentionally omitted here
+          // because it only accepts a single value and would break multi-origin setups.
         ],
       },
     ];
