@@ -31,7 +31,8 @@
       flex: 1;
 
       &.gridSize {
-        max-width: 30%;
+        max-width: 20%;
+        min-width: 200px;
       }
 
       ul {
@@ -39,7 +40,16 @@
           padding-bottom: 20px;
           position: relative;
 
+          .upcField {
+            flex: 1.8;
+          }
+
+          .itemField {
+            flex: 1;
+          }
+
           .qtyField {
+            flex: 0 0 160px;
             max-width: 160px;
           }
 

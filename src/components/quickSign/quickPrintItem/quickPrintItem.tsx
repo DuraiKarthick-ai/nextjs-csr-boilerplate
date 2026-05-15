@@ -373,13 +373,13 @@ export default function QuickPrintItem(): JSX.Element {
           <ul>
             {itemRows.map((row, index) => (
               <li key={`item-${index}`} className={styles.itemRow}>
-                <div className="inputLabelWrap">
+                <div className={`inputLabelWrap ${styles.upcField}`}>
                   {index === 0 && <label className={`label ${invalidRows.has(index) ? 'errorLabel' : ""}`}>UPC</label>}
                   <ThemeProvider theme={theme}>
                     <TextField id="filled-basic" fullWidth size="small" placeholder="Enter or Scan UPC" variant="outlined" />
                   </ThemeProvider>
                 </div>
-                <div className="inputLabelWrap">
+                <div className={`inputLabelWrap ${styles.itemField}`}>
                   {index === 0 && <label className={`label ${invalidRows.has(index) ? 'errorLabel' : ""}`}>Item #</label>}
                   <ThemeProvider theme={theme}>
                     <Autocomplete<ItemSearchResult>
