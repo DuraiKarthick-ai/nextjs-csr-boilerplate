@@ -18,6 +18,21 @@ const PORTAL_REMOTE_URL =
     ? process.env.NEXT_PUBLIC_PORTAL_REMOTE_URL_PROD
     : (process.env.NEXT_PUBLIC_PORTAL_REMOTE_URL_DEV ?? "http://localhost:3000");
 
+const APP_ORIGIN = process.env.NEXT_PUBLIC_APP_URL ?? "";
+
+/**
+ * Allowed image origins for CSP img-src.
+ *
+ * Includes self/data/blob plus explicit remote origins used by federation
+ * assets in local/dev scenarios.
+ */
+const ALLOWED_IMAGE_ORIGINS = [
+  "http://localhost:3002",
+  "https://localhost:3001",
+  APP_ORIGIN,
+  PORTAL_REMOTE_URL,
+].filter(Boolean).join(" ");
+
 /**
  * Module Federation gate.
  *
@@ -95,7 +110,7 @@ const nextConfig = {
               // Fonts served from /public/fonts
               "font-src 'self'",
               // Images from self + data URIs (Next/Image optimization)
-              "img-src 'self' data: blob:",
+              `img-src 'self' data: blob: ${ALLOWED_IMAGE_ORIGINS}`,
               // No plugins, no object embeds
               "object-src 'none'",
               // Lock base URI to self
