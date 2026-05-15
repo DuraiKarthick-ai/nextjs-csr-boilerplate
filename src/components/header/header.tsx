@@ -1,5 +1,4 @@
 
-import { useMemo, useState } from "react";
 import Link from "next/link";
 import styles from "./header.module.scss";
 
@@ -8,135 +7,10 @@ interface HeaderProps {
   open: boolean;
 }
 
-const LOGO_FILE = "/images/costco_wholesale.png";
-
-function isLoopbackHost(hostname: string): boolean {
-  return hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
-}
-
-function normalizeOrigin(input: string): string {
-  return input.replace(/\/$/, "");
-}
-
-function getConfiguredOrigin(): string {
-  return normalizeOrigin(
-    process.env.NEXT_PUBLIC_SIGNS_APP_URL ?? process.env.NEXT_PUBLIC_APP_URL ?? ""
-  );
-}
-
-function getRuntimeRemoteBase(): string {
-  if (typeof window === "undefined") {
-    return "";
-  }
-
-  const scriptSources = Array.from(document.scripts)
-    .map((script) => script.src)
-    .filter(Boolean);
-
-  for (const src of scriptSources) {
-    try {
-      const parsed = new URL(src);
-      if (!parsed.pathname.includes("/_next/")) {
-        continue;
-      }
-
-      const basePath = parsed.pathname.split("/_next/")[0] ?? "";
-      const candidateBase = `${parsed.origin}${basePath}`;
-
-      // Prefer remote bases that differ from the host page origin.
-      if (parsed.origin !== window.location.origin) {
-        return candidateBase;
-      }
-
-      // In standalone mode this still gives a valid local base.
-      if (isLoopbackHost(window.location.hostname)) {
-        return candidateBase;
-      }
-    } catch {
-      // Ignore bad script URLs.
-    }
-  }
-
-  return "";
-}
-
-/**
- * Builds logo URL that works in both standalone and federated host contexts.
- *
- * Priority:
- * 1) Explicit signs app origin env vars.
- * 2) Remote entry script origin/path when mounted by Module Federation.
- * 3) Local relative path fallback.
- */
-function resolveLogoSrc(): string {
-  const configuredOrigin = getConfiguredOrigin();
-  const runtimeRemoteBase = getRuntimeRemoteBase();
-
-  if (runtimeRemoteBase) {
-    return `${runtimeRemoteBase}${LOGO_FILE}`;
-  }
-
-  if (typeof window !== "undefined" && configuredOrigin) {
-    try {
-      const configuredUrl = new URL(configuredOrigin);
-
-      // In deployed/host mode, never use loopback image origins.
-      if (!isLoopbackHost(window.location.hostname) && isLoopbackHost(configuredUrl.hostname)) {
-        return LOGO_FILE;
-      }
-
-      // In standalone mode, keep assets relative so local http/https mismatches
-      // in dev do not break the image URL.
-      if (configuredUrl.host === window.location.host) {
-        return LOGO_FILE;
-      }
-
-      return `${configuredOrigin}${LOGO_FILE}`;
-    } catch {
-      // Ignore malformed env values and continue to other resolution paths.
-    }
-  }
-
-  if (configuredOrigin) {
-    try {
-      const configuredUrl = new URL(configuredOrigin);
-      if (isLoopbackHost(configuredUrl.hostname)) {
-        return LOGO_FILE;
-      }
-      return `${configuredOrigin}${LOGO_FILE}`;
-    } catch {
-      // Ignore malformed env values and continue to relative fallback.
-    }
-  }
-
-  return LOGO_FILE;
-}
-
-function buildLogoCandidates(): string[] {
-  const configuredOrigin = getConfiguredOrigin();
-  const runtimeRemoteBase = getRuntimeRemoteBase();
-  const candidates = [
-    runtimeRemoteBase ? `${runtimeRemoteBase}${LOGO_FILE}` : "",
-    configuredOrigin ? `${configuredOrigin}${LOGO_FILE}` : "",
-    LOGO_FILE,
-  ].filter(Boolean);
-
-  return Array.from(new Set(candidates));
-}
+// Always serve from this app's own public folder
+const LOGO_SRC = "/images/costco_wholesale.png";
 
 export default function Header({ toggle, open }: HeaderProps) {
-  const [logoSrc, setLogoSrc] = useState<string>(() => resolveLogoSrc());
-  const logoCandidates = useMemo(buildLogoCandidates, []);
-
-  const handleLogoError = (): void => {
-    const currentIndex = logoCandidates.indexOf(logoSrc);
-    const nextSrc = currentIndex >= 0 ? logoCandidates[currentIndex + 1] : logoCandidates[0];
-
-    if (nextSrc && nextSrc !== logoSrc) {
-      setLogoSrc(nextSrc);
-    }
-  };
-
   const handBurgMenuIcon  = (
     <svg width="23" height="16" viewBox="0 0 23 16" fill="none" xmlns="http://www.w3.org/2000/svg">
       <path d="M0 15.132H22.6979V12.61H0V15.132ZM0 8.82698H22.6979V6.30498H0V8.82698ZM0 0V2.52199H22.6979V0H0Z" fill="#000000"/>
@@ -182,14 +56,7 @@ export default function Header({ toggle, open }: HeaderProps) {
               <div className={styles.logoWrap}>
                 <Link href={"/"}>
                   <div className={styles.logo}>
-                    <img
-                      src={logoSrc}
-                      alt="web logo"
-                      width={160}
-                      height={40}
-                      loading="eager"
-                      onError={handleLogoError}
-                    />
+                    <img src={LOGO_SRC} alt="web logo" width={160} height={40} loading="eager" />
                   </div>
                 </Link>
                 <h4>IBMi Replatforming</h4>
