@@ -353,10 +353,13 @@ export default function QuickPrintItem(): JSX.Element {
    * Computes the helper text for a given item row based on its status.
    *
    * @param {number} index - Row index.
+   * @param {"upc" | "itemNumber"} field - Active field for the row.
    * @returns {string | undefined} Helper text to display, or undefined.
    */
-  const getItemHelperText = (index: number): string | undefined => {
-    if (invalidRows.has(index)) return "Item # / UPC not found";
+  const getItemHelperText = (index: number, field: "upc" | "itemNumber"): string | undefined => {
+    if (invalidRows.has(index)) {
+      return field === "upc" ? "UPC not found" : "Item # not found";
+    }
     if (printedRows.has(index) && printedMessage) return printedMessage;
     return undefined;
   };
@@ -399,10 +402,16 @@ export default function QuickPrintItem(): JSX.Element {
         </div>
         <div className={styles.grid}>
           <ul>
-            {itemRows.map((row, index) => (
+            {itemRows.map((row, index) => {
+              const hasUpcValue = row.upc.trim() !== "";
+              const hasItemNumberValue = row.itemNumber.trim() !== "";
+              const showUpcStatus = hasUpcValue;
+              const showItemStatus = hasItemNumberValue;
+
+              return (
               <li key={`item-${index}`} className={styles.itemRow}>
                 <div className={`inputLabelWrap ${styles.upcField}`}>
-                  {index === 0 && <label className={`label ${invalidRows.has(index) ? 'errorLabel' : ""}`}>UPC</label>}
+                  {index === 0 && <label className={`label ${invalidRows.has(index) && showUpcStatus ? 'errorLabel' : ""}`}>UPC</label>}
                   <ThemeProvider theme={theme}>
                     <TextField
                       id={`upc-${index}`}
@@ -412,10 +421,10 @@ export default function QuickPrintItem(): JSX.Element {
                       variant="outlined"
                       value={row.upc}
                       disabled={row.itemNumber.trim() !== ""}
-                      error={invalidRows.has(index)}
-                      helperText={row.upc.trim() !== "" ? getItemHelperText(index) : undefined}
-                      color={printedRows.has(index) ? "success" : undefined}
-                      FormHelperTextProps={printedRows.has(index) ? { sx: { color: "green" } } : undefined}
+                      error={invalidRows.has(index) && showUpcStatus}
+                      helperText={showUpcStatus ? getItemHelperText(index, "upc") : undefined}
+                      color={printedRows.has(index) && showUpcStatus ? "success" : undefined}
+                      FormHelperTextProps={printedRows.has(index) && showUpcStatus ? { sx: { color: "green" } } : undefined}
                       onChange={(e) => handleItemInputChange(index, "upc", e.target.value)}
                       onFocus={() => handleItemFocus(index)}
                       onPaste={(e) => handlePaste(e, index)}
@@ -423,7 +432,7 @@ export default function QuickPrintItem(): JSX.Element {
                   </ThemeProvider>
                 </div>
                 <div className={`inputLabelWrap ${styles.itemField}`}>
-                  {index === 0 && <label className={`label ${invalidRows.has(index) ? 'errorLabel' : ""}`}>Item #</label>}
+                  {index === 0 && <label className={`label ${invalidRows.has(index) && showItemStatus ? 'errorLabel' : ""}`}>Item #</label>}
                   <ThemeProvider theme={theme}>
                     <Autocomplete<ItemSearchResult>
                       options={searchOptions[index] || []}
@@ -448,10 +457,10 @@ export default function QuickPrintItem(): JSX.Element {
                           size="small"
                           placeholder="Enter or Scan Item #"
                           variant="outlined"
-                          error={invalidRows.has(index)}
-                          helperText={getItemHelperText(index)}
-                          color={printedRows.has(index) ? "success" : undefined}
-                          FormHelperTextProps={printedRows.has(index) ? { sx: { color: "green" } } : undefined}
+                          error={invalidRows.has(index) && showItemStatus}
+                          helperText={showItemStatus ? getItemHelperText(index, "itemNumber") : undefined}
+                          color={printedRows.has(index) && showItemStatus ? "success" : undefined}
+                          FormHelperTextProps={printedRows.has(index) && showItemStatus ? { sx: { color: "green" } } : undefined}
                           onFocus={() => handleItemFocus(index)}
                           onPaste={(e) => handlePaste(e, index)}
                           InputProps={{
@@ -483,7 +492,8 @@ export default function QuickPrintItem(): JSX.Element {
                   </ThemeProvider>
                 </div>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       </div>
