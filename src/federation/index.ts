@@ -1,17 +1,12 @@
 /**
- * Module Federation — single entry point.
+ * Module Federation entry point.
  *
- * The host app imports one remote (`signs/app`) and receives all components,
- * hooks, services, styles, and type definitions. Keeping a single expose
- * in next.config.js avoids listing every component individually and makes
- * additions/removals transparent to the host.
- *
- * Usage in host app:
- *   const { Dashboard, SignWorklist } = await import("signs/app");
- *
- * Or with React.lazy:
- *   const { Dashboard } = React.lazy(() => import("signs/app"));
+ * `signs/app` default-exports the full remote shell, while the named exports
+ * below keep the app's internal components available for host-side advanced
+ * composition if needed.
  */
+
+export { default } from "./app";
 
 // ── Components ──────────────────────────────────────────────────────
 export { default as AuthGate } from "@/components/auth/authGate";
