@@ -25,7 +25,7 @@ export interface ItemRow {
 export interface DeptForm {
   departmentNumber: string;
   categoryCode: string;
-  size: number | "";
+  size: "" | "SMALL" | "MEDIUM" | "LARGE";
   quantity: string;
   printOnlyItemsWithOnHand: boolean;
 }

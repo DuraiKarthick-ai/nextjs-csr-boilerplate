@@ -37,7 +37,7 @@ const ITEM_INPUT_PATTERN = new RegExp(`^\\d{0,${MAX_ITEM_DIGITS}}$`);
  */
 export default function QuickPrintItem(): JSX.Element {
   const [active, setActive] = useState<QuickSignTab>("item");
-  const [itemSize, setItemSize] = useState<number | "">("");
+  const [itemSize, setItemSize] = useState<"" | "SMALL" | "MEDIUM" | "LARGE">("");
   const [itemRows, setItemRows] = useState<ItemRow[]>(INITIAL_ITEM_ROWS);
   const [deptForm, setDeptForm] = useState<DeptForm>({ ...INITIAL_DEPT_FORM });
 
@@ -226,8 +226,8 @@ export default function QuickPrintItem(): JSX.Element {
 
   /**
    * Whether the Print button should be disabled based on mandatory field validation.
-   * For "By Item": requires size, at least one filled row, all filled rows must have
-   * a quantity and a valid selectedItem from the search API.
+    * For "By Item": requires size, at least one filled row, and quantity for each
+    * filled row. Item lookup uses entered item#/UPC directly during submission.
    * For "By Dept": requires department number.
    *
    * @returns {boolean} True when required fields are missing.
@@ -238,8 +238,7 @@ export default function QuickPrintItem(): JSX.Element {
       const hasSize = !!itemSize;
       const filledRows = itemRows.filter((r) => getRowLookupValue(r) !== "");
       const allHaveQuantity = filledRows.every((r) => r.quantity.trim() !== "");
-      const allHaveSelection = filledRows.every((r) => r.selectedItem !== null);
-      return !hasSize || filledRows.length === 0 || !allHaveQuantity || !allHaveSelection;
+      return !hasSize || filledRows.length === 0 || !allHaveQuantity;
     }
     return !deptForm.departmentNumber.trim();
   };
@@ -257,31 +256,20 @@ export default function QuickPrintItem(): JSX.Element {
 
   /**
    * Builds and submits a "By Item" print request.
-   * Validates that filled rows have a selectedItem; flags invalid rows.
-   * On success, marks valid rows as printed with inline message.
-   * Suppresses the popup dialog when there are also invalid rows.
+   * Uses entered item#/UPC values from filled rows.
+   * On success, marks submitted rows as printed with inline message.
    */
   const handleItemPrint = async (): Promise<void> => {
     const size = itemSize ? SIZE_MAP[itemSize] : undefined;
     if (!size) return;
 
     const validIndices: number[] = [];
-    const invalid = new Set<number>();
 
     itemRows.forEach((r, i) => {
       if (getRowLookupValue(r) !== "") {
-        if (r.selectedItem) {
-          validIndices.push(i);
-        } else {
-          invalid.add(i);
-        }
+        validIndices.push(i);
       }
     });
-
-    if (invalid.size > 0) {
-      // handled by isPrintDisabled but kept as safety check
-      return;
-    }
 
     if (validIndices.length === 0) return;
 
@@ -291,17 +279,17 @@ export default function QuickPrintItem(): JSX.Element {
       quantity: Number(itemRows[i]!.quantity) || 1,
     }));
 
-    const response = await submitPrint({
-      storeId: DEFAULT_STORE_ID,
-      requestedBy: DEFAULT_REQUESTED_BY,
-      printRequests: [{ type: "BY_ITEM", entries }],
-    });
+    const response = await submitPrint(
+      {
+        storeId: DEFAULT_STORE_ID,
+        requestedBy: DEFAULT_REQUESTED_BY,
+        printRequests: [{ type: "BY_ITEM", entries }],
+      },
+      { mode: "QUICK_PREVIEW" },
+    );
 
     if (response) {
       markPrinted(validIndices, `${response.responseMessage} \u2014 ${response.printerName}`);
-      if (invalid.size > 0) {
-        resetPrint();
-      }
     }
   };
 
@@ -386,7 +374,7 @@ export default function QuickPrintItem(): JSX.Element {
                     <Select
                       displayEmpty
                       value={itemSize}
-                      onChange={(e) => setItemSize(e.target.value as number | "")}
+                      onChange={(e) => setItemSize(e.target.value as "" | "SMALL" | "MEDIUM" | "LARGE")}
                       inputProps={{ "aria-label": "Select Size" }}
                     >
                       <MenuItem value="" disabled>Select Any</MenuItem>

@@ -10,10 +10,10 @@ export const ITEM_SEARCH_URL =
   "https://69ce482633a09f831b7d3ab9.mockapi.io/api/v1/dashboard/itemSearch";
 
 /** Maps size select option values to API sign sizes. */
-export const SIZE_MAP: Record<number, SignSize> = {
-  10: "SMALL",
-  20: "MEDIUM",
-  30: "LARGE",
+export const SIZE_MAP: Record<SignSize, SignSize> = {
+  SMALL: "SMALL",
+  MEDIUM: "MEDIUM",
+  LARGE: "LARGE",
 };
 
 /** Number of item rows shown by default. */

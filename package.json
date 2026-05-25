@@ -6,7 +6,7 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "dev": "cross-env ENABLE_MODULE_FEDERATION=true next dev -p 3002",
+    "dev": "cross-env ENABLE_MODULE_FEDERATION=true next dev --experimental-https -p 3002",
     "predev": "node scripts/patch-next-resolver.js",
     "prebuild": "node scripts/patch-next-resolver.js",
     "build": "next build",

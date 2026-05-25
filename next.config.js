@@ -106,7 +106,7 @@ const nextConfig = {
               // unsafe-inline is required by Next.js CSS-in-JS / MUI
               "style-src 'self' 'unsafe-inline'",
               // Allow connections to Portal and Ping OIDC
-              `connect-src 'self' ${PORTAL_REMOTE_URL ?? "https://localhost:3001"} https://loginnp.costco.com https://69ce482633a09f831b7d3ab9.mockapi.io http://34.133.77.6:8080 http://localhost:3002`,
+              `connect-src 'self' ${PORTAL_REMOTE_URL ?? "https://localhost:3001"} https://loginnp.costco.com https://69ce482633a09f831b7d3ab9.mockapi.io http://34.133.77.6:8080 http://localhost:3002 https://localhost.ecsglobalinc.com:8083 https://costcotest.ecsglobalinc.com`,
               // Fonts served from /public/fonts
               "font-src 'self'",
               // Images from self + data URIs (Next/Image optimization)

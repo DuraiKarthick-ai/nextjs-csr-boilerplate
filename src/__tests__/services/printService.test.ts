@@ -1,10 +1,15 @@
 import apiClient from "@/utils/apiClient";
 import { printService } from "@/services/printService";
+import { runQuickPreviewFlow } from "@/services/quickPreviewFlow";
 import type { PrintRequestPayload, PrintResponse } from "@/types/print";
 
 jest.mock("@/utils/apiClient");
+jest.mock("@/services/quickPreviewFlow", () => ({
+  runQuickPreviewFlow: jest.fn(),
+}));
 
 const mockPost = apiClient.post as jest.MockedFunction<typeof apiClient.post>;
+const mockRunQuickPreviewFlow = runQuickPreviewFlow as jest.MockedFunction<typeof runQuickPreviewFlow>;
 
 const samplePayload: PrintRequestPayload = {
   storeId: "1234",
@@ -49,6 +54,24 @@ describe("printService", () => {
         expect.stringContaining("/dashboard/print"),
         samplePayload,
       );
+      expect(result).toEqual(sampleResponse);
+    });
+
+    /**
+     * Quick preview path: verifies QUICK_PREVIEW mode delegates to
+     * runQuickPreviewFlow which fires the 5 ECS calls directly from the browser.
+     */
+    it("delegates QUICK_PREVIEW mode to the direct ECS flow", async () => {
+      // Arrange
+      mockRunQuickPreviewFlow.mockResolvedValueOnce(sampleResponse);
+
+      // Act
+      const result = await printService.submitPrint(samplePayload, { mode: "QUICK_PREVIEW" });
+
+      // Assert
+      expect(mockRunQuickPreviewFlow).toHaveBeenCalledTimes(1);
+      expect(mockRunQuickPreviewFlow).toHaveBeenCalledWith(samplePayload);
+      expect(mockPost).not.toHaveBeenCalled();
       expect(result).toEqual(sampleResponse);
     });
 
