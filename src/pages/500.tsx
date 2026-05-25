@@ -2,35 +2,46 @@ import Link from "next/link";
 
 export default function ServerError() {
   return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        fontFamily: "Roboto, sans-serif",
-        color: "#333",
-      }}
-    >
-      <h1 style={{ fontSize: "4rem", margin: 0, color: "#d32f2f" }}>500</h1>
-      <p style={{ fontSize: "1.25rem", marginTop: "1rem", color: "#666" }}>
-        An unexpected error occurred.
-      </p>
-      <Link
-        href="/"
-        style={{
-          marginTop: "1.5rem",
-          padding: "10px 24px",
-          background: "#005DAB",
-          color: "#fff",
-          borderRadius: 4,
-          textDecoration: "none",
-          fontWeight: 500,
-        }}
-      >
-        Go to Home
-      </Link>
-    </div>
+    <>
+      <style jsx>
+        {`
+          .errorPage {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            width: 100%;
+          }
+
+          .textWrap {
+            padding: 20px 0;
+            text-align: center;
+            color: #666666;
+          }
+
+          .buttonWrap {
+            padding-top: 20px;
+          }
+
+          h1 {
+            font-size: 72px;
+            color: #c00000;
+          }
+        `}
+      </style>
+
+      <div className="errorPage">
+        <div className="textWrap">
+          <h2>Oops!</h2>
+          <h1>500</h1>
+          <p>An unexpected error occurred.</p>
+          <div className="buttonWrap">
+            <Link href="/" className="primaryButton">
+              Go to Home
+            </Link>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
