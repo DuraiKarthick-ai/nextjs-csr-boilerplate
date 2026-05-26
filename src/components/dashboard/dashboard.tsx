@@ -7,6 +7,7 @@ import { useTableScroll } from "@/hooks/useTableScroll";
 import { usePrint } from "@/hooks/usePrint";
 import ContentWrapper from "../contentWrapper/contentWrapper";
 import SuccessToast from "../shared/SuccessToast";
+import PrintConfigModal from "../printConfigModal/printConfigModal";
 import { QuickPrintIcon, CustomPrintIcon } from "../shared/icons";
 import { DEFAULT_STORE_ID, DEFAULT_REQUESTED_BY } from "@/constants/print";
 import type { PrintRequestPayload } from "@/types/print";
@@ -28,30 +29,12 @@ export default function Dashboard() {
   const { isPrinting, printResult, printError, submitPrint, resetPrint } = usePrint();
   const [printingActivityId, setPrintingActivityId] = React.useState<number | null>(null);
   const [printedCount, setPrintedCount] = React.useState<number>(0);
+  const [printModalActivity, setPrintModalActivity] = React.useState<DashboardActivity | null>(null);
 
   const { data, isLoading, error } = useDashboard();
 
-  const handleDashboardPrint = async (activity: DashboardActivity) => {
-    setPrintingActivityId(activity.id);
-    setPrintedCount(activity.printCount);
-    const payload: PrintRequestPayload = {
-      storeId: DEFAULT_STORE_ID,
-      requestedBy: DEFAULT_REQUESTED_BY,
-      printRequests: [
-        {
-          type: "BY_ITEM",
-          entries: [
-            {
-              itemNumberOrUpc: String(activity.id),
-              size: "SMALL",
-              quantity: activity.printCount,
-            },
-          ],
-        },
-      ],
-    };
-    await submitPrint(payload);
-    setPrintingActivityId(null);
+  const handleDashboardPrint = (activity: DashboardActivity) => {
+    setPrintModalActivity(activity);
   };
   const { visibleCount, scrollRef } = useTableScroll(data.activities.length);
   const visibleActivities = data.activities.slice(0, visibleCount);
@@ -175,6 +158,15 @@ export default function Dashboard() {
             ? `${printedCount} pages Printed successfully in ${printResult.printerName}`
             : ""
         }
+      />
+
+      <PrintConfigModal
+        open={printModalActivity !== null}
+        onClose={() => setPrintModalActivity(null)}
+        jobID={printModalActivity?.batchConfigId ?? 0}
+        batchID={printModalActivity?.id ?? 0}
+        sellUnitId="100"
+        batchName={printModalActivity?.activityName}
       />
 
     </ContentWrapper>

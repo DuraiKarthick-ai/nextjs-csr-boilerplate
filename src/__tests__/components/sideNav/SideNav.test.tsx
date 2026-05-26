@@ -32,7 +32,7 @@ describe("SideNav", () => {
   /**
    * Verifies that every navigation entry defined in the sidebar is rendered.
    */
-  it("renders all four navigation menu items", () => {
+  it("renders all navigation menu items", () => {
     // Arrange
     render(<SideNav activeView="dashboard" onNavigate={mockOnNavigate} />);
 
@@ -42,7 +42,6 @@ describe("SideNav", () => {
     expect(screen.getByText("Sign Dashboard")).toBeInTheDocument();
     expect(screen.getByText("Quick Sign Print")).toBeInTheDocument();
     expect(screen.getByText("Custom Sign")).toBeInTheDocument();
-    expect(screen.getByText("Sign Worklist")).toBeInTheDocument();
   });
 
   /**
@@ -52,7 +51,6 @@ describe("SideNav", () => {
     { label: "Sign Dashboard", view: "dashboard" as ViewType },
     { label: "Quick Sign Print", view: "quickSign" as ViewType },
     { label: "Custom Sign", view: "customSign" as ViewType },
-    { label: "Sign Worklist", view: "signWorklist" as ViewType },
   ])(
     "calls onNavigate with '$view' when '$label' button is clicked",
     async ({ label, view }) => {

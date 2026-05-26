@@ -1,5 +1,6 @@
 "use client";
 import { ReactNode } from "react";
+import { useWindowControls } from "@/hooks/useWindowControls";
 import styles from "./contentWrapper.module.scss";
 
 interface ContentWrapperProps {
@@ -24,6 +25,8 @@ export default function ContentWrapper({
   lastUpdated = "Last Updated 10:31am - 08/02/25",
   children,
 }: ContentWrapperProps): JSX.Element {
+  const { onMinimize, onMaximize, onClose } = useWindowControls();
+
   return (
     <div className={styles.contentWrap}>
       <div className={styles.topContentBar}>
@@ -51,25 +54,25 @@ export default function ContentWrapper({
         <div className={styles.rightActionWrap}>
           <ul>
             <li>
-              <i>
+              <button onClick={onMinimize} aria-label="Minimize" className={styles.controlBtn}>
                 <svg width="16" height="2" viewBox="0 0 16 2" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M16 0H0V2H16V0Z" fill="#79747E" />
                 </svg>
-              </i>
+              </button>
             </li>
             <li>
-              <i>
+              <button onClick={onMaximize} aria-label="Maximize" className={styles.controlBtn}>
                 <svg width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M15 6.66667V0H8.33333L11.075 2.74167L2.74167 11.075L0 8.33333V15H6.66667L3.925 12.2583L12.2583 3.925L15 6.66667Z" fill="#79747E" />
                 </svg>
-              </i>
+              </button>
             </li>
             <li>
-              <i>
+              <button onClick={onClose} aria-label="Close" className={styles.controlBtn}>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M14 1.41L12.59 0L7 5.59L1.41 0L0 1.41L5.59 7L0 12.59L1.41 14L7 8.41L12.59 14L14 12.59L8.41 7L14 1.41Z" fill="#79747E" />
                 </svg>
-              </i>
+              </button>
             </li>
           </ul>
         </div>

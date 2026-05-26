@@ -45,7 +45,7 @@ describe("dashboardService", () => {
         batchConfigId: 237021,
         activityName: "Content Change Batch",
         status: "Ready to Print",
-        printCount: 0,
+        printCount: 7,
         lastUpdated: expect.any(String),
       });
       expect(result.activities[1]?.activityName).toBe("Daily Batch");

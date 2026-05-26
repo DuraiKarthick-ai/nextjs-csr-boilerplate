@@ -53,10 +53,19 @@ export interface PrintRequestPayload {
   printRequests: PrintRequestBlock[];
 }
 
+/** A single ECS API step (password masked). */
+export interface EcsStep {
+  step: string;
+  endpoint: string;
+  payload: Record<string, unknown>;
+}
+
 /** Print API response object. */
 export interface PrintResponse {
   responseCode: string;
   responseMessage: string;
   printerName: string;
   status: string;
+  /** ECS API steps logged by the proxy (quick-preview only). */
+  steps?: EcsStep[];
 }

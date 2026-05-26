@@ -132,7 +132,7 @@ describe("Layout", () => {
 
     // Act
     const sidebar = screen.getByRole("complementary");
-    const layoutShell = sidebar.parentElement;
+    const layoutShell = sidebar.parentElement?.parentElement;
 
     // Assert
     expect(layoutShell).not.toBeNull();

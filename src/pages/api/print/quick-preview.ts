@@ -14,7 +14,7 @@
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import https from "node:https";
-import type { PrintRequestPayload, PrintResponse, ByItemEntry } from "@/types/print";
+import type { PrintResponse, EcsStep } from "@/types/print";
 
 const ECS_GATEWAY_URL = process.env.ECS_PRINT_GATEWAY_URL ?? "https://localhost.ecsglobalinc.com:8083";
 const ECS_SERVER_URL = process.env.ECS_PRINT_SERVER_URL ?? "https://costcotest.ecsglobalinc.com/ecs/";
@@ -65,6 +65,7 @@ function postJson(url: string, body: unknown): Promise<{ statusCode?: number; bo
         path: `${parsedUrl.pathname}${parsedUrl.search}`,
         method: "POST",
         rejectUnauthorized: false,
+        timeout: 30000,
         headers: {
           "Content-Type": "application/json",
           "Content-Length": Buffer.byteLength(payload),
@@ -77,6 +78,7 @@ function postJson(url: string, body: unknown): Promise<{ statusCode?: number; bo
       },
     );
 
+    req.on("timeout", () => req.destroy(new Error("ECS request timed out after 30 s")));
     req.on("error", reject);
     req.write(payload);
     req.end();
@@ -88,19 +90,16 @@ function parseJson(raw: string): unknown {
 }
 
 /**
- * Builds the previewArgs array matching the exact reference payload shape,
- * substituting productCode and qty from each UI item row.
+ * Builds the hardcoded ECS previewArgs for the adhoc-preview-load and
+ * adhoc-preview-show-data calls. No request body is needed — all values
+ * are self-contained inside the proxy.
  *
- * @param {PrintRequestPayload} payload - Print request from the UI.
  * @returns {unknown[]} ECS previewArgs array.
  */
-function buildPreviewArgs(payload: PrintRequestPayload): unknown[] {
-  const byItem = payload.printRequests.find((r) => r.type === "BY_ITEM");
-  const entries = (byItem?.entries ?? []) as ByItemEntry[];
-
-  return entries.map((entry) => ({
+function buildPreviewArgs(): unknown[] {
+  return [{
     batchID: 13007,
-    productCode: entry.itemNumberOrUpc,
+    productCode: "123456",
     prodInd: null,
     description: "Platinum Night Table",
     productTypeCode: "DEP",
@@ -115,7 +114,7 @@ function buildPreviewArgs(payload: PrintRequestPayload): unknown[] {
     planogram: null,
     countryOfOriginDataString: null,
     createdUserID: 0,
-    qty: entry.quantity,
+    qty: 1,
     curReqQty: 0,
     requestQty: 0,
     signId: 21006,
@@ -164,7 +163,7 @@ function buildPreviewArgs(payload: PrintRequestPayload): unknown[] {
     defaultPriceStyleID: 0,
     defaultPriceStyleName: null,
     existingSign: false,
-  }));
+  }];
 }
 
 /**
@@ -188,23 +187,24 @@ export default async function quickPreviewHandler(
     return;
   }
 
-  const payload = req.body as PrintRequestPayload;
-  const previewArgs = buildPreviewArgs(payload);
-
-  if (previewArgs.length === 0) {
-    res.status(400).json({ error: "No BY_ITEM entries provided" });
-    return;
-  }
+  const previewArgs = buildPreviewArgs();
+  const steps: EcsStep[] = [];
 
   try {
     // Step 1 — create-session
-    const step1Result = await postJson(ECS_GATEWAY_URL, {
+    const step1Payload = {
       method: "create-session",
       userName: ECS_USERNAME,
       password: ECS_PASSWORD,
       apiToken: ECS_API_TOKEN,
       serverURL: ECS_SERVER_URL,
+    };
+    steps.push({
+      step: "create-session",
+      endpoint: ECS_GATEWAY_URL,
+      payload: { ...step1Payload, password: "***" },
     });
+    const step1Result = await postJson(ECS_GATEWAY_URL, step1Payload);
     const step1Data = parseJson(step1Result.body) as EcsSessionResponse;
     const sessionID = step1Data.sessionID;
 
@@ -214,33 +214,24 @@ export default async function quickPreviewHandler(
     }
 
     // Step 2 — get-printers
-    await postJson(ECS_GATEWAY_URL, {
-      method: "get-printers",
-      sessionID,
-    });
+    const step2Payload = { method: "get-printers", sessionID };
+    steps.push({ step: "get-printers", endpoint: ECS_GATEWAY_URL, payload: step2Payload });
+    await postJson(ECS_GATEWAY_URL, step2Payload);
 
     // Step 3 — get-trays
-    await postJson(ECS_GATEWAY_URL, {
-      method: "get-trays",
-      args: ECS_TRAY_PRINTER,
-      sessionID,
-    });
+    const step3Payload = { method: "get-trays", args: ECS_TRAY_PRINTER, sessionID };
+    steps.push({ step: "get-trays", endpoint: ECS_GATEWAY_URL, payload: step3Payload });
+    await postJson(ECS_GATEWAY_URL, step3Payload);
 
     // Step 4 — adhoc-preview-load
-    await postJson(ECS_GATEWAY_URL, {
-      method: "adhoc-preview-load",
-      args: previewArgs,
-      sessionID,
-      serverURL: ECS_SERVER_URL,
-    });
+    const step4Payload = { method: "adhoc-preview-load", args: previewArgs, sessionID, serverURL: ECS_SERVER_URL };
+    steps.push({ step: "adhoc-preview-load", endpoint: ECS_GATEWAY_URL, payload: step4Payload });
+    await postJson(ECS_GATEWAY_URL, step4Payload);
 
     // Step 5 — adhoc-preview-show-data
-    const step5Result = await postJson(ECS_PREVIEW_SHOW_URL, {
-      method: "adhoc-preview",
-      args: previewArgs,
-      sessionID,
-      serverURL: ECS_SERVER_URL,
-    });
+    const step5Payload = { method: "adhoc-preview", args: previewArgs, sessionID, serverURL: ECS_SERVER_URL };
+    steps.push({ step: "adhoc-preview-show-data", endpoint: ECS_PREVIEW_SHOW_URL, payload: step5Payload });
+    const step5Result = await postJson(ECS_PREVIEW_SHOW_URL, step5Payload);
 
     const isSuccess = (step5Result.statusCode ?? 500) < 400;
 
@@ -249,6 +240,7 @@ export default async function quickPreviewHandler(
       responseMessage: isSuccess ? "Quick print preview completed" : "Quick print preview failed",
       printerName: ECS_TRAY_PRINTER,
       status: isSuccess ? "PRINTED" : "FAILED",
+      steps,
     });
   } catch (err) {
     res.status(502).json({

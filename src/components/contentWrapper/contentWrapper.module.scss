@@ -64,6 +64,24 @@
     }
   }
 
+  .controlBtn {
+    background: none;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+
+    &:hover {
+      background: #e8e8e8;
+    }
+
+    &:hover svg path {
+      fill: #333;
+    }
+  }
+
   .section {
     padding: 16px;
 

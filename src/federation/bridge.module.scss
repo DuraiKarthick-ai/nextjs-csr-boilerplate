@@ -91,3 +91,38 @@
   cursor: pointer;
   min-width: 110px;
 }
+
+.windowControls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  padding: 6px 10px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.controlBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: #555;
+  cursor: pointer;
+
+  &:hover {
+    background: #e0e0e0;
+    color: #333;
+  }
+}
+
+.closeBtn {
+  &:hover {
+    background: #e81123;
+    color: #fff;
+  }
+}

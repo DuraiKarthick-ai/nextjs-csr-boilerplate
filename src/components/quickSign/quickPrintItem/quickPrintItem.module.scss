@@ -112,3 +112,267 @@
     @include font-size(14px);
   }
 }
+
+.ecsStepsPanel {
+  max-width: 95%;
+  margin-top: 24px;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.ecsStepsTitle {
+  margin: 0;
+  padding: 10px 16px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  @include font-size(14px);
+  font-weight: 600;
+  color: #333;
+}
+
+.ecsStep {
+  border-bottom: 1px solid #e0e0e0;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.ecsStepHeader {
+  @include flex();
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #fafafa;
+}
+
+.ecsStepNumber {
+  @include font-size(11px);
+  font-weight: 700;
+  color: #fff;
+  background: #1976d2;
+  border-radius: 10px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.ecsStepName {
+  @include font-size(13px);
+  font-weight: 600;
+  color: #1976d2;
+}
+
+.ecsStepEndpoint {
+  @include font-size(11px);
+  color: #666;
+  word-break: break-all;
+}
+
+.ecsStepPayload {
+  margin: 0;
+  padding: 10px 16px;
+  background: #fff;
+  @include font-size(12px);
+  line-height: 1.5;
+  color: #333;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "Courier New", monospace;
+}
+
+/* ── Interactive ECS test panel additions ─────────────────────── */
+
+.ecsStepsTitle {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 0;
+  padding: 10px 16px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e0e0e0;
+  @include font-size(14px);
+  font-weight: 600;
+  color: #333;
+}
+
+.ecsSessionBadge {
+  @include font-size(11px);
+  font-weight: 500;
+  color: #fff;
+  background: #388e3c;
+  border-radius: 10px;
+  padding: 2px 10px;
+  word-break: break-all;
+}
+
+.ecsStepHeader {
+  @include flex();
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 8px 16px;
+  background: #fafafa;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.ecsRunBtn {
+  margin-left: auto;
+  padding: 4px 14px;
+  @include font-size(12px);
+  font-weight: 600;
+  color: #fff;
+  background: #1976d2;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    background: #1565c0;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.ecsStepBody {
+  display: flex;
+  gap: 0;
+
+  @media (max-width: 800px) {
+    flex-direction: column;
+  }
+}
+
+.ecsStepCol {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 16px;
+
+  &:first-child {
+    border-right: 1px solid #eeeeee;
+  }
+}
+
+.ecsStepColLabel {
+  @include font-size(11px);
+  font-weight: 700;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ecsStatusOk {
+  @include font-size(11px);
+  font-weight: 700;
+  color: #388e3c;
+}
+
+.ecsStatusErr {
+  @include font-size(11px);
+  font-weight: 700;
+  color: #d32f2f;
+}
+
+.ecsStepResponse {
+  margin: 0;
+  @include font-size(12px);
+  line-height: 1.5;
+  color: #1b5e20;
+  background: #f1f8e9;
+  border: 1px solid #c5e1a5;
+  border-radius: 4px;
+  padding: 8px 10px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "Courier New", monospace;
+}
+
+.ecsStepError {
+  margin: 0;
+  @include font-size(12px);
+  line-height: 1.5;
+  color: #b71c1c;
+  background: #ffebee;
+  border: 1px solid #ef9a9a;
+  border-radius: 4px;
+  padding: 8px 10px;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: "Courier New", monospace;
+}
+
+.ecsStepEmpty {
+  @include font-size(12px);
+  color: #bbb;
+  font-style: italic;
+  padding: 4px 0;
+}
+
+.ecsServerLabel {
+  @include font-size(11px);
+  color: #888;
+  font-weight: 400;
+}
+
+.ecsTokenBadge {
+  @include font-size(11px);
+  font-weight: 500;
+  color: #fff;
+  background: #6a1b9a;
+  border-radius: 10px;
+  padding: 2px 10px;
+  word-break: break-all;
+}
+
+.ecsStepMeta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.ecsInputRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 8px 16px;
+  background: #f9f9f9;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.ecsInputLabel {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  @include font-size(11px);
+  color: #666;
+  font-weight: 600;
+}
+
+.ecsInput {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 4px 8px;
+  @include font-size(12px);
+  color: #333;
+  background: #fff;
+  width: 160px;
+
+  &:focus {
+    outline: none;
+    border-color: #1976d2;
+  }
+}

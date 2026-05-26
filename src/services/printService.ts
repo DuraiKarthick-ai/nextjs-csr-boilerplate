@@ -27,9 +27,13 @@ export const printService = {
   /**
    * Submits a print request.
    * - STANDARD: single POST to the mock print API.
-   * - QUICK_PREVIEW: fires the 5-step ECS sequence directly from the browser
-   *   (create-session → get-printers → get-trays → adhoc-preview-load →
-   *   adhoc-preview-show-data), matching the reference sign-print-latest flow.
+   * - QUICK_PREVIEW: delegates to /api/print/quick-preview (Next.js proxy) which
+   *   executes the 5-step ECS sequence server-to-server:
+   *   create-sess I,Ō.P[=|
+   *   SETRYUIO6P78[9]0,-\
+   * UI=0\\ters → get-trays → adhoc-preview-load →
+   *   adhoc-preview-show-data. ECS calls run in Node.js (not the browser) so
+   *   the self-signed cert and CORS preflight issues are bypassed.
    *
    * @param {PrintRequestPayload} payload - Print request payload.
    * @param {PrintSubmitOptions} [options] - Submission options.

@@ -24,6 +24,23 @@ import {
 } from "../quickSign.constants";
 import styles from "./quickPrintItem.module.scss";
 
+const ECS_PRINT_SERVER  = process.env.NEXT_PUBLIC_ECS_PRINT_SERVER_URL ?? "https://localhost.ecsglobalinc.com:8083";
+const ECS_WEB_SERVER    = process.env.NEXT_PUBLIC_ECS_WEB_SERVER_URL  ?? "https://costcotest.ecsglobalinc.com:443";
+
+/** Steps matching signs-print routes exactly. */
+const ECS_STEPS = [
+  { step: "logon",                label: "Step 1 — Logon",                  method: "POST [userName,password,apiToken]",        endpoint: `${ECS_WEB_SERVER}/ecs/logon.sws`,    needsSession: false },
+  { step: "create-session",      label: "Step 2 — Create Session",          method: "create-session",                          endpoint: `${ECS_PRINT_SERVER}/`,               needsSession: false },
+  { step: "batchSign-preview",   label: "Step 3 — Load Batch Preview",      method: "batchSign-preview",                       endpoint: `${ECS_PRINT_SERVER}/`,               needsSession: true  },
+  { step: "preview-first",       label: "Step 4a — Preview First",          method: "preview-first",                           endpoint: `${ECS_PRINT_SERVER}/`,               needsSession: true  },
+  { step: "preview-next",        label: "Step 4b — Preview Next",           method: "preview-next",                            endpoint: `${ECS_PRINT_SERVER}/`,               needsSession: true  },
+  { step: "preview-last",        label: "Step 4c — Preview Last",           method: "preview-last",                            endpoint: `${ECS_PRINT_SERVER}/`,               needsSession: true  },
+  { step: "get-layouts-from-sink",label: "Step 5 — Get Layouts",           method: "get-layouts-from-sink",                   endpoint: `${ECS_PRINT_SERVER}/`,               needsSession: true  },
+  { step: "get-printers",        label: "Step 6 — Get Printers",           method: "get-printers",                            endpoint: `${ECS_PRINT_SERVER}/`,               needsSession: true  },
+  { step: "get-trays",           label: "Step 7 — Get Trays",              method: "get-trays",                               endpoint: `${ECS_PRINT_SERVER}/`,               needsSession: true  },
+  { step: "print-signs-for-layout",label: "Step 8 — Print Layout",         method: "print-signs-for-layout",                  endpoint: `${ECS_PRINT_SERVER}/`,               needsSession: true  },
+];
+
 /** Regex pattern to validate numeric-only input up to MAX_ITEM_DIGITS. */
 const ITEM_INPUT_PATTERN = new RegExp(`^\\d{0,${MAX_ITEM_DIGITS}}$`);
 
@@ -42,6 +59,104 @@ export default function QuickPrintItem(): JSX.Element {
   const [deptForm, setDeptForm] = useState<DeptForm>({ ...INITIAL_DEPT_FORM });
 
   const { isPrinting, printResult, printError, submitPrint, resetPrint } = usePrint();
+
+  /** Session ID captured from create-session, fed into all subsequent steps. */
+  const [testSessionID, setTestSessionID] = useState<string>("");
+  /** Token captured from logon, used if needed. */
+  const [testToken, setTestToken] = useState<string>("");
+  /** Printer name captured from get-printers. */
+  const [testPrinter, setTestPrinter] = useState<string>("");
+  /** First layout ID captured from get-layouts-from-sink. */
+  const [testLayoutId, setTestLayoutId] = useState<string>("");
+  /** Editable inputs for batchSign-preview. */
+  const [batchJobID, setBatchJobID]       = useState<string>("237022");
+  const [batchBatchID, setBatchBatchID]   = useState<string>("17254");
+  const [batchSellUnit, setBatchSellUnit] = useState<string>("100");
+
+  type StepState = { loading: boolean; sentPayload: unknown; response: unknown; error: string | null };
+  const [stepStates, setStepStates] = useState<Record<string, StepState>>({});
+
+  /**
+   * Calls /api/print/ecs-step for the given step name, chaining
+   * sessionID / token / printer / layoutId from previous step responses.
+   *
+   * @param {string} stepName - ECS step identifier matching signs-print route methods.
+   */
+  const runEcsStep = async (stepName: string): Promise<void> => {
+    setStepStates((prev) => ({
+      ...prev,
+      [stepName]: { loading: true, sentPayload: null, response: null, error: null },
+    }));
+
+    const body: Record<string, unknown> = {
+      step:      stepName,
+      sessionID: testSessionID || undefined,
+      token:     testToken     || undefined,
+      printer:   testPrinter   || undefined,
+      layoutId:  testLayoutId  || undefined,
+    };
+
+    if (stepName === "batchSign-preview") {
+      body.jobID      = Number(batchJobID);
+      body.batchID    = Number(batchBatchID);
+      body.sellUnitId = batchSellUnit;
+    }
+
+    try {
+      const res  = await fetch("/api/print/ecs-step", {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(body),
+      });
+      const data = (await res.json()) as {
+        sentPayload?: unknown;
+        response?:    unknown;
+        statusCode?:  number;
+        error?:       string;
+      };
+
+      const resp = data.response as Record<string, unknown> | undefined;
+
+      if (stepName === "logon") {
+        const raw = Array.isArray(resp) ? (resp[0] as Record<string, unknown>) : resp;
+        const tok = raw?.token;
+        if (typeof tok === "string" && tok) setTestToken(tok);
+      }
+      if (stepName === "create-session") {
+        const sid = resp?.sessionID;
+        if (typeof sid === "string" && sid) setTestSessionID(sid);
+      }
+      if (stepName === "get-printers") {
+        const list = resp?.printers;
+        if (Array.isArray(list) && list.length > 0) setTestPrinter(String(list[0]));
+      }
+      if (stepName === "get-layouts-from-sink") {
+        const layouts = resp?.layouts ?? resp;
+        const first = Array.isArray(layouts) ? (layouts[0] as Record<string, unknown>) : null;
+        if (first?.layoutID_1) setTestLayoutId(String(first.layoutID_1));
+      }
+
+      setStepStates((prev) => ({
+        ...prev,
+        [stepName]: {
+          loading:     false,
+          sentPayload: data.sentPayload ?? null,
+          response:    data.response    ?? data,
+          error:       data.error       ?? null,
+        },
+      }));
+    } catch (err) {
+      setStepStates((prev) => ({
+        ...prev,
+        [stepName]: {
+          loading:     false,
+          sentPayload: null,
+          response:    null,
+          error:       err instanceof Error ? err.message : "Request failed",
+        },
+      }));
+    }
+  };
   const {
     searchOptions,
     searchLoading,
@@ -514,6 +629,91 @@ export default function QuickPrintItem(): JSX.Element {
         onClose={resetPrint}
         message={successMessage}
         />
+
+      <div className={styles.ecsStepsPanel}>
+        <div className={styles.ecsStepsTitle}>
+          <span>ECS API Test Panel</span>
+          <span className={styles.ecsServerLabel}>
+            Print: {ECS_PRINT_SERVER} &nbsp;|&nbsp; Web: {ECS_WEB_SERVER}
+          </span>
+          {testSessionID && <span className={styles.ecsSessionBadge}>sessionID: {testSessionID}</span>}
+          {testToken     && <span className={styles.ecsTokenBadge}>token: {testToken.slice(0, 20)}&#8230;</span>}
+        </div>
+
+        {ECS_STEPS.map((s, i) => {
+          const state       = stepStates[s.step];
+          const hasResponse = state !== undefined && state.response !== null && !state.error;
+          const hasError    = state !== undefined && !!state.error;
+          return (
+            <div key={s.step} className={styles.ecsStep}>
+              <div className={styles.ecsStepHeader}>
+                <span className={styles.ecsStepNumber}>{i + 1}</span>
+                <div className={styles.ecsStepMeta}>
+                  <span className={styles.ecsStepName}>{s.label}</span>
+                  <span className={styles.ecsStepEndpoint}>{s.method} &rarr; {s.endpoint}</span>
+                </div>
+                <button
+                  className={styles.ecsRunBtn}
+                  disabled={state?.loading ?? false}
+                  onClick={() => runEcsStep(s.step)}
+                >
+                  {state?.loading ? "Running…" : "Run"}
+                </button>
+              </div>
+
+              {s.step === "batchSign-preview" && (
+                <div className={styles.ecsInputRow}>
+                  <label className={styles.ecsInputLabel}>Job ID
+                    <input className={styles.ecsInput} value={batchJobID} onChange={(e) => setBatchJobID(e.target.value)} />
+                  </label>
+                  <label className={styles.ecsInputLabel}>Batch ID
+                    <input className={styles.ecsInput} value={batchBatchID} onChange={(e) => setBatchBatchID(e.target.value)} />
+                  </label>
+                  <label className={styles.ecsInputLabel}>Sell Unit ID
+                    <input className={styles.ecsInput} value={batchSellUnit} onChange={(e) => setBatchSellUnit(e.target.value)} />
+                  </label>
+                </div>
+              )}
+              {s.step === "get-trays" && (
+                <div className={styles.ecsInputRow}>
+                  <label className={styles.ecsInputLabel}>Printer
+                    <input className={styles.ecsInput} value={testPrinter} onChange={(e) => setTestPrinter(e.target.value)} placeholder="auto-filled from get-printers" />
+                  </label>
+                </div>
+              )}
+              {s.step === "print-signs-for-layout" && (
+                <div className={styles.ecsInputRow}>
+                  <label className={styles.ecsInputLabel}>Layout ID
+                    <input className={styles.ecsInput} value={testLayoutId} onChange={(e) => setTestLayoutId(e.target.value)} placeholder="auto-filled from get-layouts-from-sink" />
+                  </label>
+                  <label className={styles.ecsInputLabel}>Printer
+                    <input className={styles.ecsInput} value={testPrinter} onChange={(e) => setTestPrinter(e.target.value)} placeholder="auto-filled from get-printers" />
+                  </label>
+                </div>
+              )}
+
+              <div className={styles.ecsStepBody}>
+                <div className={styles.ecsStepCol}>
+                  <div className={styles.ecsStepColLabel}>Request Payload</div>
+                  <pre className={styles.ecsStepPayload}>
+                    {JSON.stringify(state?.sentPayload ?? { note: "Click Run to call this step" }, null, 2)}
+                  </pre>
+                </div>
+                <div className={styles.ecsStepCol}>
+                  <div className={styles.ecsStepColLabel}>
+                    Response
+                    {hasResponse && <span className={styles.ecsStatusOk}>&#10003; OK</span>}
+                    {hasError    && <span className={styles.ecsStatusErr}>&#10007; Error</span>}
+                  </div>
+                  {hasError    && <pre className={styles.ecsStepError}>{state!.error}</pre>}
+                  {hasResponse && <pre className={styles.ecsStepResponse}>{JSON.stringify(state!.response, null, 2)}</pre>}
+                  {!state      && <div className={styles.ecsStepEmpty}>Not run yet</div>}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
 
     </div>
 

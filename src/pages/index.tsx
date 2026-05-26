@@ -14,7 +14,7 @@ export default function IndexPage(): JSX.Element {
       <Head>
         <title>Signs</title>
       </Head>
-      <main aria-label="root-status"></main>
+      <main aria-label="root-status">ok</main>
     </>
   );
 }
