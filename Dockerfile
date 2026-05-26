@@ -55,11 +55,17 @@ COPY --from=builder /app/package.json ./package.json
 #COPY --from=builder /app/next-i18next.config.js ./next-i18next.config.js
 COPY --from=builder /app/next.config.js ./next.config.js
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/server.js ./server.js
+COPY --from=builder /app/lib ./lib
 
 # Do NOT bake certs or env files into image
+
+# WebSocket relay for print services
+ENV WS_RELAY_ENABLED=true
+ENV PORT=3001
 
 # Default ports (HTTP inside container; TLS handled outside)
 EXPOSE 3001
 
-# Start in production mode
-CMD ["npx", "next", "start", "-p", "3001"]
+# Start with custom server (enables WebSocket relay)
+CMD ["node", "server.js"]

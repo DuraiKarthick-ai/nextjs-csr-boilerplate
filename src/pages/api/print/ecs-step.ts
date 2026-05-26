@@ -18,6 +18,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import https from "node:https";
 import http from "node:http";
+import { printRelay } from "@/lib/ws-relay-server";
 
 const WEB_SERVER_URL           = process.env.ECS_WEB_SERVER_URL           ?? "https://costcotest.ecsglobalinc.com:443";
 const WEB_USERNAME             = process.env.ECS_WEB_USERNAME             ?? "CostcoWS";
@@ -49,14 +50,35 @@ function applyCors(req: NextApiRequest, res: NextApiResponse): void {
 
 /**
  * Posts JSON to a URL using Node http/https, bypassing browser CORS/TLS.
+ * In production (GKE), routes through WebSocket relay if a store relay is connected.
+ * Falls back to direct HTTP for local development.
  * @param {string} url - Target URL.
  * @param {unknown} body - JSON-serializable payload.
  * @returns {Promise<{ statusCode?: number; body: string }>} Raw HTTP response.
  */
 function postJson(url: string, body: unknown): Promise<{ statusCode?: number; body: string }> {
+  const payload = JSON.stringify(body);
+
+  // Route through WebSocket relay if connected (production/GKE)
+  if (printRelay.isConnected()) {
+    return printRelay.sendRequest(url, "POST", payload).then((res) => ({
+      statusCode: res.statusCode,
+      body: res.body,
+    }));
+  }
+
+  // In production without relay, direct HTTP won't work — fail fast with clear message
+  const isProduction = process.env.NODE_ENV === "production";
+  const relayEnabled = process.env.WS_RELAY_ENABLED === "true";
+  if (isProduction && relayEnabled) {
+    return Promise.reject(
+      new Error("Print relay is not connected. Ensure the store-side relay client is running and connected to this server via WebSocket at /ws/print-relay.")
+    );
+  }
+
+  // Direct HTTP (local development only)
   return new Promise((resolve, reject) => {
     const parsedUrl = new URL(url);
-    const payload   = JSON.stringify(body);
     const isHttps   = parsedUrl.protocol === "https:";
     const transport = isHttps ? https : http;
 
