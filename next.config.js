@@ -58,6 +58,12 @@ if (
 const nextConfig = {
   reactStrictMode: true,
 
+  // Skip ESLint during `next build` — lint is run separately in CI via `npm run lint`.
+  // This prevents import-order warnings and unused-var warnings from blocking production builds.
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // Next 14.2 ships a default `experimental.optimizePackageImports` list that
   // includes `@mui/material`, which routes barrel imports through the
   // `__barrel_optimize__` virtual module and into the broken
