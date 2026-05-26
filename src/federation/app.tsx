@@ -38,7 +38,7 @@ export default function FederatedApp({
   onMaximize,
   onClose,
 }: FederatedAppProps) {
-  const [open, setOpen] = useState(true);
+  const [open] = useState(true);
   const [activeView, setActiveView] = useState<ViewType>(initialView);
 
   const handleNavigate = (view: ViewType): void => {

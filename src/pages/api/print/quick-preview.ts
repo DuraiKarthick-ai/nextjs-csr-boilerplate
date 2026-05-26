@@ -12,8 +12,8 @@
  *  5. adhoc-preview-show-data→ POST https://costcotest.ecsglobalinc.com/ecs/adhoc-preview-show-data
  */
 
-import type { NextApiRequest, NextApiResponse } from "next";
 import https from "node:https";
+import type { NextApiRequest, NextApiResponse } from "next";
 import type { PrintResponse, EcsStep } from "@/types/print";
 
 const ECS_GATEWAY_URL = process.env.ECS_PRINT_GATEWAY_URL ?? "https://localhost.ecsglobalinc.com:8083";

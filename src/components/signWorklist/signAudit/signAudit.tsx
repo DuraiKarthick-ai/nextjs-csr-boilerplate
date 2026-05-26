@@ -131,7 +131,7 @@ export default function SignAuditSection() {
    const [dateFilter, setDateFilter] = useState<Dayjs | null>(null);
    const [operatorFilter, setOperatorFilter] = useState<string>(DEFAULT_OPERATOR);
    const [isLoading, setIsLoading] = useState<boolean>(false);
-   const [hasMore, setHasMore] = useState<boolean>(true);
+   const [_hasMore, setHasMore] = useState<boolean>(true);
    const [errorMessage, setErrorMessage] = useState<string>("");
    const [selectedRows, setSelectedRows] = useState<RowSelectionMap>({});
    const [printSelectionError, setPrintSelectionError] = useState<string>("");

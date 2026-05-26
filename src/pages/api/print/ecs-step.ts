@@ -15,9 +15,9 @@
  *  print-signs-for-layout POST https://localhost.ecsglobalinc.com:8083/
  */
 
-import type { NextApiRequest, NextApiResponse } from "next";
 import https from "node:https";
 import http from "node:http";
+import type { NextApiRequest, NextApiResponse } from "next";
 import { printRelay } from "@/lib/ws-relay-server";
 
 const WEB_SERVER_URL           = process.env.ECS_WEB_SERVER_URL           ?? "https://costcotest.ecsglobalinc.com:443";

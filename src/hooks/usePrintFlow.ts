@@ -112,6 +112,7 @@ export function usePrintFlow() {
       const msg = err instanceof Error ? err.message : "Session creation failed";
       patch({ sessionLoading: false, sessionError: msg, printersLoading: false });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /** Fetch trays for a printer */
@@ -135,6 +136,7 @@ export function usePrintFlow() {
     if (sessionRef.current) {
       await fetchTrays(sessionRef.current, printer);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.printerInfo]);
 
   /** Select a tray */
@@ -192,6 +194,7 @@ export function usePrintFlow() {
       const msg = err instanceof Error ? err.message : "Print failed";
       patch({ printing: false, printError: msg });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state.printerInfo, state.selectedTray]);
 
   /** Reset all state */
