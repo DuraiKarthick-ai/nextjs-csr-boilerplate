@@ -40,6 +40,7 @@ export interface RelayResponse {
 interface PrintRelayInterface {
   attach(server: unknown): void;
   isConnected(storeId?: string): boolean;
+  getConnectedStoreIds(): string[];
   sendRequest(url: string, method: string, body?: string, storeId?: string): Promise<{ statusCode: number; body: string }>;
   close(): void;
 }

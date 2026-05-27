@@ -56,12 +56,12 @@ function applyCors(req: NextApiRequest, res: NextApiResponse): void {
  * @param {unknown} body - JSON-serializable payload.
  * @returns {Promise<{ statusCode?: number; body: string }>} Raw HTTP response.
  */
-function postJson(url: string, body: unknown): Promise<{ statusCode?: number; body: string }> {
+function postJson(url: string, body: unknown, storeId: string): Promise<{ statusCode?: number; body: string }> {
   const payload = JSON.stringify(body);
 
   // Route through WebSocket relay if connected (production/GKE)
-  if (printRelay.isConnected()) {
-    return printRelay.sendRequest(url, "POST", payload).then((res) => ({
+  if (printRelay.isConnected(storeId)) {
+    return printRelay.sendRequest(url, "POST", payload, storeId).then((res) => ({
       statusCode: res.statusCode,
       body: res.body,
     }));
@@ -71,8 +71,13 @@ function postJson(url: string, body: unknown): Promise<{ statusCode?: number; bo
   const isProduction = process.env.NODE_ENV === "production";
   const relayEnabled = process.env.WS_RELAY_ENABLED === "true";
   if (isProduction && relayEnabled) {
+    const connectedStores = printRelay.getConnectedStoreIds();
+    const connectedStoresText = connectedStores.length > 0 ? connectedStores.join(", ") : "none";
     return Promise.reject(
-      new Error("Print relay is not connected. Ensure the store-side relay client is running and connected to this server via WebSocket at /ws/print-relay.")
+      new Error(
+        `Print relay is not connected for storeId "${storeId}". Connected relay storeIds: ${connectedStoresText}. ` +
+        "Ensure the store-side relay client is running and connected to this server via WebSocket at /ws/print-relay with the same storeId."
+      )
     );
   }
 
@@ -113,6 +118,7 @@ function parseJson(raw: string): unknown {
 
 type StepRequest = {
   step:        string;
+  storeId?:    string;
   sessionID?:  string;
   token?:      string;
   jobID?:      number;
@@ -134,6 +140,17 @@ type StepResponse = {
 };
 
 type ErrorResponse = { error: string };
+
+/**
+ * Resolves the relay store ID from request body/header with a safe default.
+ * @param {NextApiRequest} req - API request.
+ * @returns {string} Store ID used to route relay traffic.
+ */
+function resolveRelayStoreId(req: NextApiRequest): string {
+  const bodyStoreId = req.body && typeof req.body.storeId === "string" ? req.body.storeId : "";
+  const headerStoreId = typeof req.headers["x-store-id"] === "string" ? req.headers["x-store-id"] : "";
+  return (bodyStoreId || headerStoreId || "default").trim() || "default";
+}
 
 /**
  * Runs one named ECS step and returns its request payload + response.
@@ -159,6 +176,8 @@ export default async function ecsStepHandler(
     res.status(400).json({ error: "Missing required field: step" });
     return;
   }
+
+  const relayStoreId = resolveRelayStoreId(req);
 
   let endpoint: string;
   let payload: Record<string, unknown>;
@@ -232,7 +251,7 @@ export default async function ecsStepHandler(
   }
 
   try {
-    const result = await postJson(endpoint, payload);
+    const result = await postJson(endpoint, payload, relayStoreId);
     const parsedResponse = parseJson(result.body);
 
     let sentPayload: unknown = payload;

@@ -15,7 +15,7 @@
  *   RELAY_WS_URL   - WebSocket URL of the GKE server (required)
  *                    e.g. wss://signs-app.costco.com/ws/print-relay?storeId=100&token=secret
  *   RELAY_TOKEN    - Authentication token (must match WS_RELAY_TOKEN on server)
- *   STORE_ID       - Store identifier (default: "default")
+ *   STORE_ID       - Store identifier (default: "1234")
  *
  * Install dependencies:
  *   npm init -y && npm i ws
@@ -26,7 +26,7 @@ const https = require("https");
 const http = require("http");
 
 // ─── Configuration ──────────────────────────────────────────────────────────
-const STORE_ID = process.env.STORE_ID || "default";
+const STORE_ID = process.env.STORE_ID || "1234";
 const RELAY_TOKEN = process.env.RELAY_TOKEN || "";
 const BASE_WS_URL = process.env.RELAY_WS_URL || "";
 

@@ -90,6 +90,7 @@ export default function QuickPrintItem(): JSX.Element {
 
     const body: Record<string, unknown> = {
       step:      stepName,
+      storeId:   DEFAULT_STORE_ID,
       sessionID: testSessionID || undefined,
       token:     testToken     || undefined,
       printer:   testPrinter   || undefined,

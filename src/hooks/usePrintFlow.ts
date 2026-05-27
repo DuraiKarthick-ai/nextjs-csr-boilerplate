@@ -1,4 +1,5 @@
 import { useState, useCallback, useRef } from "react";
+import { DEFAULT_STORE_ID } from "@/constants/print";
 
 export interface PrintFlowParams {
   jobID: number;
@@ -36,10 +37,14 @@ interface PrintFlowState {
 }
 
 async function callEcsStep(body: Record<string, unknown>) {
+  const relayBody = {
+    storeId: DEFAULT_STORE_ID,
+    ...body,
+  };
   const res = await fetch("/api/print/ecs-step", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
+    body: JSON.stringify(relayBody),
   });
   const json = await res.json();
   if (!res.ok) throw new Error(json.error ?? "Request failed");
