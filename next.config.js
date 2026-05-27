@@ -155,6 +155,25 @@ const nextConfig = {
   webpack(config, options) {
     const { isServer } = options;
 
+    // Prevent webpack from bundling ws-relay-server on the server side.
+    // This ensures API routes use Node's native require() at runtime and get
+    // the same globalThis singleton that server.js created — fixing the 502
+    // "relay not connected" issue in production (GKE).
+    if (isServer) {
+      const existing = config.externals || [];
+      config.externals = [
+        ...(Array.isArray(existing) ? existing : [existing]),
+        /** @param {{ request: string }} ctx @param {Function} callback */
+        function (ctx, callback) {
+          if (ctx.request && ctx.request.includes("lib/ws-relay-server")) {
+            // Resolve to the absolute path at runtime
+            return callback(null, "commonjs " + require("path").resolve(__dirname, "lib/ws-relay-server.js"));
+          }
+          callback();
+        },
+      ];
+    }
+
     // Module Federation is opt-in (set ENABLE_MODULE_FEDERATION=true) because the
     // federation plugin's resolver hooks trigger an upstream Next/enhanced-resolve
     // bug on Windows during `next build`.

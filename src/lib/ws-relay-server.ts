@@ -10,10 +10,15 @@
  * IMPORTANT: This re-exports the singleton from /lib/ws-relay-server.js so that
  * both server.js (which attaches the WebSocket) and API routes (which call sendRequest)
  * share the same instance within the same process.
+ *
+ * The singleton lives on globalThis.__printRelaySingleton to survive webpack
+ * module-scope isolation between server.js and Next.js API routes.
  */
 
 /* eslint-disable @typescript-eslint/no-require-imports */
-// Use require to ensure we get the exact same singleton as server.js
+// Use require to ensure we get the exact same singleton as server.js.
+// The webpack externals config in next.config.js forces this to resolve
+// via Node's native require (not webpack bundle), guaranteeing singleton identity.
 const relay = require("../../lib/ws-relay-server");
 
 export interface RelayRequest {
