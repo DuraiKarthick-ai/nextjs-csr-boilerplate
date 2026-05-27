@@ -32,12 +32,22 @@ const BASE_WS_URL = process.env.RELAY_WS_URL || "";
 
 if (!BASE_WS_URL) {
   console.error("ERROR: RELAY_WS_URL environment variable is required.");
-  console.error("Example: wss://your-gke-app.com/ws/print-relay");
+  console.error("Example: ws://136.113.73.16/ws/print-relay or wss://your-domain/ws/print-relay");
+  process.exit(1);
+}
+
+if (BASE_WS_URL.includes("://http://") || BASE_WS_URL.includes("://https://")) {
+  console.error(`ERROR: RELAY_WS_URL is malformed: ${BASE_WS_URL}`);
+  console.error('Use a single scheme only, for example: ws://136.113.73.16/ws/print-relay');
   process.exit(1);
 }
 
 // Build full URL with query params
 const wsUrl = new URL(BASE_WS_URL);
+if (wsUrl.protocol !== "ws:" && wsUrl.protocol !== "wss:") {
+  console.error(`ERROR: RELAY_WS_URL must start with ws:// or wss://, got: ${wsUrl.protocol}`);
+  process.exit(1);
+}
 wsUrl.searchParams.set("storeId", STORE_ID);
 if (RELAY_TOKEN) wsUrl.searchParams.set("token", RELAY_TOKEN);
 
@@ -50,7 +60,7 @@ let pingTimer = null;
 let reconnectTimer = null;
 
 function connect() {
-  console.log(`[Relay] Connecting to ${wsUrl.origin}${wsUrl.pathname}...`);
+  console.log(`[Relay] Connecting to ${wsUrl.toString()}...`);
 
   ws = new WebSocket(wsUrl.toString(), {
     rejectUnauthorized: false, // Allow self-signed certs on GKE if needed
@@ -80,7 +90,8 @@ function connect() {
   });
 
   ws.on("close", (code, reason) => {
-    console.log(`[Relay] Disconnected (code: ${code}, reason: ${reason || "none"})`);
+    const reasonText = Buffer.isBuffer(reason) ? reason.toString("utf8") : String(reason || "none");
+    console.log(`[Relay] Disconnected (code: ${code}, reason: ${reasonText})`);
     cleanup();
     scheduleReconnect();
   });
