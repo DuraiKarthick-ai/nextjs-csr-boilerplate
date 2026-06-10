@@ -1,4 +1,13 @@
 // @ts-check
+// Required by @module-federation/nextjs-mf — must be set before the plugin is instantiated.
+process.env.NEXT_PRIVATE_LOCAL_WEBPACK = "true";
+
+// ECS test/dev servers use internal Costco CA certs not trusted by Node.js's
+// bundled CA store. Disable TLS verification in non-production only.
+if (process.env.NODE_ENV !== "production") {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0";
+}
+
 const { NextFederationPlugin } = require("@module-federation/nextjs-mf");
 
 /**
@@ -6,7 +15,7 @@ const { NextFederationPlugin } = require("@module-federation/nextjs-mf");
  * Prevents SSRF if the env var is tampered via misconfigured CI/CD secrets.
  */
 const ALLOWED_PORTAL_ORIGINS = [
-  "https://erp-portal.costco.com",
+  "https://adt.erp.np.cc-costco.com",
   "http://localhost:3000",
   "http://localhost:3001",
   "http://localhost:3002",
@@ -42,7 +51,7 @@ const ALLOWED_IMAGE_ORIGINS = [
  * `next build`. Standalone builds don't need federation, so we make it
  * opt-in via the ENABLE_MODULE_FEDERATION env var.
  */
-const ENABLE_MODULE_FEDERATION = process.env.ENABLE_MODULE_FEDERATION === "true";
+const ENABLE_MODULE_FEDERATION = true;
 
 if (
   PORTAL_REMOTE_URL &&
@@ -87,8 +96,38 @@ const nextConfig = {
   // OWASP A05: Remove "X-Powered-By: Next.js" fingerprinting header
   poweredByHeader: false,
 
-  async headers() {
+  async rewrites() {
     return [
+      {
+        source: '/health',
+        destination: '/api/health',
+      },
+    ];
+  },
+
+  async headers() {
+    // Origins allowed to load Module Federation remote chunks cross-origin.
+    // Static JS bundles contain no secrets, so a broad portal allowlist is safe here.
+    const FEDERATION_ORIGINS = [
+      "https://adt.erp.np.cc-costco.com",
+      "https://adt-signs.erp.np.cc-costco.com",
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "http://localhost:3002",
+    ].join(" ");
+
+    return [
+      // ── Module Federation: allow portal hosts to load remoteEntry.js ──
+      // Middleware excludes /_next/static/ so CORS must be set here statically.
+      // Static JS bundles carry no user data, so Allow-Origin: * is safe and
+      // is the standard practice for MFE remotes.
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          { key: "Access-Control-Allow-Origin", value: "*" },
+          { key: "Timing-Allow-Origin", value: FEDERATION_ORIGINS },
+        ],
+      },
       {
         source: "/(.*)",
         headers: [
@@ -108,11 +147,12 @@ const nextConfig = {
             value: [
               "default-src 'self'",
               // unsafe-eval is required by Module Federation (webpack runtime)
-              "script-src 'self' 'unsafe-eval'",
+              // Portal host origins are added so the host can evaluate signs remote chunks.
+              `script-src 'self' 'unsafe-eval' https://adt-signs.erp.np.cc-costco.com https://adt.erp.np.cc-costco.com`,
               // unsafe-inline is required by Next.js CSS-in-JS / MUI
               "style-src 'self' 'unsafe-inline'",
-              // Allow connections to Portal and Ping OIDC
-              `connect-src 'self' ${PORTAL_REMOTE_URL ?? "https://localhost:3001"} https://loginnp.costco.com https://69ce482633a09f831b7d3ab9.mockapi.io http://34.133.77.6:8080 http://localhost:3002 https://localhost.ecsglobalinc.com:8083 https://costcotest.ecsglobalinc.com`,
+              // Allow connections to Portal, signs remote, and Ping OIDC
+              `connect-src 'self' ${PORTAL_REMOTE_URL ?? "https://localhost:3001"} https://adt-signs.erp.np.cc-costco.com https://adt.erp.np.cc-costco.com https://loginnp.costco.com https://69ce482633a09f831b7d3ab9.mockapi.io https://adt.np.api.cc-costco.com http://34.133.77.6:8080 http://localhost:3002 https://localhost.ecsglobalinc.com:8083 https://costcotest.ecsglobalinc.com`,
               // Fonts served from /public/fonts
               "font-src 'self'",
               // Images from self + data URIs (Next/Image optimization)
@@ -192,6 +232,13 @@ const nextConfig = {
             "react-dom": { singleton: true, eager: true, requiredVersion: "18.3.1" },
             "react/jsx-runtime": { singleton: true, eager: true, requiredVersion: "18.3.1" },
             "react/jsx-dev-runtime": { singleton: true, eager: true, requiredVersion: "18.3.1" },
+            // Exposed federated components import Next runtime modules directly.
+            // Mark them eager so the runtime does not attempt a sync share load
+            // before the dependency has been provided.
+            next: { singleton: true, eager: true, requiredVersion: false },
+            "next/link": { singleton: true, eager: true, requiredVersion: false },
+            "next/router": { singleton: true, eager: true, requiredVersion: false },
+            "next/image": { singleton: true, eager: true, requiredVersion: false },
           },
           extraOptions: {
             exposePages: false,
