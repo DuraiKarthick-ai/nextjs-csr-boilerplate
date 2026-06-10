@@ -1,0 +1,313 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
+@use "../../../styles/breakpoint" as *;
+
+.contentWrap {
+  border: 1px solid $medium-gray;
+  border-radius: 10px;
+  min-height: 100%;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  position: relative;
+
+  .topContentBar {
+    padding: 14px 16px;
+    @include flex();
+    @include justify-content(space-between);
+
+    .topTitle {
+      h2 {
+        line-height: 24px;
+      }
+    }
+
+    .actionWrap {
+      ul {
+        @include flex();
+        @include align-items(center);
+
+        li {
+          padding: 0 10px;
+
+          p {
+            @include font-size(12px);
+            font-weight: 500;
+          }
+
+          .lastUpdated {
+            padding-right: 20px;
+            position: relative;
+
+            &:after {
+              content: "";
+              position: absolute;
+              border-left: 1px solid #cccccc;
+              height: 100%;
+              right: 0;
+              top: 0;
+            }
+
+            i {
+              margin-right: 12px;
+            }
+          }
+
+          &:last-child {
+            padding-right: 0;
+          }
+        }
+      }
+    }
+  }
+
+  .section {
+    padding: 16px;
+
+    .gridWrap {
+      @include flex();
+      gap: 32px;
+      padding: 16px;
+      align-items: flex-start;
+      border: 1px solid $medium-gray;
+      border-radius: 10px;
+
+      .signDetails {
+        max-width: 440px;
+        width: 100%;
+
+        .selectSignDetails {
+          padding-bottom: 16px;
+
+          ul {
+            @include flex();
+            gap: 16px;
+            width: 100%;
+
+            li {
+              flex: 1;
+
+              &:not(:first-child) {
+                max-width: 160px;
+              }
+            }
+          }
+        }
+
+        .buttonsWrap {
+          ul {
+            @include flex();
+            @include justify-content(flex-end);
+            gap: 16px;
+            width: 100%;
+          }
+        }
+
+        .loadSignDetails {
+          ul {
+            li {
+              padding: 8px 0;
+
+              .dflex {
+                @include flex();
+                gap: 16px;
+
+                .grid {
+                  flex: 1;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      .signPreviewWrapper {
+        flex: 1;
+
+        .selectQty {
+          padding-bottom: 16px;
+
+          ul {
+            @include flex();
+            @include align-items(flex-end);
+            @include justify-content(flex-end);
+            gap: 16px;
+
+            li:first-child {
+              max-width: 160px;
+              flex: 1;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// Sign Preview Card Styles
+.signPreviewWrapper {
+  background-color: $table-bg-color;
+  border-radius: 8px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .selectQty {
+    @include container(680px);
+    width: 100%;
+  }
+
+  .templateViewEmpty {
+    background-color: #ffffff;
+    border: 1px solid #d1d1d1;
+    padding: 16px;
+    @include container(680px);
+    width: 100%;
+    border-radius: 6px;
+    @include flex();
+    @include align-items(center);
+    @include justify-content(center);
+    min-height: 300px;
+
+    h2 {
+      color: $medium-gray;
+    }
+  }
+
+  .signTemplateCard {
+    background-color: #ffffff;
+    border: 1px solid #d1d1d1;
+    padding: 20px 24px;
+    width: 100%;
+    @include container(680px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    border-radius: 4px;
+
+    .rerenderOverlay {
+      position: absolute;
+      inset: 0;
+      @include flex();
+      @include align-items(center);
+      @include justify-content(center);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .signHeader {
+      padding-bottom: 30px;
+
+      ul {
+        li {
+          padding: 3px 0;
+
+          h1 {
+            display: block;
+            width: 100%;
+          }
+        }
+      }
+    }
+
+    .productInfo {
+      padding-bottom: 30px;
+
+      ul {
+        @include flex();
+        flex-wrap: wrap;
+        @include align-items(center);
+
+        li {
+          padding: 3px 0;
+          width: calc(100% / 2);
+
+          h2 {
+            font-weight: 700;
+            display: block;
+            width: 100%;
+          }
+        }
+      }
+    }
+
+    .priceDetails {
+      @include flex();
+      @include align-items(flex-end);
+
+      .grid {
+        flex: 1;
+
+        h2 {
+          font-weight: 700;
+        }
+      }
+
+      .pricePerEach {
+        text-align: left;
+      }
+
+      .sellPrice {
+        text-align: right;
+
+        .priceValue {
+          h1 {
+            font-size: 60px;
+            line-height: 56px;
+          }
+          input[type="text"] {
+            @include font-size(50px);
+            font-weight: 700;
+            text-align: right;
+            max-height: 58px;
+            @include up($lg) {
+              @include font-size(60px);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+.errorMessage {
+  color: #d32f2f;
+  @include font-size(13px);
+  margin: 8px 0;
+}
+
+.previewImageWrap {
+  width: 100%;
+
+  img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 4px;
+  }
+}
+
+.signActions {
+  background-color: #e8e8e8;
+  width: 100%;
+  padding-top: 20px;
+
+  ul {
+    @include flex();
+    @include justify-content(flex-end);
+    width: 100%;
+    @include container(680px);
+
+    li {
+      .actionBtn {
+        @include flex();
+        @include align-items(center);
+        @include font-size(16px);
+        color: $primary-color;
+        padding: 10px 16px;
+
+        i {
+          margin-right: 6px;
+        }
+      }
+    }
+  }
+}

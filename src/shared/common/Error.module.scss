@@ -1,0 +1,22 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+
+.errorBox {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 16px;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  width: 100%;
+
+  h4 {
+    padding-bottom: 6px;
+    color: $red-color
+  }
+
+  p {
+    color: $red-color;  
+    font-weight: 300;
+  }
+}

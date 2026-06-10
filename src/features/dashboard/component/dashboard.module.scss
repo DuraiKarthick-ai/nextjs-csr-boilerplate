@@ -1,0 +1,279 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
+@use "../../../styles/breakpoint" as *;
+
+.contentWrap {
+  border: 1px solid $medium-gray;
+  border-radius: 10px;
+  min-height: 100%;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  position: relative;
+
+  .topContentBar {
+    padding: 14px 16px;
+    @include flex();
+    @include justify-content(space-between);
+
+    .topTitle {
+      h2 {
+        line-height: 24px;
+      }
+    }
+
+    .actionWrap {
+      
+      ul {
+        @include flex();
+        @include align-items(center);
+
+        li {
+          padding: 0 10px;
+
+           p {
+            @include font-size(12px);
+            font-weight: 500;
+          }
+
+          .lastUpdated {
+            padding-right: 20px;
+            position: relative;
+
+            &:after {
+              content: '';
+              position: absolute;
+              border-left: 1px solid #CCCCCC;
+              height: 100%;
+              right: 0;
+              top: 0;
+            }
+
+            i {
+              margin-right: 12px;
+            }
+          }
+
+          &:last-child {
+            padding-right: 0;
+          }
+        }
+      }
+    }
+  }
+
+  .section {
+    padding: 16px;
+  }
+}
+
+.contentSection {
+  padding: 16px;
+  
+  .contentWrap {
+    padding: 16px;
+    border: 1px solid $medium-gray;
+    border-radius: 10px;
+  }
+}
+
+.quickLinks {
+  padding: 16px;
+
+  .subTitle {
+    padding-bottom: 16px
+  }
+
+  ul {
+    @include flex();
+    @include align-items(center);
+    margin-left: -16px;
+    margin-right: -16px;
+    max-width: 700px;
+
+
+    li {
+      padding: 0 16px;
+      flex: 1;
+    }
+  }
+
+  .quickLinksWrap {
+    padding: 36px 26px;
+    border-radius: 10px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+    text-align: center;
+
+    .icons {
+      @include flex();
+      @include justify-content(center);
+      background-color: $primary-color;
+      border-radius: 30px;
+      width: 49px;
+      margin: auto;
+      padding: 14px 0;
+    }
+
+    label {
+      @include font-size(14px);
+      color: $primary-color;
+      display: block;
+      padding-top: 10px;
+      font-weight: 500;
+      @include up($xxxl) {
+        @include font-size(16px);
+      }
+    }
+  }
+}
+
+.batchActivity {
+  padding: 16px;
+
+  .subTitle {
+    padding-bottom: 16px
+  }
+  
+  .tableWrap {
+    width: 100%;
+    max-height: 368px;
+    overflow: auto;
+  
+    .dataTable {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background-color: $white-color;
+      table-layout: auto;
+  
+      thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: $white-color;
+        transform: translateZ(0);
+        will-change: transform;
+        backface-visibility: hidden;
+  
+        tr {
+          th {
+            text-align: left;
+            vertical-align: middle;
+            white-space: nowrap;
+            padding: 20px 16px;
+            border: 1px solid $medium-gray;
+
+            &.columnJobs {
+              min-width: 300px;
+            }
+            
+            p {
+              @include font-size(14px);
+              font-weight: 500;
+              color: $text-color;
+              @include up($xxxl) {
+                @include font-size(16px);
+              }
+            }
+          }
+        }
+      }
+  
+      tbody {
+        tr {
+  
+          td {
+            padding: 10px 16px;
+            border: 1px solid $medium-gray;
+
+            p {
+              @include font-size(14px);
+              line-height: 22px;
+              color: #005dab;
+              @include up($xxxl) {
+                @include font-size(16px);
+              }
+            }
+  
+            .batchLink {
+              @include font-size(14px);
+              line-height: 22px;
+              color: #005dab;
+              cursor: pointer;
+              text-decoration: none;
+              font-weight: 500;
+              @include up($xxxl) {
+                @include font-size(16px);
+              }
+  
+              &:hover {
+                text-decoration: underline;
+              }
+            }
+
+            .printStatusTag {
+            
+              span {
+                display: block;
+                padding: 8px 10px;
+                background-color: #e8f5e9;
+                color: #2e7d32;
+                border-radius: 4px;
+                @include font-size(14px);
+                line-height: 16px;
+                font-weight: 500;
+                text-align: center;
+              }
+            }
+  
+            .noDatafound {
+              margin-left: -18px;
+              margin-right: -18px;
+            }
+
+            .shimmerBtnWrap {
+              @include flex();
+              max-width: 410px;
+            }
+
+            .printerSelect {
+              width: 100%;
+              min-width: 140px;
+              padding: 6px 10px;
+              border: 1px solid $medium-gray;
+              border-radius: 4px;
+              @include font-size(13px);
+              color: $text-dark-color;
+              background-color: $white-color;
+              cursor: pointer;
+              appearance: auto;
+
+              &:focus {
+                outline: none;
+                border-color: $primary-color;
+              }
+
+              &:disabled {
+                background-color: $extra-light-color;
+                color: $gray;
+                cursor: not-allowed;
+              }
+            }
+
+            ul {
+              @include flex();
+              @include align-items(center);
+              gap: 16px;
+              
+              li{
+
+                .printButton{
+                  min-width: 200px;
+                }
+              }
+            }
+
+          }
+        }
+      }
+    }
+  }
+}

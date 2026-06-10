@@ -1,41 +1,37 @@
 /**
  * Module Federation entry point.
  *
- * `signs/app` default-exports the full remote shell, while the named exports
- * below keep the app's internal components available for host-side advanced
- * composition if needed.
+ * `signs/app` default-exports the full remote shell. The named exports expose
+ * the current layout, feature screens, hooks, constants, and shared types that
+ * exist in this repo's present folder structure.
  */
 
 export { default } from "./app";
+export type { FederatedAppProps, FederatedView } from "./app";
 
-// ── Components ──────────────────────────────────────────────────────
-export { default as AuthGate } from "@/components/auth/authGate";
-export { default as ContentWrapper } from "@/components/contentWrapper/contentWrapper";
-export { default as CustomPrint } from "@/components/customPrint/customPrint";
-export { default as Dashboard } from "@/components/dashboard/dashboard";
-export { default as Header } from "@/components/header/header";
-export { default as Layout } from "@/components/layout/layout";
-export { default as PrintSuccessDialog } from "@/components/printSuccessDialog/printSuccessDialog";
-export { default as QuickSign } from "@/components/quickSign/quickSign";
-export { default as QuickPrintDepartmentCategory } from "@/components/quickSign/quickPrintDepartmentCategory/quickPrintDepartmentCategory";
-export { default as QuickPrintItem } from "@/components/quickSign/quickPrintItem/quickPrintItem";
-export { default as SideNav } from "@/components/sideNav/sideNav";
-export { default as SignAudit } from "@/components/signAudit/signAudit";
-export { default as SignManagement } from "@/components/signManagement/signManagement";
-export { default as SignWorklist } from "@/components/signWorklist/signWorklist";
-export { default as EmergencyPriceChange } from "@/components/signWorklist/emergencyPriceChange/emergencyPriceChange";
-export { default as Endcap } from "@/components/signWorklist/endcap/endcap";
-export { default as ItemNameChange } from "@/components/signWorklist/itemNameChange/itemNameChange";
-export { default as SignWorklistSignAudit } from "@/components/signWorklist/signAudit/signAudit";
-export * from "@/components/shared/icons";
-export { default as SuccessToast } from "@/components/shared/SuccessToast";
+// Current layout components
+export { default as PageContainer } from "../shared/layout/PageContainer";
+export { default as Sidebar } from "../shared/layout/Sidebar";
 
-// ── Hooks ────────────────────────────────────────────────────────────
-export { useDashboard } from "@/hooks/useDashboard";
-export { usePrint } from "@/hooks/usePrint";
+// Current feature screens
+export { default as DashboardScreen } from "../features/dashboard/component/dashboard";
+export { default as QuickPrintScreen } from "../features/quick-print/component/quickPrint";
+export { default as CustomSignScreen } from "../features/custom-sign/component/customSign";
+export { default as WorklistScreen } from "../features/worklist/component/worklist";
 
-// ── Types ────────────────────────────────────────────────────────────
-export type * from "@/types";
-export type * from "@/types/batch";
-export type * from "@/types/dashboard";
-export type * from "@/types/print";
+// Current hooks
+export { default as useBatches } from "../features/dashboard/hooks/useBatches";
+export { default as useBatchDetail } from "../features/worklist/hooks/useBatchDetail";
+export { default as useDebounce } from "../hooks/useDebounce";
+export { default as useOAuthInit } from "../hooks/useOAuthInit";
+export { default as usePagination } from "../hooks/usePagination";
+
+// Shared constants and app store surface
+export { ROUTES } from "../lib/constants";
+export { AppProvider } from "../store/useAppStore";
+
+// Shared types
+export type * from "../types/batch.types";
+export type * from "../types/common.types";
+export type * from "../types/sign.types";
+export type * from "../types/worklist.types";

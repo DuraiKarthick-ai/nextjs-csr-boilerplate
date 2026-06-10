@@ -1,0 +1,8 @@
+apiVersion: networking.gke.io/v1beta1
+kind: FrontendConfig
+metadata:
+  name: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}-https-redirect-config
+  namespace: #{GKE_NAMESPACE}
+spec:
+  redirectToHttps:
+    enabled: true

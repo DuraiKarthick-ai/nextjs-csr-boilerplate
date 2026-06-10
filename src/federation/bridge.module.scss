@@ -1,128 +1,50 @@
-.bridge :global(*),
-.bridge :global(*::before),
-.bridge :global(*::after) {
-  box-sizing: border-box;
-}
+/**
+ * bridge.module.scss
+ *
+ * Federation shell layout styles only.
+ * All utility/reset/button/form styles come from _shared-foundation.scss —
+ * the single source of truth shared with globals.scss (standalone app).
+ */
+@use "../styles/shared-foundation" as sf;
+@use "../styles/variables" as *;
 
-.bridge :global(ul),
-.bridge :global(ol) {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.bridge :global(a) {
-  text-decoration: none;
-  color: inherit;
-}
-
-.bridge :global(button) {
-  font: inherit;
-  color: inherit;
-}
-
-.bridge :global(.container) {
-  max-width: 1920px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.bridge :global(.d-flex) {
-  display: flex;
-}
-
-.bridge :global(.flex-align-center) {
-  align-items: center;
-}
-
-.bridge :global(.inputLabelWrap) {
-  position: relative;
-  width: 100%;
-}
-
-.bridge :global(.primaryButton) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 24px;
-  background-color: #005dab;
-  color: #ffffff;
-  border: 1px solid #005dab;
-  border-radius: 4px;
-  font-size: 16px;
-  line-height: 20px;
-  font-weight: 400;
-  cursor: pointer;
-}
-
-.bridge :global(.primaryButton:disabled) {
-  cursor: not-allowed;
-  background-color: #afafaf;
-  border-color: #afafaf;
-}
-
-.bridge :global(.primaryButtonOutline) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 24px;
-  background-color: transparent;
-  color: #005dab;
-  border: 1px solid #005dab;
-  border-radius: 4px;
-  font-size: 16px;
-  line-height: 20px;
-  font-weight: 400;
-  cursor: pointer;
-}
-
-.bridge :global(.printButton) {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  background-color: #005dab;
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
+/* ── Inject shared utilities as global classes inside the bridge root ── */
+.bridge {
+  min-height: 100vh;
+  background-color: $bg-color;
+  font-family: 'Roboto', sans-serif;
   font-size: 14px;
-  line-height: 16px;
-  font-weight: 400;
-  cursor: pointer;
-  min-width: 110px;
+  color: $text-dark-color;
+
+  :global {
+    /* Utility classes (buttons, forms, helpers) */
+    @include sf.foundation-globals();
+
+    /*
+     * Scoped element typography — .bridge h2 (specificity 0,1,1) beats the
+     * portal's bare h2 (0,0,1), so portal global styles cannot bleed in.
+     */
+    @include sf.typography-scoped();
+  }
 }
 
-.windowControls {
+/* ── Federation layout structure ────────────────────────────────── */
+.federatedLayout {
   display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
-  padding: 6px 10px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #e0e0e0;
+  width: 100%;
+  min-height: 100vh;
 }
 
-.controlBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: #555;
-  cursor: pointer;
-
-  &:hover {
-    background: #e0e0e0;
-    color: #333;
-  }
+.federatedSidebar {
+  width: 290px;
+  min-width: 290px;
+  flex-shrink: 0;
 }
 
-.closeBtn {
-  &:hover {
-    background: #e81123;
-    color: #fff;
-  }
+.federatedMain {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background-color: #ffffff;
 }

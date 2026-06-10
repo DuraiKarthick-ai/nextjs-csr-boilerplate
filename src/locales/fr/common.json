@@ -1,0 +1,15 @@
+{
+  "nav": {
+    "myApps": "Mes applications",
+    "signManagement": "Gestion des enseignes",
+    "dashboard": "Tableau de bord des enseignes",
+    "customSign": "Enseigne personnalisée",
+    "quickPrint": "Impression rapide d'enseigne",
+    "worklist": "Liste de travail des enseignes",
+    "tools": "Outils"
+  },
+  "actions": {
+    "print": "Imprimer",
+    "reset": "Réinitialiser"
+  }
+}

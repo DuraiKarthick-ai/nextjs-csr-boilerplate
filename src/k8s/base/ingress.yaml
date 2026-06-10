@@ -1,0 +1,26 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}-ingress
+  namespace: #{GKE_NAMESPACE}
+  labels:
+    app: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}
+  annotations:
+    kubernetes.io/ingress.class: "gce-internal"
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  tls:
+    - hosts:
+        - #{GKE_INGRESS_TLS_HOSTS}      #svc.ibmi-replatform.np.nxt.costco.com
+      secretName: #{GKE_INGRESS_TLS_SECRETNAME}    #ibmi-api-tls-secret
+  rules:
+    - host: #{GKE_INGRESS_TLS_HOSTS}      #svc.ibmi-replatform.np.nxt.costco.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}-service
+                port: 
+                  number: 8080

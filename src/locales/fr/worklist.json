@@ -1,0 +1,12 @@
+{
+  "title": "Liste de travail des enseignes",
+  "filters": {
+    "status": "Statut"
+  },
+  "table": {
+    "columns": {
+      "status": "Statut",
+      "actions": "Actions"
+    }
+  }
+}

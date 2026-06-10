@@ -1,0 +1,14 @@
+@use "../../../styles/variables" as *;
+
+.screen-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+
+  .screen-placeholder-label {
+    font-size: 18px;
+    font-weight: 500;
+    color: $primary-color;
+  }
+}

@@ -1,0 +1,49 @@
+{
+  "loading": "Loading…",
+  "error": {
+    "title": "Error"
+  },
+  "emptyState": {
+    "title": "No items found"
+  },
+  "modal": {
+    "close": "Close"
+  },
+  "header": {
+    "title": "Costco ERP",
+    "brandAlt": "Costco Wholesale",
+    "warehouse": "Warehouse 101",
+    "welcome": "Welcome, Kelsey",
+    "language": "English",
+    "openSidebar": "Open sidebar",
+    "closeSidebar": "Close sidebar"
+  },
+  "nav": {
+    "main": "Main navigation",
+    "search": "Search apps, features, etc",
+    "myApps": "My Apps",
+    "signManagement": "Signs Management",
+    "dashboard": "Signs Dashboard",
+    "customSign": "Custom Sign",
+    "quickPrint": "Quick Sign Print",
+    "worklist": "Sign Worklist",
+    "tools": "Tools",
+    "help": "Help"
+  },
+  "topBar": {
+    "searchLabel": "Global search",
+    "searchPlaceholder": "Search…",
+    "gridButton": "Open dashboard tools",
+    "collapseButton": "Collapse panel"
+  },
+  "actions": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "delete": "Delete",
+    "print": "Print",
+    "clear": "Clear",
+    "reset": "Reset",
+    "apply": "Apply"
+  }
+}

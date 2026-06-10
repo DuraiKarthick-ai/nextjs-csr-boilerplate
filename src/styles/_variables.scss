@@ -1,9 +1,11 @@
 
 // Breakpoint Variables
-$sm: 576px !default;
-$md: 768px !default;
-$lg: 992px !default;
-$xl: 1200px !default;
+$sm: 575px !default;
+$md: 767px !default;
+$lg: 991px !default;
+$xl: 1199px !default;
+$xxl: 1439px !default;
+$xxxl: 1919px !default;
 
 // Color Variables
 $primary-color: #005DAB;
@@ -12,8 +14,7 @@ $primary-btn-hover-color: #4580B2;
 
 $dark-blue-color: #002242;
 
-
-$title-color: #333333;
+$text-dark-color: #333333;
 $text-color: #666666;
 $light-black-color: #999999;
 $bg-color: #F8F8F8;
@@ -36,7 +37,6 @@ $table-border-color: #E0E0E0;
 $status-green: #DFF0D8;
 
 $table-bg-color: #FAFAFA;
-
 /* ── Roboto Font Family ─────────────────────────────────────────── */
 @font-face {
   font-family: 'Roboto';
@@ -94,8 +94,4 @@ $table-bg-color: #FAFAFA;
   font-display: swap;
 }
 
-
 $Roboto: 'Roboto';
-
-
-

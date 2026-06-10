@@ -1,0 +1,49 @@
+{
+  "title": "Worklist",
+  "description": "Emergency price change sign management",
+  "filters": {
+    "label": "Filters",
+    "department": "Department",
+    "status": "Status",
+    "printStatus": "Print Status",
+    "dateFrom": "From",
+    "dateTo": "To",
+    "search": "Search items",
+    "searchPlaceholder": "Item number or description",
+    "clearAll": "Clear all filters"
+  },
+  "table": {
+    "caption": "Worklist items",
+    "columns": {
+      "itemNumber": "Item #",
+      "description": "Description",
+      "department": "Department",
+      "oldPrice": "Old Price",
+      "newPrice": "New Price",
+      "delta": "Change",
+      "effectiveDate": "Effective Date",
+      "status": "Status",
+      "printStatus": "Print Status",
+      "actions": "Actions"
+    },
+    "empty": "No worklist items match your filters."
+  },
+  "toolbar": {
+    "printSelected": "Print Selected",
+    "selectAll": "Select All",
+    "clearSelection": "Clear Selection",
+    "selectedCount": "{{count}} selected"
+  },
+  "status": {
+    "PENDING": "Pending",
+    "APPROVED": "Approved",
+    "REJECTED": "Rejected",
+    "PROCESSED": "Processed"
+  },
+  "printStatus": {
+    "NOT_PRINTED": "Not Printed",
+    "PRINTING": "Printing",
+    "PRINTED": "Printed",
+    "FAILED": "Failed"
+  }
+}

@@ -1,0 +1,13 @@
+{
+  "title": "Tableau de bord de gestion des enseignes",
+  "quickLinks": {
+    "quickPrint": "Impression rapide d'enseigne"
+  },
+  "worklistSummary": {
+    "columnBatchJob": "Travaux par lot",
+    "columnStatus": "Statut",
+    "columnActions": "Actions",
+    "readyToPrint": "Prêt à imprimer",
+    "print": "Imprimer ({{progress}})"
+  }
+}

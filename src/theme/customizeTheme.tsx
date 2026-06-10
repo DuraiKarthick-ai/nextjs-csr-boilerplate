@@ -43,12 +43,16 @@ export const theme = createTheme({
 
         input: {
           fontSize: "16px",
-          lineHeight: "20px",
           fontWeight: "400",
           letterSpacing: "normal",
           color: "#666666",
           width: "100%",
-          padding: "12px 8px",
+          padding: "10px 8px",
+
+          // Reduce font size on screens below 1920px
+          "@media (max-width:1919px)": {
+            fontSize: "14px",
+          },
 
           "&::placeholder": {
             color: "#999999",
@@ -81,12 +85,15 @@ export const theme = createTheme({
         },
         select: {
           fontSize: "16px",
-          lineHeight: "20px",
           fontWeight: "400",
           letterSpacing: "normal",
           color: "#666666",
           width: "100%",
-          padding: "12px 8px",
+          padding: "10px 8px",
+          // Reduce font size on screens below 1920px
+          "@media (max-width:1919px)": {
+            fontSize: "14px",
+          },
         },
         icon: {
           color: "#005DAB", // Blue dropdown arrow
@@ -120,6 +127,10 @@ export const theme = createTheme({
           fontSize: "16px",
           lineHeight: "20px",
           fontWeight: "400",
+          // Reduce font size on screens below 1920px
+          "@media (max-width:1919px)": {
+            fontSize: "14px",
+          },
           "&:hover": {
             backgroundColor: "#f5f5f5",
           },
@@ -194,10 +205,13 @@ export const theme = createTheme({
 
             "& .MuiAutocomplete-input": {
               fontSize: "16px",
-              lineHeight: "20px",
               fontWeight: "400",
               color: "#666666",
-              padding: "12px 8px !important",
+              padding: "10px 8px !important",
+              // Reduce font size on screens below 1920px
+              "@media (max-width:1919px)": {
+                fontSize: "14px",
+              },
 
               "&::placeholder": {
                 color: "#999999",

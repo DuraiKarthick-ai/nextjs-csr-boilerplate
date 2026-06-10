@@ -1,0 +1,376 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
+@use "../../../styles/breakpoint" as *;
+
+.contentWrap {
+  border: 1px solid $medium-gray;
+  border-radius: 10px;
+  min-height: 100%;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  position: relative;
+
+  .topContentBar {
+    padding: 14px 16px;
+    @include flex();
+    @include justify-content(space-between);
+
+    .topTitle {
+      h2 {
+        line-height: 24px;
+      }
+    }
+
+    .actionWrap {
+      ul {
+        @include flex();
+        @include align-items(center);
+
+        li {
+          padding: 0 10px;
+
+          p {
+            @include font-size(12px);
+            font-weight: 500;
+          }
+
+          .lastUpdated {
+            padding-right: 20px;
+            position: relative;
+
+            &:after {
+              content: "";
+              position: absolute;
+              border-left: 1px solid #cccccc;
+              height: 100%;
+              right: 0;
+              top: 0;
+            }
+
+            i {
+              margin-right: 12px;
+            }
+          }
+
+          &:last-child {
+            padding-right: 0;
+          }
+        }
+      }
+    }
+  }
+
+  .section {
+    padding: 16px;
+  }
+
+  .groupBox {
+    padding: 26px 20px;
+    border: 1px solid $medium-gray;
+    border-radius: 10px;
+
+    .groupBoxHeader {
+      @include flex();
+      @include align-items(center);
+      @include justify-content(space-between);
+      padding-bottom: 12px;
+
+      .filterButtonWrap {
+        ul {
+          @include flex();
+          @include align-items(center);
+
+          li {
+            padding: 0 20px;
+
+            &:last-child {
+              padding-right: 0;
+            }
+          }
+        }
+
+        p {
+          @include font-size(14px);
+          color: $dark-blue-color;
+          font-weight: 400;
+        }
+
+        .clearFiltersBtn {
+          @include font-size(14px);
+          color: $dark-blue-color;
+          font-weight: 400;
+          text-decoration: underline;
+        }
+      }
+    }
+  }
+
+  .tableWrap {
+    width: 100%;
+    max-height: 560px;
+    overflow: auto;
+
+    .dataTable {
+      width: 100%;
+      min-width: 1030px;
+      border-collapse: separate;
+      border-spacing: 0;
+      background-color: $white-color;
+      table-layout: fixed;
+      @include up($xxl) {
+        min-width: auto;
+      }
+
+      thead {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        background-color: $white-color;
+        transform: translateZ(0);
+        will-change: transform;
+        backface-visibility: hidden;
+
+        tr {
+          th {
+            @include font-size(12px);
+            font-weight: 500;
+            color: $text-dark-color;
+            text-align: left;
+            vertical-align: middle;
+            white-space: nowrap;
+            padding: 12px 8px;
+            border: 1px solid $medium-gray;
+            @include up($xxxl) {
+              @include font-size(14px);
+            }
+
+            .labelWrap {
+              @include flex();
+              @include align-items(center);
+              padding-bottom: 6px;
+
+              span {
+                display: block;
+              }
+
+              .sortIcon {
+                min-width: 10px;
+                cursor: pointer;
+                margin-left: auto;
+              }
+            }
+
+            &.checkboxCell {
+              text-align: center;
+              width: 90px;
+
+              .labelWrap {
+                @include justify-content(center);
+              }
+            }
+
+            &.thDatePickerCell {
+              width: 140px;
+            }
+
+            &.thCopies {
+              vertical-align: top;
+            }
+
+            .filterWrap {
+              &.dateFilter {
+                max-width: 120px;
+              }
+
+              input[type="date"] {
+                width: 100%;
+                padding: 6px 10px;
+                border: 1px solid $medium-gray;
+                border-radius: 4px;
+                font-size: 13px;
+                line-height: 16px;
+                color: #333333;
+                background-color: $white-color;
+                height: 32px;
+                box-sizing: border-box;
+
+                &:focus {
+                  outline: none;
+                  border-color: $primary-color;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      tbody {
+        tr {
+          &:nth-child(even) {
+            background-color: #fafafa;
+          }
+
+          &.selectedRow {
+            background-color: #e8f0fe;
+          }
+
+          td {
+            padding: 12px 8px;
+            border: 1px solid $medium-gray;
+
+            p {
+              @include font-size(12px);
+              font-weight: 400;
+              color: $text-dark-color;
+              @include up($xxxl) {
+                @include font-size(14px);
+              }
+            }
+
+            .previewBtn {
+              @include flex();
+              @include align-items(center);
+              @include font-size(12px);
+              font-weight: 400;
+              color: $primary-color;
+              text-decoration: none;
+              @include up($xxxl) {
+                @include font-size(14px);
+              }
+
+              i {
+                margin-right: 8px;
+              }
+            }
+
+            &.checkboxCell {
+              text-align: center;
+            }
+
+            .printStatusTag {
+              span {
+                display: block;
+                padding: 8px 10px;
+                background-color: #e8f5e9;
+                color: #2e7d32;
+                border-radius: 4px;
+                @include font-size(12px);
+                line-height: 16px;
+                font-weight: 500;
+                text-align: center;
+                @include up($xxxl) {
+                  @include font-size(14px);
+                }
+              }
+            }
+
+            .noDatafound {
+              margin-left: -8px;
+              margin-right: -8px;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 22px 8px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 1px 2px 0px;
+    border: 1px solid #d9d9d9;
+
+    p {
+      @include font-size(14px);
+      color: $text-color;
+      font-weight: 500;
+    }
+  }
+}
+
+// Preview dialog
+.previewDialogTitleRow {
+  @include flex();
+  @include align-items(center);
+  @include justify-content(space-between);
+}
+
+.previewDialogCloseIcon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  @include flex();
+  @include align-items(center);
+  padding: 4px;
+  border-radius: 50%;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04);
+  }
+}
+
+.previewDialogLoading {
+  @include flex();
+  flex-direction: column;
+  @include align-items(center);
+  @include justify-content(center);
+  padding: 40px 0;
+  gap: 16px;
+
+  p {
+    @include font-size(14px);
+    color: $text-color;
+    margin: 0;
+  }
+}
+
+.previewDialogImageWrap {
+  @include flex();
+  @include justify-content(center);
+  padding: 8px 0;
+}
+
+.previewDialogOutlineBtn {
+  @include flex();
+  @include align-items(center);
+  @include justify-content(center);
+  padding: 10px 24px;
+  background: transparent;
+  color: $primary-color;
+  border: 1px solid $primary-color;
+  border-radius: 4px;
+  @include font-size(14px);
+  font-weight: 400;
+  cursor: pointer;
+
+  &:hover {
+    background-color: rgba($primary-color, 0.04);
+  }
+}
+
+.previewDialogPrimaryBtn {
+  @include flex();
+  @include align-items(center);
+  @include justify-content(center);
+  gap: 8px;
+  padding: 10px 24px;
+  background: $primary-color;
+  color: $white-color;
+  border: 1px solid $primary-color;
+  border-radius: 4px;
+  @include font-size(14px);
+  font-weight: 400;
+  cursor: pointer;
+
+  &:hover:not(:disabled) {
+    background-color: $primary-btn-hover-color;
+    border-color: $primary-btn-hover-color;
+  }
+
+  &:disabled {
+    background: $gray;
+    border-color: $gray;
+    cursor: not-allowed;
+  }
+}

@@ -10,10 +10,12 @@
 /* ── Partials ───────────────────────────────────────────────────── */
 @use "variables" as *;
 @use "mixins" as *;
-@use "typography" as *;
+@use "typography" as typo;
 @use "utilities" as *;
 @use "breakpoint" as *;
 @use "reset" as *;
+@use "shared-foundation" as sf;
+// @use "../features/custom-sign/component/customSign";
 
 html,
 body {
@@ -28,17 +30,13 @@ body {
   background-color: $bg-color;
   font-family: $Roboto;
   @include font-size(14px);
-  color: $black-color;
-  @include up($lg) {
+  color: $text-dark-color;
+  @include up($xxxl) {
     @include font-size(16px);
   }
 
   &::-webkit-scrollbar {
     display: none;
-  }
-
-  .container {
-    @include container();
   }
 
   #__next {
@@ -54,236 +52,8 @@ body {
   }
 }
 
-/* ── Form elements ──────────────────────────────────────────────── */
-.inputLabelWrap {
-  position: relative;
-  width: 100%;
-}
+/* ── Typography (h1–h6, p, a) — single source of truth in _typography.scss) */
+@include typo.typography-rules();
 
-label.label {
-  @include font-size(12px);
-  font-weight: 500;
-  color: $text-color;
-  text-transform: uppercase;
-  line-height: 20px;
-  padding-bottom: 6px;
-  display: inline-block;
-  
-  &.errorLabel {
-    color: $red-color;
-  }
-  
-  .astrik {
-    color: $red-color;
-    margin-left: 2px;
-  }
-
-
-  .mandatoryStar {
-    color: $red-color;
-    margin-left: 2px;
-  }
-}
-
-.validationMsg {
-  font-size: 11px;
-  margin-top: 2px;
-
-  &.info {
-    color: $text-color;
-  }
-
-  &.error {
-    color: $red-color;
-  }
-}
-
-.iconClose {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(4px);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-
-  &:focus-visible {
-    outline: 2px solid $primary-color;
-    border-radius: 50%;
-  }
-}
-
-/* ── Buttons ────────────────────────────────────────────────────── */
-.primaryButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 24px;
-  background-color: $primary-color;
-  color: #ffffff;
-  border: 1px solid $primary-color;
-  border-radius: 4px;
-  @include font-size(16px);
-  font-weight: 400;
-  cursor: pointer;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease;
-
-  &:hover {
-    background-color: $primary-btn-hover-color;
-    border-color: $primary-btn-hover-color;
-  }
-
-  &:focus-visible {
-    outline: 2px solid $primary-color;
-    outline-offset: 2px;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    background-color: $gray;
-    border-color: $gray
-  }
-}
-
-.primaryButtonOutline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 24px;
-  background-color: transparent;
-  color: $primary-color;
-  border: 1px solid $primary-color;
-  border-radius: 4px;
-  @include font-size(16px);
-  font-weight: 400;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: rgba(0, 93, 171, 0.06);
-  }
-
-  &:focus-visible {
-    outline: 2px solid $primary-color;
-    outline-offset: 2px;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    border-color: $gray;
-    color: $gray;
-  }
-}
-
-.printButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 16px;
-  background-color: $primary-color;
-  color: #ffffff;
-  border: none;
-  border-radius: 4px;
-  @include font-size(14px);
-  line-height: 16px;
-  font-weight: 400;
-  cursor: pointer;
-  min-width: 110px;
-
-  &:hover {
-    background-color: $primary-btn-hover-color;
-  }
-
-  &:focus-visible {
-    outline: 2px solid $primary-color;
-    outline-offset: 2px;
-  }
-
-  &:disabled {
-    cursor: not-allowed;
-    background-color: $gray;
-  }
-}
-
-/* ── Status tags ────────────────────────────────────────────────── */
-.statusTag {
-  display: inline-flex;
-  align-items: center;
-
-  &.minWidth {
-    min-width: 262px;
-  }
-
-  span {
-    padding: 8px 10px;
-    background-color: #e8f5e9;
-    color: #2e7d32;
-    border-radius: 4px;
-    @include font-size(14px);
-    line-height: 16px;
-    font-weight: 500;
-    text-align: center;
-  }
-}
-
-.noDataContent {
-  text-align: center;
-  padding: 80px 16px;
-  border-radius: 4px;
-  border: 1px solid $medium-gray;
-
-  h4 {
-    color: $title-color;
-    padding-bottom: 6px;
-  }
-
-  label {
-    color: $text-color;
-    @include font-size(14px);
-    line-height: 16px;
-    font-weight: 300;
-  }
-}
-
-.shimmer {
-  height: 20px;
-  border-radius: 4px;
-  background: linear-gradient(90deg, #e0e0e0 25%, #f0f0f0 37%, #e0e0e0 63%);
-  background-size: 400% 100%;
-  animation: shimmer 1.4s ease infinite;
-
-  &.checkbox {
-    width: 20px;
-  }
-
-  &.xs {
-    width: 25%;
-  }
-
-  &.sm {
-    width: 50%;
-  }
-
-  &.md {
-    width: 75%;
-  }
-
-  &.lg {
-    width: 90%;
-  }
-
-  &.m-auto {
-    margin: auto;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 100% 0;
-  }
-  100% {
-    background-position: -100% 0;
-  }
-}
+/* ── Shared utility classes (single source of truth in _shared-foundation.scss) */
+@include sf.foundation-globals();

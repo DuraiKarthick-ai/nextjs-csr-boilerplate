@@ -1,14 +1,14 @@
 import Head from "next/head";
 
 /**
- * Root page for load balancer checks.
+ * Root page for load balancer / health probe checks.
  *
  * Returns a minimal static payload at / so probes receive a deterministic
  * HTTP 200 response without depending on routing or UI state.
  *
  * @returns {JSX.Element} A minimal response page.
  */
-export default function IndexPage(): JSX.Element {
+function IndexPage(): JSX.Element {
   return (
     <>
       <Head>
@@ -18,3 +18,7 @@ export default function IndexPage(): JSX.Element {
     </>
   );
 }
+
+IndexPage.noLayout = true;
+
+export default IndexPage;

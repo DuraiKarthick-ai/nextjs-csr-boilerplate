@@ -1,0 +1,70 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# namespace the resources will be applied into
+namespace: #{GKE_NAMESPACE}
+
+# optional prefix applied to names (leave or remove)
+# namePrefix: "#{SERVICE_IMAGENAME}-"
+
+# resources included in this kustomize deployment
+resources:
+  - backendconfig.yaml
+  - configmap.yaml
+  - deployment.yaml
+  - hpa.yaml
+  - networkpolicy.yaml
+  - pdb.yaml
+  #- secret.yaml
+  - ingress.yaml
+  - frontend-config.yaml
+  #- cert-secret.yaml
+  # - secretproviderclass-gsm.yml
+  - service.yaml
+  - serviceaccount.yaml
+
+# Use commonLabels (standard kustomize) instead of custom pairs block
+commonLabels:
+  #app: #{SERVICE_IMAGENAME}
+  environment: "#{CD_ENVIRONMENT_LOWER}"
+
+# Standard commonAnnotations block
+commonAnnotations:
+  workload.ecp.costco.com/organization: "#{GKE_ORGANIZATION}"
+  workload.ecp.costco.com/support-group-email: "#{SUPPORT_GROUP_EMAIL}"
+  workload.ecp.costco.com/team: "#{GROUP_CODE}"
+
+# Allow CI to replace image tag easily using kustomize images feature
+# images:
+  # - name: #{IMAGE_REF}
+    # Default tag to be overridden by CI (see commands below)
+    # newTag: CHANGE_ME_IMAGE_REF_TAG
+
+# Patches: target the actual deployment name used for replat-poc-ui-remote
+patches:
+  - target:
+      kind: Deployment
+      name: api
+    patch: |-
+      - op: replace
+        path: /spec/replicas
+        value: #{KUSTO_REPLICAS}
+      - op: add
+        path: /metadata/annotations
+        value:
+          workload.ecp.costco.com/organization: "#{GKE_ORGANIZATION}"
+          workload.ecp.costco.com/support-group-email: "#{SUPPORT_GROUP_EMAIL}"
+          workload.ecp.costco.com/team: "#{GROUP_CODE}"
+      - op: add
+        path: /spec/template/metadata/annotations/workload.ecp.costco.com~1organization
+        value: "#{GKE_ORGANIZATION}"
+      - op: add
+        path: /spec/template/metadata/annotations/workload.ecp.costco.com~1support-group-email
+        value: "#{SUPPORT_GROUP_EMAIL}"
+      - op: add
+        path: /spec/template/metadata/annotations/workload.ecp.costco.com~1team
+        value: "#{GROUP_CODE}"
+      - op: add
+        path: /spec/template/spec/containers/0/securityContext/seccompProfile
+        value:
+          type: RuntimeDefault

@@ -1,0 +1,84 @@
+{
+  "sizes": {
+    "selectPrompt": "Select Size",
+    "small": "S-Small",
+    "medium": "M-Medium",
+    "large": "L-Large"
+  },
+  "customSign": {
+    "title": "Custom Sign Builder",
+    "description": "Design a custom price sign for any department",
+    "form": {
+      "title1": "Title Line 1",
+      "title2": "Title Line 2",
+      "title3": "Title Line 3",
+      "price": "Price",
+      "department": "Department",
+      "signType": "Sign Type",
+      "departmentPlaceholder": "Select department",
+      "signTypePlaceholder": "Select sign type",
+      "itemUpc": "Item # / UPC",
+      "itemUpcPlaceholder": "Enter Item # / UPC",
+      "size": "Size",
+      "quantity": "Quantity",
+      "lookup": "Lookup",
+      "lookingUp": "Looking up…"
+    },
+    "preview": {
+      "heading": "Preview"
+    },
+    "actions": {
+      "preview": "Preview",
+      "print": "Print",
+      "reset": "Reset"
+    }
+  },
+  "quickPrint": {
+    "screenTitle": "Signs Dashboard - Quick Sign Print",
+    "groupTitle": "Quick Sign Print",
+    "title": "Quick Print",
+    "description": "Print signs by item number or department",
+    "tabs": {
+      "byItem": "By Item",
+      "byDept": "By Department & Category",
+      "byEndcap": "By Endcap"
+    },
+    "form": {
+      "itemNumber": "Item Number",
+      "itemNumberPlaceholder": "Enter item number",
+      "itemUpc": "Item # / UPC",
+      "itemUpcPlaceholder": "Enter or Scan Item # / UPC",
+      "department": "Department #",
+      "departmentPlaceholder": "Enter Department #",
+      "catCode": "Cat Code #",
+      "catCodePlaceholder": "Enter Category Code",
+      "leaveBlankForAll": "Leave Blank for All",
+      "printOnlyOnHand": "Print Only Items With On Hand",
+      "quantity": "Quantity",
+      "quantityPlaceholder": "Enter Quantity",
+      "size": "Size",
+      "clearFields": "Clear Fields",
+      "addToList": "Add to List",
+      "lookup": "Look Up"
+    },
+    "list": {
+      "title": "Quick Sign Print List",
+      "empty": "No items added. Look up an item to add it.",
+      "caption": "Items queued for printing"
+    },
+    "controls": {
+      "print": "Print ({{count}})",
+      "printAll": "Print All",
+      "clearAll": "Clear All",
+      "clearList": "Clear List",
+      "undo": "Undo",
+      "redo": "Redo"
+    }
+  },
+  "signTypes": {
+    "STANDARD": "Standard",
+    "SALE": "Sale",
+    "CLEARANCE": "Clearance",
+    "CUSTOM": "Custom"
+  }
+}

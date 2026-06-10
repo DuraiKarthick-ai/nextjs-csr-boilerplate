@@ -1,0 +1,108 @@
+@use "../../styles/variables" as *;
+@use "../../styles/mixins" as *;
+@use "../../styles/breakpoint" as *;
+
+.subHeader {
+  background-color: $light-gray;
+
+  .headerSearch {
+    background-color: $primary-color;
+    max-width: 290px;
+    padding: 14px 20px;
+    width: 100%;
+  }
+
+  .titleIcons {
+    width: 100%;
+    @include flex();
+    @include align-items(center);
+    padding: 10px 20px;
+
+    ul {
+      @include flex();
+      @include align-items(center);
+
+      li {
+        padding: 0;
+      }
+
+      .gridToggle {
+        @include flex();
+        box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+
+        .gridBtn {
+          padding: 10px 8px;
+          border: 1px solid #afafaf;
+          border-top-left-radius: 6px;
+          border-bottom-left-radius: 6px;
+        }
+
+        .chevronBtn {
+          border-top-right-radius: 6px;
+          border-bottom-right-radius: 6px;
+          padding: 12px 6px;
+          border: 1px solid #afafaf;
+        }
+      }
+    }
+  }
+
+  .searchWrap {
+    position: relative;
+    input {
+      width: 100%;
+      border-radius: 4px;
+      border: 1px solid $white-color;
+      background-color: $primary-color;
+      color: $white-color;
+      @include font-size(12px);
+      text-transform: uppercase;
+      font-weight: 500;
+      padding: 12px;
+      outline: none;
+      padding-left: 38px;
+
+      &::placeholder {
+        color: $white-color;
+      }
+    }
+    i {
+      position: absolute;
+      top: 50%;
+      left: 10px;
+      transform: translateY(-50%);
+    }
+  }
+
+  .operationTypeTag {
+    background-color: $white-color;
+    color: $text-color;
+    @include font-size(12px);
+    font-weight: 700;
+    border: 1px solid #cccccc;
+    display: inline-block;
+    border-radius: 4px;
+    padding: 6px 10px;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+
+    span {
+      display: block;
+    }
+  }
+
+  .rightAlignedbtnWrap {
+    margin-left: auto;
+    @include flex();
+    @include align-items(center);
+  }
+
+  .notificationBtn {
+    padding: 12px;
+    border: 1px solid #cccccc;
+    background-color: $white-color;
+    border-radius: 23px;
+    padding: 12px 14px;
+    display: inline-block;
+    box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  }
+}

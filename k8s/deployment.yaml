@@ -33,6 +33,13 @@ spec:
         env:
         - name: NODE_ENV
           value: "production"
+        # Disable server-side middleware auth: this MFE uses Module Federation
+        # (portal/AuthContext) for authentication — the client-side AuthGate
+        # handles access control. Server-side cookie/header checks cannot work
+        # here because the Portal runs on a different domain and cannot share
+        # HttpOnly cookies with this origin.
+        - name: NEXT_PUBLIC_AUTH_REQUIRED
+          value: "false"
         - name: NEXT_PUBLIC_API_BASE_URL
           valueFrom:
             configMapKeyRef:

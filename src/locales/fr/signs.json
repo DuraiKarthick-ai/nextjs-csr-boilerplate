@@ -1,0 +1,43 @@
+{
+  "sizes": {
+    "selectPrompt": "Sélectionner la taille",
+    "small": "P — Petit",
+    "medium": "M — Moyen",
+    "large": "G — Grand"
+  },
+  "customSign": {
+    "title": "Enseigne personnalisée",
+    "form": {
+      "itemUpc": "Nº d'article / CUP",
+      "size": "Taille",
+      "quantity": "Quantité"
+    },
+    "actions": {
+      "print": "Imprimer",
+      "reset": "Réinitialiser"
+    }
+  },
+  "quickPrint": {
+    "title": "Impression rapide",
+    "controls": {
+      "print": "Imprimer ({{count}})"
+    },
+    "tabs": {
+      "byItem": "Par article",
+      "byDept": "Par département et catégorie",
+      "byEndcap": "Par tête de gondole"
+    },
+    "form": {
+      "itemUpc": "Nº d'article / CUP",
+      "department": "Nº de département",
+      "departmentPlaceholder": "Saisir le nº de département",
+      "catCode": "Code catégorie nº",
+      "catCodePlaceholder": "Saisir le code catégorie",
+      "leaveBlankForAll": "Laisser vide pour tout",
+      "printOnlyOnHand": "Imprimer uniquement les articles en stock",
+      "quantity": "Quantité",
+      "quantityPlaceholder": "Saisir la quantité",
+      "size": "Taille"
+    }
+  }
+}

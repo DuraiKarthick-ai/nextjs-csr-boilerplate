@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}                             # IMPORTANT: keep 'api' so HPA and shared pipelines find it
+  namespace: #{GKE_NAMESPACE}
+  labels:
+    app: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}
+    app-version: "#{VERSION_TAG}"
+spec:
+  replicas: #{KUSTO_REPLICAS}           # set by your kustomize/CI (e.g. 1 or 3)
+  selector:
+    matchLabels:
+      app: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}
+      environment: #{APPLICATION_ENVIRONMENT}
+  template:
+    metadata:
+      labels:
+        app: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}
+        environment: #{APPLICATION_ENVIRONMENT}
+        app-version: "#{VERSION_TAG}"
+      annotations:
+        workload.ecp.costco.com/organization: "#{GKE_ORGANIZATION}"
+        workload.ecp.costco.com/support-group-email: "#{SUPPORT_GROUP_EMAIL}"
+        workload.ecp.costco.com/team: "#{GROUP_CODE}"
+        container.seccomp.security.alpha.kubernetes.io/pod: runtime/default
+    spec:
+      serviceAccountName: #{KSA_SERVICEACCOUNT}
+      automountServiceAccountToken: false
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}     # container name matches service image name (optional)
+          image: #{IMAGE_REF}            # CI replaces this
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3002
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}-config
+            #- secretRef:
+            #    name: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}-db-secret
+          env:
+            - name: NEXT_PUBLIC_AUTH_REQUIRED
+              value: "false"
+            - name: GCP_PROJECT_ID
+              value: "#{GKE_PROJECT_ID}"
+            - name: CLOUD_SQL_INSTANCE
+              value: "#{KUSTO_CLOUDSQL_CONNECTIONSTRING}"
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "1024Mi"
+            limits:
+              cpu: "1000m"
+              memory: "2Gi"
+          livenessProbe:
+            httpGet:
+              path:  /api/health
+              port: 3002
+              scheme: HTTP
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 5
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 3002
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+            seccompProfile:
+              type: RuntimeDefault
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst

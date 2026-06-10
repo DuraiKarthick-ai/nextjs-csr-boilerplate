@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}-service
+  namespace: #{GKE_NAMESPACE}
+  labels:
+    app: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}
+  annotations:
+    # Tell GKE to create a NEG for port 80 -> targetPort 3002
+    #cloud.google.com/neg: '{"exposed_ports":{"80":{}}}'
+    cloud.google.com/neg: '{"ingress": true}'
+    networking.gke.io/service-backend-config: '{"default":"#{SERVICE_IMAGENAME}-#{SERVICE_TYPE}-backend-config"}'     
+spec:
+  selector:
+    app: #{SERVICE_IMAGENAME}-#{SERVICE_TYPE}
+    environment: #{APPLICATION_ENVIRONMENT}
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 3002
+      protocol: TCP
+  type: ClusterIP

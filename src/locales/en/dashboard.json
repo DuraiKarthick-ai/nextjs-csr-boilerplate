@@ -1,0 +1,23 @@
+{
+  "title": "Signs Dashboard",
+  "quickLinks": {
+    "heading": "Quick Links",
+    "customSign": "Custom Sign Builder",
+    "quickPrint": "Quick Sign Print"
+  },
+  "worklistSummary": {
+    "heading": "Batch Jobs  (Worklist)",
+    "columnBatchJob": "Batch Jobs",
+    "columnStatus": "Status",
+    "columnActions": "Actions",
+    "dailySignMaintenance": "Daily Sign Maintenance",
+    "readyToPrint": "Ready to Print",
+    "print": "Print ({{progress}})",
+    "printAria": "Print batch job with progress {{progress}}"
+  },
+  "panel": {
+    "minimize": "Minimize",
+    "expand": "Expand",
+    "close": "Close"
+  }
+}

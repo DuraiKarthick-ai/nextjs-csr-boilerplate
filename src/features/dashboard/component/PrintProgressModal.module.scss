@@ -1,0 +1,183 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
+
+/* ── Backdrop ───────────────────────────────────────────────────────── */
+.backgroundOverlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
+  @include flex();
+  @include align-items(center);
+  @include justify-content(center);
+}
+
+/* ── Dialog card ────────────────────────────────────────────────────── */
+.dialog {
+  background: $white-color;
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  padding: 32px;
+  width: 100%;
+  max-width: 560px;
+  min-width: 360px;
+}
+
+.dialogTitle {
+  padding-bottom: 12px;
+
+  span {
+    @include font-size(12px);
+    color: $light-black-color;
+    display: block;
+    margin-top: 4px;
+    font-weight: 400;
+  }
+}
+
+.dialogContent {
+  padding: 16px;
+  border: 1px solid $medium-gray;
+  border-radius: 10px;
+  margin-bottom: 16px;
+
+  .progressBar {
+    padding-bottom: 20px;
+
+    .progressTitle {
+      @include flex();
+      @include align-items(center);
+      padding-bottom: 8px;
+
+      .progressPct {
+        color: $primary-color;
+        margin-left: auto;
+      }
+    }
+
+    .progressRow {
+      @include flex();
+      @include align-items(center);
+      gap: 10px;
+
+      .progressTrack {
+        flex: 1;
+        margin-bottom: 0;
+        background-color: #e5e7eb;
+        border-radius: 8px;
+        height: 8px;
+        overflow: hidden;
+
+        .progressFill {
+          height: 100%;
+          background-color: $primary-color;
+          border-radius: 8px;
+          transition: width 0.4s ease;
+        }
+      }
+    }
+  }
+
+  .stepList {
+    li {
+      padding: 8px 0;
+
+      .stepLabel {
+        @include flex();
+        @include align-items(center);
+        @include justify-content(center);
+        gap: 10px;
+
+        &--pending {
+          color: #9ca3af;
+          i {
+            background-color: #e5e7eb;
+          }
+        }
+
+        &--active {
+          color: $primary-color;
+          i {
+            background-color: $primary-color;
+            animation: pulse 1.2s ease-in-out infinite;
+          }
+        }
+
+        &--done {
+          color: #374151;
+          i {
+            background-color: #22c55e;
+          }
+        }
+
+        &--error {
+          color: #ef4444;
+          i {
+            background-color: #ef4444;
+          }
+        }
+
+        i {
+          @include flex();
+          @include align-items(center);
+          @include justify-content(center);
+          flex-shrink: 0;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+        }
+
+        span {
+          flex: 1;
+        }
+      }
+    }
+  }
+}
+
+.errorBox {
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+
+  p {
+    color: #dc2626;
+  }
+}
+
+.successBox {
+  background-color: #d6fde5;
+  border: 1px solid #80eea9;
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 16px;
+
+  p {
+    color: #16a34a;
+  }
+
+  .successTitle {
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+}
+
+.dialogFooter {
+  @include flex();
+  @include justify-content(flex-end);
+}
+
+/* ── Animations ─────────────────────────────────────────────────────── */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.88);
+  }
+}

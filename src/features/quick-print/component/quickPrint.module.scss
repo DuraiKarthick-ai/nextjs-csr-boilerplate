@@ -1,0 +1,140 @@
+@use "../../../styles/variables" as *;
+@use "../../../styles/mixins" as *;
+@use "../../../styles/breakpoint" as *;
+
+.contentWrap {
+  border: 1px solid $medium-gray;
+  border-radius: 10px;
+  min-height: 100%;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 4px 12px;
+  position: relative;
+
+  .topContentBar {
+    padding: 14px 16px;
+    @include flex();
+    @include justify-content(space-between);
+
+    .topTitle {
+      h2 {
+        line-height: 24px;
+      }
+    }
+
+    .actionWrap {
+      ul {
+        @include flex();
+        @include align-items(center);
+
+        li {
+          padding: 0 10px;
+
+          p {
+            @include font-size(12px);
+            font-weight: 500;
+          }
+
+          .lastUpdated {
+            padding-right: 20px;
+            position: relative;
+
+            &:after {
+              content: "";
+              position: absolute;
+              border-left: 1px solid #cccccc;
+              height: 100%;
+              right: 0;
+              top: 0;
+            }
+
+            i {
+              margin-right: 12px;
+            }
+          }
+
+          &:last-child {
+            padding-right: 0;
+          }
+        }
+      }
+    }
+  }
+
+  .section {
+    padding: 20px;
+  }
+
+  .groupBox {
+    padding: 20px;
+    border: 1px solid $medium-gray;
+    border-radius: 10px;
+
+    .groupBoxHeader {
+      @include flex();
+      @include align-items(center);
+      @include justify-content(space-between);
+      padding-bottom: 12px;
+    }
+
+    .tabsHeading {
+      padding-bottom: 16px;
+
+      ul {
+        @include flex();
+        @include align-items(center);
+
+        li {
+          padding-right: 16px;
+
+          &:last-child {
+            padding-right: 0;
+          }
+
+          .tab {
+            @include font-size(14px);
+            font-weight: 500;
+            color: $text-color;
+            padding: 10px 8px;
+            background-color: $white-color;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            border-radius: 2px;
+            transition: all 0.2s ease;
+            border-bottom: 2px solid transparent;
+            @include up($xxxl) {
+              @include font-size(16px);
+            }
+
+            &.active {
+              border-color: $primary-btn-color;
+              color: $primary-btn-color;
+            }
+
+            &:not(.active):hover {
+              background-color: $extra-light-color;
+            }
+          }
+        }
+      }
+    }
+
+    .tabsContent {
+      padding: 16px 0;
+
+      .animateContent {
+        animation: fadeIn 0.3s ease-in-out;
+      }
+    }
+  }
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

@@ -2,51 +2,93 @@
 @use "./mixins" as *;
 @use './breakpoint' as *;
 
-h1 {
-  @include font-size(28px);
-  font-weight: 700;
-  @include up($lg) {
-    @include font-size(32px);
+/// All heading/text element rules live here — single source of truth.
+/// Used by:
+///   - globals.scss (standalone): emits bare h1/h2/... selectors at root
+///   - _shared-foundation.scss typography-scoped() (federation): emits
+///     the same rules scoped under .bridge so portal styles can't bleed in
+///
+/// To change any font size or weight, edit ONLY this mixin.
+@mixin typography-rules() {
+  h1, h2, h3, h4, h5, h6, p, a {
+    margin: 0;
+    padding: 0;
   }
-}
 
-h2 {
-  @include font-size(20px);
-  font-weight: 500;
-  @include up($lg) {
-   @include font-size(22px); //
+  h1 {
+    @include font-size(28px);
+    font-weight: 700;
+    @include up($xxxl) {
+      @include font-size(32px);
+    }
   }
-}
 
-h3 {
-  @include font-size(18px);
-  font-weight: 500;
-  @include up($lg) {
+  h2 {
     @include font-size(20px);
+    font-weight: 500;
+    @include up($xxxl) {
+      @include font-size(24px);
+    }
+  }
+
+  h3 {
+    @include font-size(16px);
+    font-weight: 500;
+    @include up($xxxl) {
+      @include font-size(20px);
+    }
+  }
+
+  h4 {
+    @include font-size(15px);
+    font-weight: 500;
+    @include up($xxxl) {
+      @include font-size(16px);
+    }
+  }
+
+  h5, h6 {
+    @include font-size(13px);
+    font-weight: 500;
+  }
+
+  p {
+    @include font-size(14px);
+    font-weight: 400;
+    @include up($xxxl) {
+      @include font-size(16px);
+    }
+  }
+
+  a {
+    @include font-size(14px);
+    font-weight: 400;
+    color: inherit;
+    text-decoration: none;
+    @include up($xxxl) {
+      @include font-size(16px);
+    }
+  }
+
+  button {
+    @include font-size(14px);
+    @include up($xxxl) {
+      @include font-size(16px);
+    }
+  }
+
+  input,
+  textarea,
+  select {
+    @include font-size(14px);
+    @include up($xxxl) {
+      @include font-size(16px);
+    }
   }
 }
 
-h4 {
-  @include font-size(14px);
-  font-weight: 500;
-  @include up($lg) {
-    @include font-size(16px);
-  }
-}
-
-p {
-  @include font-size(14px);
-  font-weight: 400;
-  @include up($lg) {
-    @include font-size(16px);
-  }
-}
-
-a {
-  @include font-size(14px);
-  font-weight: 400;
-  @include up($lg) {
-    @include font-size(16px);
-  }
-}
+// Note: do NOT call @include typography-rules() here.
+// globals.scss calls it explicitly so this file stays a pure mixin library
+// and can be @use'd safely from CSS Modules (e.g. _shared-foundation.scss)
+// without leaking bare element selectors into the module output.
 
