@@ -14,6 +14,9 @@ import { FALLBACK_BATCHES } from "../services/mockBatchData";
 import type { BatchItem } from "../../../types/batch.types";
 import { DEFAULT_STORE_ID } from "../../../services/config";
 
+/** TEMP: serve mock data instead of calling the real batches API. */
+const USE_MOCK_BATCHES = true;
+
 /** Shape returned by the useBatches hook. */
 export interface UseBatchesResult {
   /** The list of batch jobs returned from the API. */
@@ -50,12 +53,13 @@ function useBatches(): UseBatchesResult {
       setIsLoading(true);
       setError(null);
 
-      // TEMP: API call disabled for testing; serving mock data instead.
-      if (!cancelled) {
-        setBatches(FALLBACK_BATCHES);
-        setIsLoading(false);
+      if (USE_MOCK_BATCHES) {
+        if (!cancelled) {
+          setBatches(FALLBACK_BATCHES);
+          setIsLoading(false);
+        }
+        return;
       }
-      return;
 
       try {
         const data = await fetchAllBatches(DEFAULT_STORE_ID);
