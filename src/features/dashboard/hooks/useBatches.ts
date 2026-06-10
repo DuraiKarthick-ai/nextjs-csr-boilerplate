@@ -50,6 +50,13 @@ function useBatches(): UseBatchesResult {
       setIsLoading(true);
       setError(null);
 
+      // TEMP: API call disabled for testing; serving mock data instead.
+      if (!cancelled) {
+        setBatches(FALLBACK_BATCHES);
+        setIsLoading(false);
+      }
+      return;
+
       try {
         const data = await fetchAllBatches(DEFAULT_STORE_ID);
         if (!cancelled) {
