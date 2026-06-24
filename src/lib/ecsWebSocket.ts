@@ -168,6 +168,14 @@ export function ecsWsCall(
 
     ws.on("close", () => {
       clearTimeout(timer);
+      // Reject if the connection closed before any response was received
+      settle(() =>
+        reject(
+          new Error(
+            `ECS WebSocket closed without response — method: ${String(payload.method)}`
+          )
+        )
+      );
     });
   });
 }

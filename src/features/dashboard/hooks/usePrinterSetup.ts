@@ -4,7 +4,7 @@
  * lists per printer to avoid redundant API calls.
  */
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { API_BASE_URL } from "../../../services/config";
 
 const FALLBACK_TRAY = "Tray1";
@@ -36,6 +36,8 @@ export function usePrinterSetup(): UsePrinterSetupResult {
   const [traysCache, setTraysCache] = useState<Record<string, string[]>>({});
   // Per-batch tray loading state (keyed by batchId)
   const [trayLoadingByBatch, setTrayLoadingByBatch] = useState<Record<number, boolean>>({});
+  // In-flight tray fetches: printer name → Promise — deduplicates concurrent calls for the same printer
+  const pendingTrayFetches = useRef<Map<string, Promise<string[]>>>(new Map());
 
   useEffect(() => {
     const init = async () => {
@@ -88,16 +90,33 @@ export function usePrinterSetup(): UsePrinterSetupResult {
   }, []);
 
   const fetchAndCacheTrays = useCallback(async (sessionID: string, printer: string): Promise<string[]> => {
+    // Return cached result if already fetched
     if (traysCache[printer]) return traysCache[printer];
-    const res = await fetch(`${API_BASE_URL}/api/print/trays`, {
+
+    // Return in-flight promise if a fetch for this printer is already running —
+    // prevents N concurrent calls when N batches all share the same default printer
+    const existing = pendingTrayFetches.current.get(printer);
+    if (existing) return existing;
+
+    const fetchPromise = fetch(`${API_BASE_URL}/api/print/trays`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sessionID, printer }),
-    });
-    const data = await res.json() as { success: boolean; trays?: string[] };
-    const trays = data.trays?.length ? data.trays : [FALLBACK_TRAY];
-    setTraysCache((prev) => ({ ...prev, [printer]: trays }));
-    return trays;
+    })
+      .then((res) => res.json() as Promise<{ success: boolean; trays?: string[] }>)
+      .then((data) => {
+        const trays = data.trays?.length ? data.trays : [FALLBACK_TRAY];
+        setTraysCache((prev) => ({ ...prev, [printer]: trays }));
+        pendingTrayFetches.current.delete(printer);
+        return trays;
+      })
+      .catch(() => {
+        pendingTrayFetches.current.delete(printer);
+        return [FALLBACK_TRAY];
+      });
+
+  pendingTrayFetches.current.set(printer, fetchPromise);
+    return fetchPromise;
   }, [traysCache]);
 
   const setSelectedPrinter = useCallback(async (batchId: number, printer: string): Promise<void> => {

@@ -4,55 +4,108 @@ import { ThemeProvider } from "@emotion/react";
 import { FormControl, MenuItem, Select, TextField } from "@mui/material";
 import { theme } from "@/theme/customizeTheme";
 import { useTranslation } from "react-i18next";
-
-export interface PrintItem {
-  itemUpc: string;
-  size: string;
-  quantity: string;
-}
+import { API_BASE_URL, DEFAULT_STORE_ID } from "../../../../services/config";
+import { ENABLE_DOWNLOAD } from "../../../../lib/constants";
+import { useQuickPrintItem } from "../../hooks/useQuickPrintItem";
+import PrintProgressModal from "../../../dashboard/component/PrintProgressModal";
+import type { PrintItem } from "../../types";
 
 function PrintByItem(): JSX.Element {
   const { t } = useTranslation("signs");
-  const [size, setSize] = useState<string>("");
+  const [size, setSize] = useState<string>("Medium");
   const [itemUpc, setItemUpc] = useState<string>("");
-  const [quantity, setQuantity] = useState<string>("");
+  const [quantity, setQuantity] = useState<string>("1");
 
   const [printItems, setPrintItems] = useState<PrintItem[]>([]);
   const [undoHistory, setUndoHistory] = useState<PrintItem[][]>([]);
   const [redoHistory, setRedoHistory] = useState<PrintItem[][]>([]);
 
-  // Ref for programmatic focus — used after Clear Fields and Add to List.
+  const [isSearching, setIsSearching] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+
   const itemUpcRef = useRef<HTMLInputElement>(null);
+
+  const {
+    isOpen,
+    isPrintStarted,
+    steps,
+    printError,
+    isDone,
+    printers,
+    trays,
+    selectedPrinter,
+    selectedTray,
+    isLoadingPrinters,
+    successInfo,
+    openPrintModal,
+    startPrint,
+    startDownload,
+    mode,
+    onPrinterChange,
+    onTrayChange,
+    closeModal,
+  } = useQuickPrintItem();
 
   const focusItemUpc = useCallback((): void => {
     setTimeout(() => itemUpcRef.current?.focus(), 0);
   }, []);
 
-  // Clears Item # and Quantity but keeps the previously selected Size.
-  // Cursor returns to the Item # field so the user can scan the next item immediately.
   const handleClearFields = useCallback((): void => {
     setItemUpc("");
-    setQuantity("");
+    setQuantity("1");
+    setAddError(null);
     focusItemUpc();
   }, [focusItemUpc]);
 
-  // Validates both Size and Item # before adding. After adding:
-  // — Size is preserved (auto-populated for the next item)
-  // — Item # and Quantity are cleared
-  // — Cursor returns to Item #
-  const handleAddToList = useCallback((): void => {
+  const handleAddToList = useCallback(async (): Promise<void> => {
     if (!size || !itemUpc.trim()) return;
-    const newItem: PrintItem = {
-      itemUpc: itemUpc.trim(),
-      size,
-      quantity: quantity.trim() || "1",
-    };
-    setUndoHistory((prev) => [...prev, printItems]);
-    setRedoHistory([]);
-    setPrintItems((prev) => [...prev, newItem]);
-    setItemUpc("");
-    setQuantity("");
-    focusItemUpc();
+
+    const isDuplicate = printItems.some((item) => item.itemUpc === itemUpc.trim());
+    if (isDuplicate) {
+      setAddError(`Item "${itemUpc.trim()}" is already in the list.`);
+      return;
+    }
+
+    setAddError(null);
+    setIsSearching(true);
+
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/print/item-search`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          items: [{ storeId: DEFAULT_STORE_ID, productCode: itemUpc.trim(), productTypeCode: "ITM" }],
+        }),
+      });
+      const data = await res.json() as { success: boolean; items?: { styleId: number; styleName: string; description: string; productTypeCode: string }[]; message?: string };
+
+      const itemDetail = data.success ? data.items?.[0] : undefined;
+      if (!itemDetail) {
+        setAddError(`Item "${itemUpc.trim()}" not found. Please check the item number.`);
+        return;
+      }
+
+      const newItem: PrintItem = {
+        itemUpc: itemUpc.trim(),
+        size,
+        quantity: quantity.trim() || "1",
+        styleId:         itemDetail.styleId,
+        styleName:       itemDetail.styleName,
+        description:     itemDetail.description,
+        productTypeCode: itemDetail.productTypeCode,
+      };
+
+      setUndoHistory((prev) => [...prev, printItems]);
+      setRedoHistory([]);
+      setPrintItems((prev) => [...prev, newItem]);
+      setItemUpc("");
+      setQuantity("1");
+      focusItemUpc();
+    } catch {
+      setAddError("Failed to look up item. Please try again.");
+    } finally {
+      setIsSearching(false);
+    }
   }, [itemUpc, size, quantity, printItems, focusItemUpc]);
 
   const handleUndo = useCallback((): void => {
@@ -78,6 +131,12 @@ function PrintByItem(): JSX.Element {
     setPrintItems([]);
   }, [printItems]);
 
+  const handleRemoveItem = useCallback((indexToRemove: number): void => {
+    setUndoHistory((prev) => [...prev, printItems]);
+    setRedoHistory([]);
+    setPrintItems((prev) => prev.filter((_, i) => i !== indexToRemove));
+  }, [printItems]);
+
   const getTableItems = (colIndex: number): (PrintItem | null)[] => {
     const start = colIndex * 12;
     const colItems = printItems.slice(start, start + 12);
@@ -85,11 +144,14 @@ function PrintByItem(): JSX.Element {
   };
 
   const isAddDisabled =
+    isSearching ||
     !size ||
-    itemUpc.trim().length < 5 ||
-    itemUpc.trim().length > 8 ||
+    itemUpc.trim().length < 1 ||
+    itemUpc.trim().length > 9 ||
     !quantity.trim() ||
     parseInt(quantity) < 1;
+
+  const totalCopies = printItems.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
 
   const printIcon = (
     <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -146,15 +208,19 @@ function PrintByItem(): JSX.Element {
                   placeholder={t("quickPrint.form.itemUpcPlaceholder")}
                   variant="outlined"
                   value={itemUpc}
-                  onChange={(e) => setItemUpc(e.target.value)}
+                  onChange={(e) => { setItemUpc(e.target.value.replace(/[^0-9]/g, "")); setAddError(null); }}
                   inputRef={itemUpcRef}
-                  inputProps={{ minLength: 5, maxLength: 8, "aria-label": "Item number or UPC" }}
+                  inputProps={{ minLength: 1, maxLength: 9, "aria-label": "Item number or UPC" }}
+                  error={!!addError}
                 />
               </ThemeProvider>
+              {addError && (
+                <p className={styles.fieldError} role="alert">{addError}</p>
+              )}
             </div>
           </li>
 
-          {/* Quantity — second in tab order */}
+          {/* Quantity (copies) — second in tab order */}
           <li>
             <div className="inputLabelWrap">
               <label className="label">{t("quickPrint.form.quantity")}<span className="mandatoryStar">*</span></label>
@@ -165,7 +231,7 @@ function PrintByItem(): JSX.Element {
                   placeholder={t("quickPrint.form.quantityPlaceholder")}
                   variant="outlined"
                   type="number"
-                  inputProps={{ min: 1, max: 9999, maxLength: 4, "aria-label": "Quantity" }}
+                  inputProps={{ min: 1, maxLength: 4, "aria-label": "Quantity" }}
                   value={quantity}
                   onChange={(e) => {
                     const val = e.target.value;
@@ -179,6 +245,17 @@ function PrintByItem(): JSX.Element {
           </li>
 
           <li className={styles.buttonRow}>
+            {/* Add to List — calls item-search to enrich with styleId */}
+            <button
+              className="primaryButton"
+              type="button"
+              onClick={() => void handleAddToList()}
+              disabled={isAddDisabled}
+              aria-busy={isSearching}
+            >
+              <span>{isSearching ? "Adding..." : t("quickPrint.form.addToList")}</span>
+            </button>
+
             {/* Clear Fields — tabIndex={-1}: not part of the keyboard flow */}
             <button
               className="clearButton"
@@ -187,16 +264,6 @@ function PrintByItem(): JSX.Element {
               tabIndex={-1}
             >
               <span>{t("quickPrint.form.clearFields")}</span>
-            </button>
-
-            {/* Add to List — third in tab order (after Item # → Quantity) */}
-            <button
-              className="primaryButton"
-              type="button"
-              onClick={handleAddToList}
-              disabled={isAddDisabled}
-            >
-              <span>{t("quickPrint.form.addToList")}</span>
             </button>
           </li>
         </ul>
@@ -225,9 +292,14 @@ function PrintByItem(): JSX.Element {
                 </button>
               </li>
               <li>
-                <button className="primaryButton" type="button" disabled={printItems.length === 0}>
+                <button
+                  className="primaryButton"
+                  type="button"
+                  disabled={printItems.length === 0}
+                  onClick={() => void openPrintModal(printItems)}
+                >
                   <i>{printIcon}</i>
-                  <span>{t("quickPrint.controls.print", { count: printItems.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0) })}</span>
+                  <span>{t("quickPrint.controls.print", { count: totalCopies })}</span>
                 </button>
               </li>
             </ul>
@@ -243,22 +315,59 @@ function PrintByItem(): JSX.Element {
                     <th>{t("quickPrint.form.itemUpc")}</th>
                     <th>{t("quickPrint.form.size")}</th>
                     <th>{t("quickPrint.form.quantity")}</th>
+                    <th></th>
                   </tr>
                 </thead>
                 <tbody>
-                  {getTableItems(colIndex).map((item, idx) => (
-                    <tr key={idx}>
-                      <td>{item ? item.itemUpc : "-"}</td>
-                      <td>{item ? (item.size || "-") : "-"}</td>
-                      <td>{item ? item.quantity : "-"}</td>
-                    </tr>
-                  ))}
+                  {getTableItems(colIndex).map((item, idx) => {
+                    const globalIndex = colIndex * 12 + idx;
+                    return (
+                      <tr key={idx}>
+                        <td>{item ? item.itemUpc : "-"}</td>
+                        <td>{item ? (item.size || "-") : "-"}</td>
+                        <td>{item ? item.quantity : "-"}</td>
+                        <td className={styles.removeCell}>
+                          {item && (
+                            <button
+                              type="button"
+                              className={styles.removeItemBtn}
+                              aria-label={`Remove item ${item.itemUpc}`}
+                              onClick={() => handleRemoveItem(globalIndex)}
+                            >
+                              &#x2715;
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
           ))}
         </div>
       </div>
+
+      <PrintProgressModal
+        isOpen={isOpen}
+        batchName="Quick Print"
+        mode={mode}
+        steps={steps}
+        error={printError}
+        isDone={isDone}
+        successInfo={successInfo}
+        onClose={closeModal}
+        printers={printers}
+        trays={trays}
+        selectedPrinter={selectedPrinter}
+        selectedTray={selectedTray}
+        isLoadingPrinters={isLoadingPrinters}
+        onPrinterChange={(p) => void onPrinterChange(p)}
+        onTrayChange={onTrayChange}
+        onStartPrint={() => void startPrint()}
+        onStartDownload={ENABLE_DOWNLOAD ? () => void startDownload() : undefined}
+        isPrintStarted={isPrintStarted}
+      />
     </div>
   );
 }

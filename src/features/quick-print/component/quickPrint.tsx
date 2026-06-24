@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styles from "./quickPrint.module.scss";
 import { useTranslation } from "react-i18next";
 import PrintByItem from "./print-by-item/PrintByItem";
@@ -7,6 +7,13 @@ import PrintByDept from "./print-by-dept/PrintByDept";
 function QuickPrintScreen(): JSX.Element {
   const { t } = useTranslation("signs");
   const [active, setActive] = useState("item");
+  const [updatedTime, setUpdatedTime] = useState("");
+
+  useEffect(() => {
+    setUpdatedTime(
+      new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
+    );
+  }, []);
 
   return (
     <div className={styles.contentWrap}>
@@ -23,7 +30,7 @@ function QuickPrintScreen(): JSX.Element {
                     <path d="M14.2083 2.44792C12.6979 0.9375 10.625 0 8.32292 0C3.71875 0 0 3.72917 0 8.33333C0 12.9375 3.71875 16.6667 8.32292 16.6667C12.2083 16.6667 15.4479 14.0104 16.375 10.4167H14.2083C13.3542 12.8437 11.0417 14.5833 8.32292 14.5833C4.875 14.5833 2.07292 11.7812 2.07292 8.33333C2.07292 4.88542 4.875 2.08333 8.32292 2.08333C10.0521 2.08333 11.5937 2.80208 12.7187 3.9375L9.36458 7.29167H16.6562V0L14.2083 2.44792Z" fill="#79747E" />
                   </svg>
                 </i>
-                <p>Updated 10:31 am</p>
+                <p>Updated {updatedTime}</p>
               </div>
             </li>
             <li>

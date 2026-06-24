@@ -19,7 +19,7 @@ import type {
   CustomSignRenderResponse,
 } from "../../../types/sign.types";
 import { HTTP_STATUS, ECS_CUSTOM_SIGN_PATHS, MAX_PRINT_BATCH_SIZE } from "../../../lib/constants";
-import { ECS_API_BASE_URL } from "../../../services/config";
+import { SIGNS_API_BASE_URL } from "../../../services/config";
 import { getAccessToken } from "../../../services/oauthTokenService";
 import { fetchWithTimeout } from "../../../lib/fetchWithTimeout";
 
@@ -138,7 +138,7 @@ export default async function handler(
     const token = await getAccessToken();
 
     const upstreamRes = await fetchWithTimeout(
-      `${ECS_API_BASE_URL}${ECS_CUSTOM_SIGN_PATHS.RENDER}`,
+      `${SIGNS_API_BASE_URL}${ECS_CUSTOM_SIGN_PATHS.RENDER}`,
       {
         method: "POST",
         headers: {

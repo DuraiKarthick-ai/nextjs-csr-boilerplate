@@ -9,7 +9,7 @@ function PrintByDept(): JSX.Element {
   const { t } = useTranslation("signs");
   const [deptNumber, setDeptNumber] = useState<string>("");
   const [catCode, setCatCode] = useState<string>("");
-  const [deptQuantity, setDeptQuantity] = useState<string>("");
+  const [deptQuantity, setDeptQuantity] = useState<string>("1");
   const [deptSize, setDeptSize] = useState<string>("");
   const [printOnlyOnHand, setPrintOnlyOnHand] = useState<boolean>(true);
 
@@ -36,9 +36,9 @@ function PrintByDept(): JSX.Element {
                   value={deptNumber}
                   onChange={(e) => {
                     const val = e.target.value.replace(/[^0-9]/g, "");
-                    if (val.length <= 4) setDeptNumber(val);
+                    if (val.length <= 3) setDeptNumber(val);
                   }}
-                  inputProps={{ minLength: 2, maxLength: 4 }}
+                  inputProps={{ minLength: 1, maxLength: 3 }}
                 />
               </ThemeProvider>
             </div>
@@ -55,10 +55,10 @@ function PrintByDept(): JSX.Element {
                   variant="outlined"
                   value={catCode}
                   onChange={(e) => {
-                    const val = e.target.value;
-                    if (val.length <= 5) setCatCode(val);
+                    const val = e.target.value.replace(/[^0-9]/g, "");
+                    if (val.length <= 3) setCatCode(val);
                   }}
-                  inputProps={{ minLength: 2, maxLength: 5 }}
+                  inputProps={{ minLength: 1, maxLength: 3 }}
                 />
               </ThemeProvider>
               <span className="validationMsg info">{t("quickPrint.form.leaveBlankForAll")}</span>
@@ -111,7 +111,7 @@ function PrintByDept(): JSX.Element {
       </div>
       <div className={styles.buttonWrap}>
         <ul>
-          <li>
+          {/* <li>
             <div className={styles.toggleWrap}>
               <label className="label">{t("quickPrint.form.printOnlyOnHand")}</label>
               <ThemeProvider theme={theme}>
@@ -121,12 +121,12 @@ function PrintByDept(): JSX.Element {
                 />
               </ThemeProvider>
             </div>
-          </li>
+          </li> */}
           <li>
             <button
               className="primaryButton"
               type="button"
-              disabled={deptNumber.trim().length < 2}
+              disabled={deptNumber.trim().length < 1 || !deptSize}
             >
               <i>{printIcon}</i>
               <span>{t("quickPrint.controls.printAll")}</span>

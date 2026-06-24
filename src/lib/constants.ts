@@ -60,11 +60,12 @@ export const ROUTES = {
 
 /**
  * ECS external batch API endpoint path segments.
- * Combined with ECS_API_BASE_URL in the Next.js API route handlers.
+ * Combined with SIGNS_API_BASE_URL in the Next.js API route handlers.
  */
 export const ECS_BATCH_API_PATHS = {
   GET_ALL_BATCHES: "/batch/get-all-batches",
   GET_BATCH_DETAIL: "/batch/get-batch-detail",
+  ITEM_SEARCH: "/item-search",
 } as const;
 
 /** Internal Next.js API route paths for the ECS batch endpoints. */
@@ -76,7 +77,7 @@ export const BATCH_API_PATHS = {
 
 /**
  * ECS external custom-sign API endpoint path segments.
- * Combined with ECS_API_BASE_URL in the Next.js API route handlers.
+ * Combined with SIGNS_API_BASE_URL in the Next.js API route handlers.
  */
 export const ECS_CUSTOM_SIGN_PATHS = {
   RENDER: "/custom-signs/render",
@@ -88,7 +89,7 @@ export const PREVIEW_SIGN_API_PATHS = {
 } as const;
 
 /** Default store ID sent to the ECS render API. */
-export const DEFAULT_STORE_ID = 51 as const;
+export const DEFAULT_STORE_ID = 106 as const;
 
 /** Default style name sent to the ECS custom-sign render API. */
 export const DEFAULT_SIGN_STYLE_NAME = "Man Key Test" as const;
@@ -98,6 +99,9 @@ export const SIGN_OUTPUT_TYPE = "png" as const;
 
 /** Printer queue identifier for the default store printer. */
 export const DEFAULT_PRINTER_QUEUE = "STORE_DEFAULT" as const;
+
+/** Set to true to show the "Download as PDF" button across all screens. */
+export const ENABLE_DOWNLOAD = false as const;
 
 /** HTTP status codes used in API route responses. */
 export const HTTP_STATUS = {

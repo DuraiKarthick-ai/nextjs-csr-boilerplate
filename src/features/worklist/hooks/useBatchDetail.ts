@@ -11,7 +11,6 @@
 
 import { useEffect, useState } from "react";
 import { fetchBatchDetail } from "../services/worklistService";
-import { FALLBACK_BATCH_DETAIL_ITEMS } from "../../dashboard/services/mockBatchData";
 import type { BatchDetailItem, BatchQueryParams } from "../../../types/batch.types";
 
 /** Shape returned by the useBatchDetail hook. */
@@ -39,18 +38,12 @@ function useBatchDetail(params: BatchQueryParams | null): UseBatchDetailResult {
   useEffect(() => {
     if (!params) return;
     const currentParams = params;
-
     let cancelled = false;
 
-    /**
-     * Fetches the batch detail from the API.
-     *
-     * @returns {Promise<void>}
-     */
-    async function loadBatchDetail(): Promise<void> {
-      setIsLoading(true);
-      setError(null);
+    setIsLoading(true);
+    setError(null);
 
+    async function loadBatchDetail(): Promise<void> {
       try {
         const data = await fetchBatchDetail(currentParams);
         if (!cancelled) {
@@ -61,7 +54,7 @@ function useBatchDetail(params: BatchQueryParams | null): UseBatchDetailResult {
           setError(
             err instanceof Error ? err.message : "Failed to load batch detail."
           );
-          setItems(FALLBACK_BATCH_DETAIL_ITEMS);
+          setItems([]);
         }
       } finally {
         if (!cancelled) setIsLoading(false);

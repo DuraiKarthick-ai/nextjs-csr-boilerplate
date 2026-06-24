@@ -142,7 +142,7 @@ export function useDashboardPrint(): UseDashboardPrintResult {
       const loadRes = await fetch(loadBatchUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionID, jobID: batch.batchConfigId, batchID: batch.batchId }),
+        body: JSON.stringify({ sessionID, jobID: batch.batchConfigId, batchID: batch.batchId, sellUnitId: batch.storeId }),
       });
       const loadData = await loadRes.json() as { success: boolean; message?: string; _sentToECS?: unknown; _ecsResponse?: unknown };
       // TODO: remove console logging before production
@@ -224,7 +224,7 @@ export function useDashboardPrint(): UseDashboardPrintResult {
       const previewRes = await fetch(previewUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ sessionID, jobID: batch.batchConfigId, batchID: batch.batchId }),
+        body: JSON.stringify({ sessionID, jobID: batch.batchConfigId, batchID: batch.batchId, sellUnitId: batch.storeId, signQuantity: batch.signQuantity }),
       });
       const previewData = await previewRes.json() as { success: boolean; previewImages?: string[]; message?: string; _sentToECS?: unknown };
       const ecs = previewData._sentToECS as Record<string,unknown> | undefined;

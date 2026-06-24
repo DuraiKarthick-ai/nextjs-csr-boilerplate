@@ -77,17 +77,30 @@ export default async function handler(
       []
     );
 
+    const sinkSize =
+      typeof layoutsData.sinkSize === "number"
+        ? layoutsData.sinkSize
+        : typeof layoutsData.SinkSize === "number"
+          ? layoutsData.SinkSize
+          : layouts.length;
+
     // TODO: remove console logging before production
-    console.log(`[print-batch] get-layouts-from-sink — ${layouts.length} layout(s):`, JSON.stringify(layouts));
+    console.log(`[print-batch] get-layouts-from-sink — ${layouts.length} layout(s), sinkSize: ${sinkSize}`, JSON.stringify(layouts));
 
     if (layouts.length === 0) throw new Error(`No layouts found in SignSink. ECS response: ${JSON.stringify(layoutsData)}`);
 
-    // Step 2: print each layout — collect sent payloads for browser logging
+    // Step 2: download each layout into LayoutSink, then print
     const printPayloads: Record<string, unknown>[] = [];
     for (const layout of layouts) {
+      await ecsWsCall(ECS_PRINT_WS_URL, {
+        method: "get-layouts-by-id",
+        args: { layout_id: layout.layoutID_1 },
+        sessionID,
+      });
+
       const printPayload = {
         method: "print-signs-for-layout",
-        args: { ID: layout.layoutID_1, PRINTER: printer, daily: tray, PAGE_FROM: PRINT_PAGE_FROM, PAGE_TO: PRINT_PAGE_TO },
+        args: { ID: layout.layoutID_1, PRINTER: printer, TRAY: tray, PAGE_FROM: PRINT_PAGE_FROM, PAGE_TO: PRINT_PAGE_TO },
         sessionID,
       };
       printPayloads.push({ ...printPayload, sessionID: "(sessionID)" });
@@ -97,12 +110,10 @@ export default async function handler(
     res.status(HTTP_STATUS.OK).json({
       success: true,
       layoutCount: layouts.length,
+      sinkSize,
       _sentToECS: {
-        getLayouts: {
-          url: ECS_PRINT_WS_URL,
-          payload: { ...layoutsPayload, sessionID: "(sessionID)" },
-          response: layoutsData,
-        },
+        getLayouts: { url: ECS_PRINT_WS_URL, payload: { ...layoutsPayload, sessionID: "(sessionID)" }, response: layoutsData },
+        getLayoutsById: layouts.map((l) => ({ layout_id: l.layoutID_1 })),
         printLayouts: printPayloads.map((p) => ({ url: ECS_PRINT_WS_URL, payload: p })),
       },
     });

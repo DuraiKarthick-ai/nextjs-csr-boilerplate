@@ -10,12 +10,8 @@
 
 import { useEffect, useState } from "react";
 import { fetchAllBatches } from "../services/dashboardService";
-import { FALLBACK_BATCHES } from "../services/mockBatchData";
 import type { BatchItem } from "../../../types/batch.types";
 import { DEFAULT_STORE_ID } from "../../../services/config";
-
-/** TEMP: serve mock data instead of calling the real batches API. */
-const USE_MOCK_BATCHES = true;
 
 /** Shape returned by the useBatches hook. */
 export interface UseBatchesResult {
@@ -53,14 +49,6 @@ function useBatches(): UseBatchesResult {
       setIsLoading(true);
       setError(null);
 
-      if (USE_MOCK_BATCHES) {
-        if (!cancelled) {
-          setBatches(FALLBACK_BATCHES);
-          setIsLoading(false);
-        }
-        return;
-      }
-
       try {
         const data = await fetchAllBatches(DEFAULT_STORE_ID);
         if (!cancelled) {
@@ -71,7 +59,7 @@ function useBatches(): UseBatchesResult {
           setError(
             err instanceof Error ? err.message : "Failed to load batch jobs."
           );
-          setBatches(FALLBACK_BATCHES);
+          setBatches([]);
         }
       } finally {
         if (!cancelled) setIsLoading(false);

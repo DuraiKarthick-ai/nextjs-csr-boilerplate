@@ -9,10 +9,26 @@
 
 /**
  * The base URL for the internal Signs API.
- * Falls back to an empty string so relative paths work during SSR.
+ *
+ * Resolution order:
+ *  1. NEXT_PUBLIC_API_BASE_URL env var — set this explicitly only for local
+ *     Module Federation dev (Signs runs at a different port than the portal).
+ *  2. window.location.origin — automatically picks up the deployed host
+ *     (QAT, ADT, or any future env) with zero CI/CD changes needed.
+ *  3. "" — fallback during SSR where window is unavailable; relative paths
+ *     are used, which resolve correctly on the server.
  */
-export const API_BASE_URL: string =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "";
+function resolveApiBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_API_BASE_URL) {
+    return process.env.NEXT_PUBLIC_API_BASE_URL;
+  }
+  if (typeof window !== "undefined") {
+    return window.location.origin;
+  }
+  return "";
+}
+
+export const API_BASE_URL: string = resolveApiBaseUrl();
 
 /**
  * Request timeout in milliseconds for all Axios calls.
@@ -31,16 +47,18 @@ export const BACKEND_SIGNS_URL: string =
 /**
  * The base URL of the external ECS batch API.
  * Security: server-side only — never prefixed with NEXT_PUBLIC_.
+ * SIGNS_API_BASE_URL is the canonical name used in k8s configmaps/env.example.
+ * Both names are exported so API route files work regardless of which is set.
  */
-export const ECS_API_BASE_URL: string =
-  process.env.ECS_API_BASE_URL ?? "";
+
+export const SIGNS_API_BASE_URL: string = process.env.SIGNS_API_BASE_URL ?? "";
 
 /**
  * The default store identifier used in ECS batch API requests.
  * Exposed to the client bundle via the NEXT_PUBLIC_ prefix.
  */
 export const DEFAULT_STORE_ID: string =
-  process.env.NEXT_PUBLIC_DEFAULT_STORE_ID ?? "51";
+  process.env.NEXT_PUBLIC_DEFAULT_STORE_ID ?? "106";
 
 // ── ECS Print Server (server-side only) ──────────────────────────────────────
 
@@ -79,4 +97,8 @@ export const ECS_PRINT_API_TOKEN: string =
 /** ECS Print Server WebSocket URL (port 8082, used for all print operations except session creation). */
 export const ECS_PRINT_WS_URL: string =
   process.env.ECS_PRINT_WS_URL ?? "wss://localhost.ecsglobalinc.com:8082";
+
+/** ECS local web server URL passed as serverURL in adhoc-preview-load-data calls (port 8443). */
+export const ECS_PRINT_LOCAL_SERVER_URL: string =
+  process.env.ECS_PRINT_LOCAL_SERVER_URL ?? "https://localhost.ecsglobalinc.com:8443";
 

@@ -6,7 +6,7 @@
     "large": "L-Large"
   },
   "customSign": {
-    "title": "Custom Sign Builder",
+    "title": "Custom Sign",
     "description": "Design a custom price sign for any department",
     "form": {
       "title1": "Title Line 1",
@@ -20,7 +20,7 @@
       "itemUpc": "Item # / UPC",
       "itemUpcPlaceholder": "Enter Item # / UPC",
       "size": "Size",
-      "quantity": "Quantity",
+      "quantity": "Copies",
       "lookup": "Lookup",
       "lookingUp": "Looking up…"
     },
@@ -54,8 +54,8 @@
       "catCodePlaceholder": "Enter Category Code",
       "leaveBlankForAll": "Leave Blank for All",
       "printOnlyOnHand": "Print Only Items With On Hand",
-      "quantity": "Quantity",
-      "quantityPlaceholder": "Enter Quantity",
+      "quantity": "Copies",
+      "quantityPlaceholder": "Enter Copies",
       "size": "Size",
       "clearFields": "Clear Fields",
       "addToList": "Add to List",

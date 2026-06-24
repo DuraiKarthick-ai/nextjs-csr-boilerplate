@@ -26,11 +26,23 @@ const MOCK_RENDER_RESPONSE = {
   timestamp: "2026-06-05T00:00:00.000Z",
 };
 
+const MOCK_ITEM_SEARCH_RESPONSE = {
+  success: true,
+  items: [{ styleId: 123, styleName: "TEST", description: "Test Item", productTypeCode: "ITM" }],
+};
+
 // The Lookup button requires both a product code and a size to be enabled.
 // MUI Select renders as role="combobox" with aria-label from inputProps.
 function selectSize() {
   fireEvent.mouseDown(screen.getByRole("combobox", { name: /select size/i }));
   fireEvent.click(screen.getByRole("option", { name: "S-Small" }));
+}
+
+/** Mock fetch to return a successful item-search response. */
+function mockFetchSuccess() {
+  global.fetch = jest.fn().mockResolvedValueOnce({
+    json: () => Promise.resolve(MOCK_ITEM_SEARCH_RESPONSE),
+  } as unknown as Response);
 }
 
 describe("CustomSignScreen", () => {
@@ -84,6 +96,7 @@ describe("CustomSignScreen", () => {
   it("calls renderCustomSign with the entered item number on Lookup click", async () => {
     // Arrange
     mockRenderCustomSign.mockResolvedValueOnce(MOCK_RENDER_RESPONSE);
+    mockFetchSuccess();
     render(<CustomSignScreen />);
     selectSize();
     const input = screen.getByPlaceholderText("Enter Item # / UPC");
@@ -106,6 +119,7 @@ describe("CustomSignScreen", () => {
   it("displays the preview image and text fields after a successful lookup", async () => {
     // Arrange
     mockRenderCustomSign.mockResolvedValueOnce(MOCK_RENDER_RESPONSE);
+    mockFetchSuccess();
     render(<CustomSignScreen />);
     selectSize();
     fireEvent.change(screen.getByPlaceholderText("Enter Item # / UPC"), {
@@ -145,6 +159,7 @@ describe("CustomSignScreen", () => {
   it("resets state and hides text fields when Reset is clicked", async () => {
     // Arrange
     mockRenderCustomSign.mockResolvedValueOnce(MOCK_RENDER_RESPONSE);
+    mockFetchSuccess();
     render(<CustomSignScreen />);
     selectSize();
     fireEvent.change(screen.getByPlaceholderText("Enter Item # / UPC"), {
@@ -176,6 +191,7 @@ describe("CustomSignScreen", () => {
   it("enables the Print button after a successful lookup", async () => {
     // Arrange
     mockRenderCustomSign.mockResolvedValueOnce(MOCK_RENDER_RESPONSE);
+    mockFetchSuccess();
     render(<CustomSignScreen />);
     selectSize();
     fireEvent.change(screen.getByPlaceholderText("Enter Item # / UPC"), {

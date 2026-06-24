@@ -16,13 +16,14 @@ import { HTTP_STATUS } from "../../../lib/constants";
 import { ecsWsCall } from "../../../lib/ecsWebSocket";
 import { ECS_PRINT_WS_URL } from "../../../services/config";
 
-const DEFAULT_SELL_UNIT_ID = "51";
+const DEFAULT_SELL_UNIT_ID = "106";
 
 interface LoadPreviewRequestBody {
   sessionID?: string;
   jobID?: number;
   batchID?: number;
   sellUnitId?: string;
+  signQuantity?: number;
 }
 
 /**
@@ -53,7 +54,7 @@ export default async function handler(
     return;
   }
 
-  const { sessionID, jobID, batchID, sellUnitId = DEFAULT_SELL_UNIT_ID } = req.body as LoadPreviewRequestBody;
+  const { sessionID, jobID, batchID, sellUnitId = DEFAULT_SELL_UNIT_ID, signQuantity } = req.body as LoadPreviewRequestBody;
 
   if (!sessionID || jobID === undefined || batchID === undefined) {
     res.status(HTTP_STATUS.BAD_REQUEST).json({ success: false, message: "sessionID, jobID, and batchID are required." });
@@ -72,7 +73,11 @@ export default async function handler(
       }],
     });
 
-    const sinkSize = typeof batchRes.sinkSize === "number" ? (batchRes.sinkSize as number) : 1;
+    const sinkSize =
+      (signQuantity != null && signQuantity > 0) ? signQuantity :
+      typeof batchRes.sinkSize === "number" ? (batchRes.sinkSize as number) :
+      typeof batchRes.SinkSize === "number" ? (batchRes.SinkSize as number) :
+      1;
     // TODO: remove console logging before production
     console.log(`[load-preview] batchSign-preview OK — sinkSize: ${sinkSize}`);
 

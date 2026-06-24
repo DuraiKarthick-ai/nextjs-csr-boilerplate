@@ -7,7 +7,9 @@ import { ThemeProvider } from "@emotion/react";
 import { CircularProgress, FormControl, MenuItem, Select, TextField } from "@mui/material";
 import { theme } from "@/theme/customizeTheme";
 import { useTranslation } from "react-i18next";
+import { ENABLE_DOWNLOAD } from "../../../lib/constants";
 import useCustomSign from "../hooks/useCustomSign";
+import PrintProgressModal from "../../dashboard/component/PrintProgressModal";
 
 const printIcon = (
   <svg width="20" height="18" viewBox="0 0 20 18" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -32,7 +34,7 @@ function CustomSignScreen(): JSX.Element {
     isLoaded,
     isLookingUp,
     isRerendering,
-    isPrinting,
+    isOpen,
     error,
     setProductCode,
     setSize,
@@ -41,8 +43,24 @@ function CustomSignScreen(): JSX.Element {
     setTitleLine2,
     handleLookup,
     handleFieldBlur,
-    handlePrint,
     handleReset,
+    openPrintModal,
+    startPrint,
+    startDownload,
+    mode,
+    onPrinterChange,
+    onTrayChange,
+    closeModal,
+    isPrintStarted,
+    steps,
+    printError,
+    isDone,
+    successInfo,
+    printers,
+    trays,
+    selectedPrinter,
+    selectedTray,
+    isLoadingPrinters,
   } = useCustomSign();
 
   const { t } = useTranslation("signs");
@@ -108,9 +126,9 @@ function CustomSignScreen(): JSX.Element {
                         placeholder={t("customSign.form.itemUpcPlaceholder")}
                         variant="outlined"
                         value={productCode}
-                        onChange={(e) => setProductCode(e.target.value)}
+                        onChange={(e) => setProductCode(e.target.value.replace(/[^0-9]/g, ""))}
                         inputRef={productCodeRef}
-                        inputProps={{ "aria-label": "Item number or UPC" }}
+                        inputProps={{ minLength: 1, maxLength: 9, "aria-label": "Item number or UPC" }}
                       />
                     </ThemeProvider>
                     {productCode && (
@@ -229,7 +247,7 @@ function CustomSignScreen(): JSX.Element {
             )}
           </div>
 
-          {/* ── Right panel: quantity selector + sign preview ── */}
+          {/* ── Right panel: quantity (copies) selector + sign preview ── */}
           <div className={styles.signPreviewWrapper}>
             <div className={styles.selectQty}>
               <ul>
@@ -253,12 +271,12 @@ function CustomSignScreen(): JSX.Element {
                 <li>
                   <button
                     className="primaryButton"
-                    onClick={() => void handlePrint()}
-                    disabled={!isLoaded || isPrinting}
-                    aria-busy={isPrinting}
+                    onClick={() => void openPrintModal()}
+                    disabled={!isLoaded || isOpen}
+                    aria-busy={isOpen && !isPrintStarted}
                   >
                     <i>{printIcon}</i>
-                    <span>{isPrinting ? t("customSign.actions.print") : `${t("customSign.actions.print")}`}</span>
+                    <span>{t("customSign.actions.print")}</span>
                   </button>
                 </li>
               </ul>
@@ -301,6 +319,27 @@ function CustomSignScreen(): JSX.Element {
 
         </div>
       </div>
+
+      <PrintProgressModal
+        isOpen={isOpen}
+        batchName={productCode}
+        mode={mode}
+        steps={steps}
+        error={printError}
+        isDone={isDone}
+        successInfo={successInfo}
+        onClose={closeModal}
+        printers={printers}
+        trays={trays}
+        selectedPrinter={selectedPrinter}
+        selectedTray={selectedTray}
+        isLoadingPrinters={isLoadingPrinters}
+        onPrinterChange={(p) => void onPrinterChange(p)}
+        onTrayChange={onTrayChange}
+        onStartPrint={() => void startPrint()}
+        onStartDownload={ENABLE_DOWNLOAD ? () => void startDownload() : undefined}
+        isPrintStarted={isPrintStarted}
+      />
     </div>
   );
 }

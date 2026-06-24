@@ -57,19 +57,21 @@ export default async function handler(
   }
 
   try {
-    await getAccessToken();
+  console.log("Initializing OAuth token");
+  await getAccessToken();
 
-    res.status(HTTP_STATUS.OK).json({
-      success: true,
-      message: "Authentication initialised.",
-      data: { initialised: true },
-    });
-  } catch {
-    /* Token fetch failed — return failure without exposing error details. */
-    res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: "Failed to initialise authentication.",
-      data: { initialised: false },
-    });
+  res.status(HTTP_STATUS.OK).json({
+    success: true,
+    message: "Authentication initialised.",
+    data: { initialised: true },
+  });
+} catch (error) {
+  console.error("OAuth token initialization failed:", error);
+
+  res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
+    success: false,
+    message: "Failed to initialise authentication.",
+    data: { initialised: false },
+  });
   }
 }

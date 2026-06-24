@@ -5,7 +5,7 @@
  * it nears expiry, then transparently refreshes it.
  *
  * Security:
- * - ECS_OAUTH_TOKEN_URL, ECS_CLIENT_ID, and ECS_CLIENT_SECRET must be set as
+ * - SIGNS_OAUTH_TOKEN_URL, SIGNS_APIGEE_CLIENT_ID, and SIGNS_APIGEE_CLIENT_SECRET must be set as
  *   server-side environment variables (no NEXT_PUBLIC_ prefix).
  * - This module must NEVER be imported in client-side code.
  * - Credentials are never logged or forwarded to the UI.
@@ -46,12 +46,12 @@ const TOKEN_EXPIRY_BUFFER_MS = 60_000;
  * Reads the OAuth token endpoint URL from the environment.
  *
  * @returns {string} The configured OAuth token URL.
- * @throws {Error} If ECS_OAUTH_TOKEN_URL is not set.
+ * @throws {Error} If SIGNS_OAUTH_TOKEN_URL is not set.
  */
 function getOAuthTokenUrl(): string {
-  const url = process.env.ECS_OAUTH_TOKEN_URL;
+  const url = process.env.SIGNS_OAUTH_TOKEN_URL;
   if (!url) {
-    throw new Error("ECS_OAUTH_TOKEN_URL environment variable is not set.");
+    throw new Error("SIGNS_OAUTH_TOKEN_URL environment variable is not set.");
   }
   return url;
 }
@@ -60,14 +60,14 @@ function getOAuthTokenUrl(): string {
  * Reads the OAuth client credentials from the environment.
  *
  * @returns {{ clientId: string; clientSecret: string }} Client ID and secret.
- * @throws {Error} If ECS_CLIENT_ID or ECS_CLIENT_SECRET are not set.
+ * @throws {Error} If SIGNS_APIGEE_CLIENT_ID or SIGNS_APIGEE_CLIENT_SECRET are not set.
  */
 function getClientCredentials(): { clientId: string; clientSecret: string } {
-  const clientId = process.env.ECS_CLIENT_ID;
-  const clientSecret = process.env.ECS_CLIENT_SECRET;
+  const clientId = process.env.SIGNS_APIGEE_CLIENT_ID;
+  const clientSecret = process.env.SIGNS_APIGEE_CLIENT_SECRET;
   if (!clientId || !clientSecret) {
     throw new Error(
-      "ECS_CLIENT_ID or ECS_CLIENT_SECRET environment variables are not set."
+      "SIGNS_APIGEE_CLIENT_ID or SIGNS_APIGEE_CLIENT_SECRET environment variables are not set."
     );
   }
   return { clientId, clientSecret };
@@ -94,6 +94,7 @@ function isCacheValid(): boolean {
  */
 async function fetchNewToken(): Promise<TokenCache> {
   const tokenUrl = getOAuthTokenUrl();
+  console.log("Fetching OAuth token from:", tokenUrl);
   const { clientId, clientSecret } = getClientCredentials();
 
   const body = new URLSearchParams({
@@ -155,6 +156,7 @@ export async function getAccessToken(): Promise<string> {
         return cache;
       })
       .catch((err: unknown) => {
+        console.error("OAuth token fetch failed:", err);
         inflightTokenRequest = null;
         throw err;
       });

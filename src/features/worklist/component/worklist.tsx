@@ -1,19 +1,23 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef, useCallback } from "react";
 
 import styles from "./signWorklist.module.scss";
-import { CircularProgress, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, FormControl, MenuItem, Select, TextField, ThemeProvider } from "@mui/material";
+import { Autocomplete, CircularProgress, Checkbox, Dialog, DialogActions, DialogContent, DialogTitle, TextField, ThemeProvider } from "@mui/material";
 import Image from "next/image";
 import { tableFilterTheme, datePickerTheme } from "@/theme/customizeTheme";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 import type { Dayjs } from "dayjs";
 import type { BatchQueryParams, BatchDetailItem } from "../../../types/batch.types";
+import { API_BASE_URL } from "../../../services/config";
+import { DEFAULT_SIGN_STYLE_NAME } from "../../../lib/constants";
 import useBatchDetail from "../hooks/useBatchDetail";
 import useWorklist from "../hooks/useWorklist";
+import { useWorklistPrint } from "../hooks/useWorklistPrint";
+import PrintProgressModal from "../../dashboard/component/PrintProgressModal";
 import ErrorMessage from "../../../shared/common/ErrorMessage";
-import { renderWorklistItemPreview } from "../services/worklistService";
 
 type SortKey = "effectiveDate" | "itemNumber" | "description" | "changeReason" | "signSize" | "copies" | "printStatus";
 type SortOrder = "asc" | "desc";
@@ -37,11 +41,28 @@ const INITIAL_FILTERS: FilterState = {
   printStatus: "",
 };
 
+/**
+ * Number of rows rendered per "page" of the worklist table.
+ * The full dataset is held in memory (ECS returns it all at once), but only
+ * this many rows are rendered to the DOM at a time. Each time the user scrolls
+ * near the bottom of the table, another PAGE_SIZE rows are appended. This keeps
+ * the DOM small enough to stay responsive even for very large batches.
+ */
+const PAGE_SIZE = 50;
+
+/**
+ * Distance in pixels from the bottom of the scroll container at which the next
+ * page of rows is appended, so new rows load slightly before the user hits the
+ * very end.
+ */
+const SCROLL_THRESHOLD_PX = 150;
+
 /** Props accepted by the WorklistScreen component. */
 interface WorklistScreenProps {
   /**
    * Batch identifiers sourced from URL query params when the user navigates
-   * from a dashboard batch-job hyperlink. When null, fallback static data is shown.
+   * from a dashboard batch-job hyperlink. When null, no batch detail is loaded
+   * and the table renders its empty state.
    */
   batchParams?: BatchQueryParams | null;
 }
@@ -61,43 +82,64 @@ function getRowKey(row: BatchDetailItem, index: number): string {
  * Renders the Sign Worklist (Daily Sign Maintenance) screen.
  *
  * Displays a filterable, sortable, and selectable table of batch sign items.
- * When batchParams are provided the ECS batch detail API is called; on failure
- * or empty response the static fallback data is used automatically via useBatchDetail.
- * When no batchParams are given, the fallback data is displayed directly.
+ * When batchParams are provided the ECS batch detail API is called via
+ * useBatchDetail; on failure an error is shown and the table stays empty.
+ * When no batchParams are given, the table renders its empty state.
  *
  * @param {WorklistScreenProps} props
  * @returns {JSX.Element} The rendered Sign Worklist view.
  */
 export default function WorklistScreen({ batchParams = null }: WorklistScreenProps): JSX.Element {
-  const { items: batchItems, isLoading: isBatchLoading, error: batchError } = useBatchDetail(batchParams ?? null);
-  const { handlePrintSelected, isPrinting } = useWorklist();
+  const { items: batchItems, isLoading: isBatchLoading, error: batchError } = useBatchDetail(batchParams);
+  useWorklist();
+  const worklistPrint = useWorklistPrint();
 
-  /** Raw data — sourced from the API response; empty until the first successful fetch. */
-  const [data, setData] = useState<BatchDetailItem[]>([]);
+  const data = batchItems;
   const [sortKey, setSortKey] = useState<SortKey | null>(null);
   const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
   const [filters, setFilters] = useState<FilterState>(INITIAL_FILTERS);
 
-  /** Set of row keys currently selected for printing. */
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
-
-  /** Per-row copies overrides keyed by row key. */
   const [itemCopies, setItemCopies] = useState<Record<string, number>>({});
 
-  /** Preview modal state. */
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isPreviewLoading, setIsPreviewLoading] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
 
   /**
+   * Prefetched preview images keyed by item number (productCode). Each sign is
+   * rendered directly by its product code, so lookups are position-independent —
+   * a searched item is handled the same whether or not it was in the first page.
+   * Filled in pages of PAGE_SIZE so clicking a row's Preview is instant when the
+   * image is already cached. Held in a ref so filling it does not re-render the table.
+   */
+  const previewCacheRef = useRef<Record<string, string>>({});
+  /** How many rows of `data` have been prefetched so far (paged sequentially). */
+  const prefetchedCountRef = useRef<number>(0);
+  /** In-flight prefetch page request, so callers can await it instead of racing. */
+  const prefetchInFlightRef = useRef<Promise<void> | null>(null);
+  /** Mirror of prefetchedCountRef in state, so the scroll effect can react. */
+  const [prefetchedCount, setPrefetchedCount] = useState<number>(0);
+
+  /** How many rows are currently rendered to the DOM (grows on scroll). */
+  const [visibleCount, setVisibleCount] = useState<number>(PAGE_SIZE);
+
+  /** Scroll container around the table; used to detect scroll-to-bottom. */
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+
+  /**
    * Synchronises the raw data state when the API result or batch context changes.
    * Resets selection and per-row copy overrides on each data refresh.
    */
   useEffect(() => {
-    setData(batchItems);
     setSelectedRows(new Set());
     setItemCopies({});
+    // Reset the preview prefetch cache for the new batch.
+    previewCacheRef.current = {};
+    prefetchedCountRef.current = 0;
+    prefetchInFlightRef.current = null;
+    setPrefetchedCount(0);
   }, [batchItems, batchParams]);
 
   /**
@@ -143,6 +185,135 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
 
     return result;
   }, [data, filters, sortKey, sortOrder]);
+
+  /**
+   * The subset of rows currently rendered to the DOM. Only the first
+   * `visibleCount` filtered/sorted rows are mapped to table rows; the rest are
+   * appended as the user scrolls. Slicing from index 0 preserves each row's
+   * original position in displayData, so getRowKey indices stay consistent.
+   */
+  const visibleData = useMemo<BatchDetailItem[]>(
+    () => displayData.slice(0, visibleCount),
+    [displayData, visibleCount]
+  );
+
+  /**
+   * Resets the visible window back to the first page whenever the underlying
+   * filtered/sorted dataset changes (filter applied, sort changed, new batch
+   * loaded). Without this, a stale large window could persist after filtering.
+   */
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+    if (tableScrollRef.current) {
+      tableScrollRef.current.scrollTop = 0;
+    }
+  }, [displayData]);
+
+  /**
+   * Appends the next page of rows when the user scrolls near the bottom of the
+   * table container, until all filtered rows are rendered.
+   */
+  function handleTableScroll(): void {
+    const el = tableScrollRef.current;
+    if (!el) return;
+    const reachedBottom =
+      el.scrollTop + el.clientHeight >= el.scrollHeight - SCROLL_THRESHOLD_PX;
+    if (reachedBottom) {
+      setVisibleCount((prev) =>
+        prev >= displayData.length ? prev : prev + PAGE_SIZE
+      );
+    }
+  }
+
+  /**
+   * Renders preview images for a set of rows by product code: looks up each
+   * item's style via item-search, then renders all rows in one batched call.
+   * Returns a map of itemNumber → base64 PNG (missing entries are omitted).
+   */
+  const renderRowsByProductCode = useCallback(async (
+    rows: BatchDetailItem[]
+  ): Promise<Record<string, string>> => {
+    if (!batchParams || rows.length === 0) return {};
+    const storeId = batchParams.storeId;
+
+    // 1. item-search → real style name per item (rendering needs a valid style).
+    const searchRes = await fetch(`${API_BASE_URL}/api/print/item-search`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        items: rows.map((r) => ({ storeId, productCode: r.itemNumber, productTypeCode: "ITM" })),
+      }),
+    });
+    const searchData = await searchRes.json() as { success: boolean; items?: { productCode: string; styleName: string }[] };
+    const styleByCode = new Map((searchData.items ?? []).map((it) => [it.productCode, it.styleName]));
+
+    // 2. custom-sign-render → one batched render for the whole page.
+    const renderBody = rows.map((r) => ({
+      styleName: styleByCode.get(r.itemNumber) ?? DEFAULT_SIGN_STYLE_NAME,
+      outputType: "png",
+      productCode: r.itemNumber,
+      storeId: Number(storeId),
+      outputParams: "",
+      shapeNameValues: [],
+    }));
+    const renderRes = await fetch(`${API_BASE_URL}/api/signs/custom-sign-render`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(renderBody),
+    });
+    const renderData = await renderRes.json() as { success: boolean; data?: { data?: { responseData: string }[] } };
+    const items = renderData.data?.data ?? [];
+
+    const out: Record<string, string> = {};
+    rows.forEach((r, i) => {
+      const img = items[i]?.responseData;
+      if (img) out[r.itemNumber] = img;
+    });
+    return out;
+  }, [batchParams]);
+
+  /**
+   * Prefetches the next page of preview images (by product code) into the cache.
+   * Best-effort: failures are swallowed, since a per-row Preview click can still
+   * render that item on demand. Advances the page cursor even on failure so a
+   * single bad page does not stall prefetching of the rest.
+   */
+  const prefetchPreviewPage = useCallback(async (): Promise<void> => {
+    if (!batchParams) return;
+    // Coalesce concurrent callers (background scroll prefetch + on-demand search).
+    if (prefetchInFlightRef.current) return prefetchInFlightRef.current;
+    const start = prefetchedCountRef.current;
+    const slice = data.slice(start, start + PAGE_SIZE);
+    if (slice.length === 0) return;
+
+    const run = (async (): Promise<void> => {
+      try {
+        const rendered = await renderRowsByProductCode(slice);
+        previewCacheRef.current = { ...previewCacheRef.current, ...rendered };
+      } catch {
+        // Best-effort prefetch; per-row Preview can still render on demand.
+      } finally {
+        prefetchedCountRef.current = start + slice.length;
+        setPrefetchedCount(prefetchedCountRef.current);
+      }
+    })();
+
+    prefetchInFlightRef.current = run;
+    try { await run; } finally { prefetchInFlightRef.current = null; }
+  }, [batchParams, data, renderRowsByProductCode]);
+
+  /**
+   * Keeps the preview cache one page ahead of the rendered rows: prefetches the
+   * first PAGE_SIZE images on load and the next page each time the table scroll
+   * reveals more rows, until every sign in the batch is cached.
+   */
+  useEffect(() => {
+    if (!batchParams || data.length === 0) return;
+    const target = Math.min(visibleCount, data.length);
+    if (prefetchedCount < target) {
+      void prefetchPreviewPage();
+    }
+  }, [batchParams, data.length, visibleCount, prefetchedCount, prefetchPreviewPage]);
 
   /** Number of currently active filter fields. */
   const activeFilterCount = useMemo<number>(() => {
@@ -279,27 +450,37 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
   }
 
   /**
-   * Opens the preview dialog and fetches a rendered sign image for the given row.
-   *
-   * @param {BatchDetailItem} row - The row whose sign will be previewed.
+   * Opens the preview dialog. Shows the prefetched image instantly when it is
+   * already cached (no API call); otherwise renders that one item by its
+   * product code on demand — position-independent, so a searched item beyond
+   * the prefetched pages is handled the same way.
    */
-  async function handlePreview(row: BatchDetailItem): Promise<void> {
+  function handlePreview(row: BatchDetailItem): void {
     setPreviewOpen(true);
-    setPreviewImage(null);
     setPreviewError(null);
-    setIsPreviewLoading(true);
-    try {
-      const response = await renderWorklistItemPreview(row.itemNumber);
-      const firstItem = response?.data?.[0];
-      if (!firstItem?.responseData) {
-        throw new Error("No preview data returned.");
-      }
-      setPreviewImage(firstItem.responseData);
-    } catch (err) {
-      setPreviewError(err instanceof Error ? err.message : "Preview failed. Please try again.");
-    } finally {
+
+    const cached = previewCacheRef.current[row.itemNumber];
+    if (cached) {
+      setPreviewImage(cached);
       setIsPreviewLoading(false);
+      return;
     }
+
+    setPreviewImage(null);
+    setIsPreviewLoading(true);
+    void (async () => {
+      try {
+        const rendered = await renderRowsByProductCode([row]);
+        const img = rendered[row.itemNumber];
+        if (!img) throw new Error("No preview image returned");
+        previewCacheRef.current[row.itemNumber] = img; // cache for instant re-click
+        setPreviewImage(img);
+      } catch (err) {
+        setPreviewError(err instanceof Error ? err.message : "Preview failed. Please try again.");
+      } finally {
+        setIsPreviewLoading(false);
+      }
+    })();
   }
 
   function handlePreviewClose(): void {
@@ -426,12 +607,21 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
                   <button
                     type="button"
                     className="primaryButton"
-                    disabled={selectedRows.size === 0 || isPrinting}
-                    onClick={handlePrintSelected}
-                    aria-busy={isPrinting}
+                    disabled={selectedRows.size === 0 || worklistPrint.isOpen}
+                    onClick={() => {
+                      if (!batchParams) return;
+                      // Apply per-row copies overrides before passing to the hook
+                      const selectedItems = displayData
+                        .filter((row, idx) => selectedRows.has(getRowKey(row, idx)))
+                        .map((row) => {
+                          const key = getRowKey(row, displayData.indexOf(row));
+                          return { ...row, copies: getCopies(key, row.copies) };
+                        });
+                      void worklistPrint.openPrintModal(batchParams, selectedItems);
+                    }}
                   >
                     <i>{printIcon}</i>
-                    <span>{isPrinting ? "Printing…" : `Print (${selectedRows.size})`}</span>
+                    <span>{`Print (${displayData.reduce((sum, row, idx) => selectedRows.has(getRowKey(row, idx)) ? sum + getCopies(getRowKey(row, idx), row.copies) : sum, 0)})`}</span>
                   </button>
                 </li>
               </ul>
@@ -440,7 +630,7 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
 
           {batchError && <ErrorMessage message={batchError} />}
 
-          <div className={styles.tableWrap}>
+          <div className={styles.tableWrap} ref={tableScrollRef} onScroll={handleTableScroll}>
             <table className={styles.dataTable}>
               <thead>
                 <tr>
@@ -473,6 +663,8 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
                               value={filters.date}
                               onChange={(newValue) => handleFilterChange({ date: newValue })}
                               format="MM/DD/YYYY"
+                              minDate={dayjs().subtract(6, "day")}
+                              maxDate={dayjs()}
                               slotProps={{
                                 textField: { size: "small", fullWidth: true },
                                 actionBar: { actions: ["clear", "today"] },
@@ -493,18 +685,24 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
                       </div>
                       <div className={styles.filterWrap}>
                         <ThemeProvider theme={tableFilterTheme}>
-                          <FormControl fullWidth size="small">
-                            <Select
-                              displayEmpty
-                              value={filters.itemNumber}
-                              onChange={(e) => handleFilterChange({ itemNumber: e.target.value })}
-                            >
-                              <MenuItem value="">All</MenuItem>
-                              {uniqueItemNumbers.map((num) => (
-                                <MenuItem key={num} value={num}>{num}</MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
+                          <Autocomplete
+                            size="small"
+                            options={["", ...uniqueItemNumbers]}
+                            getOptionLabel={(o) => o === "" ? "All" : o}
+                            value={filters.itemNumber}
+                            onChange={(_, val) => handleFilterChange({ itemNumber: val ?? "" })}
+                            renderInput={(params) => (
+                              <TextField {...params} placeholder="All"
+                                inputProps={{
+                                  ...params.inputProps, maxLength: 9,
+                                  onInput: (e: React.FormEvent<HTMLInputElement>) => {
+                                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                                  },
+                                }}
+                              />
+                            )}
+                            disableClearable={false}
+                          />
                         </ThemeProvider>
                       </div>
                     </div>
@@ -519,18 +717,24 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
                       </div>
                       <div className={styles.filterWrap}>
                         <ThemeProvider theme={tableFilterTheme}>
-                          <FormControl fullWidth size="small">
-                            <Select
-                              displayEmpty
-                              value={filters.itemName}
-                              onChange={(e) => handleFilterChange({ itemName: e.target.value })}
-                            >
-                              <MenuItem value="">All</MenuItem>
-                              {uniqueItemNames.map((name) => (
-                                <MenuItem key={name} value={name}>{name}</MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
+                          <Autocomplete
+                            size="small"
+                            options={["", ...uniqueItemNames]}
+                            getOptionLabel={(o) => o === "" ? "All" : o}
+                            value={filters.itemName}
+                            onChange={(_, val) => handleFilterChange({ itemName: val ?? "" })}
+                            renderInput={(params) => (
+                              <TextField {...params} placeholder="All"
+                                inputProps={{
+                                  ...params.inputProps, maxLength: 37,
+                                  onInput: (e: React.FormEvent<HTMLInputElement>) => {
+                                    e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z\s]/g, "");
+                                  },
+                                }}
+                              />
+                            )}
+                            disableClearable={false}
+                          />
                         </ThemeProvider>
                       </div>
                     </div>
@@ -545,18 +749,24 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
                       </div>
                       <div className={styles.filterWrap}>
                         <ThemeProvider theme={tableFilterTheme}>
-                          <FormControl fullWidth size="small">
-                            <Select
-                              displayEmpty
-                              value={filters.changeReason}
-                              onChange={(e) => handleFilterChange({ changeReason: e.target.value })}
-                            >
-                              <MenuItem value="">All</MenuItem>
-                              {uniqueChangeReasons.map((reason) => (
-                                <MenuItem key={reason} value={reason}>{reason}</MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
+                          <Autocomplete
+                            size="small"
+                            options={["", ...uniqueChangeReasons]}
+                            getOptionLabel={(o) => o === "" ? "All" : o}
+                            value={filters.changeReason}
+                            onChange={(_, val) => handleFilterChange({ changeReason: val ?? "" })}
+                            renderInput={(params) => (
+                              <TextField {...params} placeholder="All"
+                                inputProps={{
+                                  ...params.inputProps, maxLength: 2,
+                                  onInput: (e: React.FormEvent<HTMLInputElement>) => {
+                                    e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, "");
+                                  },
+                                }}
+                              />
+                            )}
+                            disableClearable={false}
+                          />
                         </ThemeProvider>
                       </div>
                     </div>
@@ -571,18 +781,24 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
                       </div>
                       <div className={styles.filterWrap}>
                         <ThemeProvider theme={tableFilterTheme}>
-                          <FormControl fullWidth size="small">
-                            <Select
-                              displayEmpty
-                              value={filters.signSize}
-                              onChange={(e) => handleFilterChange({ signSize: e.target.value })}
-                            >
-                              <MenuItem value="">All</MenuItem>
-                              {uniqueSignSizes.map((size) => (
-                                <MenuItem key={size} value={size}>{size}</MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
+                          <Autocomplete
+                            size="small"
+                            options={["", ...uniqueSignSizes]}
+                            getOptionLabel={(o) => o === "" ? "All" : o}
+                            value={filters.signSize}
+                            onChange={(_, val) => handleFilterChange({ signSize: val ?? "" })}
+                            renderInput={(params) => (
+                              <TextField {...params} placeholder="All"
+                                inputProps={{
+                                  ...params.inputProps, maxLength: 6,
+                                  onInput: (e: React.FormEvent<HTMLInputElement>) => {
+                                    e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z\s]/g, "");
+                                  },
+                                }}
+                              />
+                            )}
+                            disableClearable={false}
+                          />
                         </ThemeProvider>
                       </div>
                     </div>
@@ -607,18 +823,24 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
                       </div>
                       <div className={styles.filterWrap}>
                         <ThemeProvider theme={tableFilterTheme}>
-                          <FormControl fullWidth size="small">
-                            <Select
-                              displayEmpty
-                              value={filters.printStatus}
-                              onChange={(e) => handleFilterChange({ printStatus: e.target.value })}
-                            >
-                              <MenuItem value="">All</MenuItem>
-                              {uniquePrintStatuses.map((status) => (
-                                <MenuItem key={status} value={status}>{status}</MenuItem>
-                              ))}
-                            </Select>
-                          </FormControl>
+                          <Autocomplete
+                            size="small"
+                            options={["", ...uniquePrintStatuses]}
+                            getOptionLabel={(o) => o === "" ? "All" : o}
+                            value={filters.printStatus}
+                            onChange={(_, val) => handleFilterChange({ printStatus: val ?? "" })}
+                            renderInput={(params) => (
+                              <TextField {...params} placeholder="All"
+                                inputProps={{
+                                  ...params.inputProps, maxLength: 8,
+                                  onInput: (e: React.FormEvent<HTMLInputElement>) => {
+                                    e.currentTarget.value = e.currentTarget.value.replace(/[^a-zA-Z\s]/g, "");
+                                  },
+                                }}
+                              />
+                            )}
+                            disableClearable={false}
+                          />
                         </ThemeProvider>
                       </div>
                     </div>
@@ -675,7 +897,7 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
                     </td>
                   </tr>
                 ) : (
-                  displayData.map((row, index) => {
+                  visibleData.map((row, index) => {
                     const rowKey = getRowKey(row, index);
                     const isSelected = selectedRows.has(rowKey);
                     return (
@@ -693,18 +915,7 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
                         <td><p>{row.itemNumber}</p></td>
                         <td><p>{row.description}</p></td>
                         <td><p>{row.changeReason}</p></td>
-                        <td>
-                          <ThemeProvider theme={tableFilterTheme}>
-                            <TextField
-                              fullWidth
-                              size="small"
-                              value={row.signSize}
-                              variant="outlined"
-                              type="number"
-                              inputProps={{ min: 0 }}
-                            />
-                          </ThemeProvider>
-                        </td>
+                        <td><p>{row.signSize}</p></td>
                         <td className={styles.thCopies}>
                           <ThemeProvider theme={tableFilterTheme}>
                             <TextField
@@ -738,7 +949,9 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
           </div>
 
           <div className={styles.pagination}>
-            <p>Total Rows: {displayData.length}</p>
+            <p>
+              Showing {visibleData.length} of {displayData.length} rows
+            </p>
           </div>
         </div>
       </div>
@@ -793,6 +1006,27 @@ export default function WorklistScreen({ batchParams = null }: WorklistScreenPro
           </button>
         </DialogActions>
       </Dialog>
+
+      {/* ── Worklist Print Progress Modal ── */}
+      <PrintProgressModal
+        isOpen={worklistPrint.isOpen}
+        batchName={batchParams?.batchName ?? ""}
+        mode="print"
+        steps={worklistPrint.steps}
+        error={worklistPrint.error}
+        isDone={worklistPrint.isDone}
+        successInfo={worklistPrint.successInfo}
+        onClose={worklistPrint.closeModal}
+        printers={worklistPrint.printers}
+        trays={worklistPrint.trays}
+        selectedPrinter={worklistPrint.selectedPrinter}
+        selectedTray={worklistPrint.selectedTray}
+        isLoadingPrinters={worklistPrint.isLoadingPrinters}
+        onPrinterChange={(p) => void worklistPrint.onPrinterChange(p)}
+        onTrayChange={worklistPrint.onTrayChange}
+        onStartPrint={() => void worklistPrint.startPrint()}
+        isPrintStarted={worklistPrint.isPrintStarted}
+      />
     </div>
   );
 }

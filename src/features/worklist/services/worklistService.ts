@@ -13,13 +13,9 @@ import type {
   WorklistPrintRequest,
   WorklistSummaryData,
 } from "../../../types/worklist.types";
-import type {
-  PrintResponse,
-  CustomSignRenderRequest,
-  CustomSignRenderResponse,
-} from "../../../types/sign.types";
+import type { PrintResponse } from "../../../types/sign.types";
 import type { BatchQueryParams, BatchDetailResponse } from "../../../types/batch.types";
-import { API_BASE_PATH, DEFAULT_PAGE_SIZE, BATCH_API_PATHS, PREVIEW_SIGN_API_PATHS, DEFAULT_STORE_ID } from "../../../lib/constants";
+import { API_BASE_PATH, DEFAULT_PAGE_SIZE, BATCH_API_PATHS } from "../../../lib/constants";
 
 /**
  * Fetches a paginated list of worklist items with optional filters.
@@ -65,36 +61,6 @@ export async function printWorklistItems(
   const response = await apiClient.post<ApiResponse<PrintResponse>>(
     `${API_BASE_PATH}/worklist/print`,
     request
-  );
-  return response.data.data;
-}
-
-/**
- * Requests a rendered sign preview image for a single worklist item.
- * Calls the shared ECS custom-sign render endpoint with the item number
- * as the product code and default style parameters.
- *
- * @param {string} itemNumber - The item number to preview.
- * @returns {Promise<CustomSignRenderResponse>} The ECS render response containing
- *   a base-64 encoded PNG in data[0].responseData.
- * @throws {Error} If the request fails or the response is not successful.
- */
-export async function renderWorklistItemPreview(
-  itemNumber: string
-): Promise<CustomSignRenderResponse> {
-  const payload: CustomSignRenderRequest[] = [
-    {
-      styleName: "Default",
-      outputType: "png",
-      productCode: itemNumber,
-      storeId: DEFAULT_STORE_ID,
-      outputParams: "",
-      shapeNameValues: [],
-    },
-  ];
-  const response = await apiClient.post<ApiResponse<CustomSignRenderResponse>>(
-    PREVIEW_SIGN_API_PATHS.RENDER,
-    payload
   );
   return response.data.data;
 }

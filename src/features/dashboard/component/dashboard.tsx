@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useTranslation } from "react-i18next";
 import ErrorMessage from "../../../shared/common/ErrorMessage";
-import { ROUTES } from "../../../lib/constants";
+import { ROUTES, ENABLE_DOWNLOAD } from "../../../lib/constants";
 import type { BatchItem } from "../../../types/batch.types";
 import { BatchStatus } from "../../../types/batch.types";
 import useBatches from "../hooks/useBatches";
@@ -60,23 +60,6 @@ function QuickLinks({ onNavigateHref }: DashboardNavProps): JSX.Element {
       <ul>
         <li>
           <Link
-            href={ROUTES.CUSTOM_SIGN}
-            onClick={(event) => {
-              if (!onNavigateHref) return;
-              event.preventDefault();
-              onNavigateHref(ROUTES.CUSTOM_SIGN);
-            }}
-          >
-            <div className={styles.quickLinksWrap}>
-              <div className={styles.icons}>
-                <i><CustomPrintIcon /></i>
-              </div>
-              <label>{t("quickLinks.customSign")}</label>
-            </div>
-          </Link>
-        </li>
-        <li>
-          <Link
             href={ROUTES.QUICK_PRINT}
             onClick={(event) => {
               if (!onNavigateHref) return;
@@ -89,6 +72,23 @@ function QuickLinks({ onNavigateHref }: DashboardNavProps): JSX.Element {
                 <i><QuickPrintIcon /></i>
               </div>
               <label>{t("quickLinks.quickPrint")}</label>
+            </div>
+          </Link>
+        </li>
+        <li>
+          <Link
+            href={ROUTES.CUSTOM_SIGN}
+            onClick={(event) => {
+              if (!onNavigateHref) return;
+              event.preventDefault();
+              onNavigateHref(ROUTES.CUSTOM_SIGN);
+            }}
+          >
+            <div className={styles.quickLinksWrap}>
+              <div className={styles.icons}>
+                <i><CustomPrintIcon /></i>
+              </div>
+              <label>{t("quickLinks.customSign")}</label>
             </div>
           </Link>
         </li>
@@ -176,7 +176,7 @@ function BatchJobsSection({
               ))
             ) : (
               batches.map((batch) => {
-                const printProgress = `${toTwoDigits(batch.signQuantity ?? 0)}/${toTwoDigits(batch.printedQuantity ?? 0)}`;
+                const printProgress = `${toTwoDigits(batch.printedQuantity ?? 0)}/${toTwoDigits(batch.signQuantity ?? 0)}`;
                 const worklistHref = `${ROUTES.WORKLIST}?batchId=${batch.batchId}&storeId=${encodeURIComponent(batch.storeId)}&batchConfigId=${batch.batchConfigId}&batchName=${encodeURIComponent(batch.batchName)}`;
                 const isCompleted = batch.status === BatchStatus.COMPLETED;
                 const selectedPrinter = getSelectedPrinter(batch.batchId);
@@ -260,6 +260,7 @@ function BatchJobsSection({
                             <span>{t("worklistSummary.print", { progress: printProgress })}</span>
                           </button>
                         </li>
+                        {ENABLE_DOWNLOAD && (
                         <li>
                           <button
                             className="primaryButtonOutline"
@@ -271,6 +272,7 @@ function BatchJobsSection({
                             <span>Download</span>
                           </button>
                         </li>
+                        )}
                       </ul>
                     </td>
                   </tr>
@@ -297,15 +299,23 @@ function BatchJobsSection({
 }
 
 function DashboardScreen({ onNavigateHref }: DashboardNavProps): JSX.Element {
-  const { batches, isLoading: isBatchesLoading, error: batchesError } = useBatches();
+  const { batches, isLoading: isBatchesLoading, error: batchesError, refresh } = useBatches();
   const [updatedTime, setUpdatedTime] = useState("");
 
-  useEffect(() => {
-    const now = new Date();
+  function updateTimestamp(): void {
     setUpdatedTime(
-      now.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
+      new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })
     );
+  }
+
+  useEffect(() => {
+    updateTimestamp();
   }, []);
+
+  function handleRefresh(): void {
+    refresh();
+    updateTimestamp();
+  }
 
   return (
     <div className={styles.contentWrap}>
@@ -316,14 +326,19 @@ function DashboardScreen({ onNavigateHref }: DashboardNavProps): JSX.Element {
         <div className={styles.actionWrap}>
           <ul>
             <li>
-              <div className={`d-flex flex-align-center ${styles.lastUpdated}`}>
+              <button
+                type="button"
+                className={`d-flex flex-align-center ${styles.lastUpdated}`}
+                onClick={handleRefresh}
+                aria-label="Refresh dashboard"
+              >
                 <i>
                   <svg width="17" height="17" viewBox="0 0 17 17" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M14.2083 2.44792C12.6979 0.9375 10.625 0 8.32292 0C3.71875 0 0 3.72917 0 8.33333C0 12.9375 3.71875 16.6667 8.32292 16.6667C12.2083 16.6667 15.4479 14.0104 16.375 10.4167H14.2083C13.3542 12.8437 11.0417 14.5833 8.32292 14.5833C4.875 14.5833 2.07292 11.7812 2.07292 8.33333C2.07292 4.88542 4.875 2.08333 8.32292 2.08333C10.0521 2.08333 11.5937 2.80208 12.7187 3.9375L9.36458 7.29167H16.6562V0L14.2083 2.44792Z" fill="#79747E" />
                   </svg>
                 </i>
                 <p>Updated {updatedTime}</p>
-              </div>
+              </button>
             </li>
             <li>
               <i>

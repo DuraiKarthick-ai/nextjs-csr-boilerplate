@@ -37,6 +37,9 @@
           .lastUpdated {
             padding-right: 20px;
             position: relative;
+            background: none;
+            border: none;
+            cursor: pointer;
 
             &:after {
               content: '';

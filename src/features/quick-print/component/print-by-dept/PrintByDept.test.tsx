@@ -7,6 +7,5 @@ describe("PrintByDept", () => {
     render(<PrintByDept />);
     expect(screen.getByPlaceholderText("Enter Department #")).toBeInTheDocument();
     expect(screen.getByPlaceholderText("Enter Category Code")).toBeInTheDocument();
-    expect(screen.getByText("Print Only Items With On Hand")).toBeInTheDocument();
   });
 });

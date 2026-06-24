@@ -6,57 +6,35 @@ metadata:
 data:
   NEXT_PUBLIC_ENV: "#{CD_ENVIRONMENT_LOWER}"
   NEXT_PRIVATE_LOCAL_WEBPACK: "true"
-  NEXT_PUBLIC_IFRAME_SRC: "https://dev400:8030/presto/presto?devicename=O8SKUMAR"
-  #NEXT_PUBLIC_APP_URL: "http://localhost:3002"
-  NEXT_PUBLIC_PORTAL_REMOTE_URL_DEV: "http://localhost:3000"
-  NEXT_PUBLIC_PORTAL_REMOTE_URL_PROD: "https://adt.erp.np.cc-costco.com"
-  NEXT_PUBLIC_PING_ISSUER: "https://loginnp.costco.com"
-  NEXT_PUBLIC_PING_CLIENT_ID: "5c246b05-ddfa-45f2-a8e5-61623873c1c2"
-  NEXT_PUBLIC_PING_REDIRECT_URI: "http://localhost:3002/auth/callback"
-  NEXT_PUBLIC_PING_LOGOUT_URI: "http://localhost:3002/"
-  NEXT_PUBLIC_PING_SCOPE: "openid profile email"
-  NEXT_PUBLIC_DASHBOARD_API_URL: "https://69ce482633a09f831b7d3ab9.mockapi.io/api/v1/dashboard/dashboard"
-
-  # SERVER-ONLY (not prefixed with NEXT_PUBLIC_)
-  JWT_SECRET: "dev-secret-replace-in-production"
-  ITEM_API_BASE_URL: "http://localhost:3001"
-  ITEM_API_USERNAME: "dev-user"
-  ITEM_API_PASSWORD: "dev-password"
   NEXT_PUBLIC_AUTH_REQUIRED: "false"
   ENABLE_MODULE_FEDERATION: "true"
-  # NEXT_PUBLIC_BATCH_API_BASE_URL must stay empty so batchService.ts routes
-  # all browser requests through the Next.js proxy (/api/batch/*).
-  # Only the server-side BATCH_API_BASE_URL (below) should point at the backend.
-  BATCH_API_BASE_URL: "http://34.133.77.6:8080/api/v1/ecs/batch"
 
-  # ECS Print Server (create-session, batchSign-preview, get-printers, get-trays, etc.)
-  ECS_STORE_ID: "51"
+  # Public API base URL (Signs app's own origin — required for MF cross-origin API calls)
+  NEXT_PUBLIC_API_BASE_URL: "#{NEXT_PUBLIC_API_BASE_URL}"
+
+  # Module Federation portal URL — value injected per environment by CI/CD pipeline
+  NEXT_PUBLIC_PORTAL_REMOTE_URL: "#{NEXT_PUBLIC_PORTAL_REMOTE_URL}"
+
+  # Ping SSO
+  NEXT_PUBLIC_PING_ISSUER: "https://loginnp.costco.com"
+  NEXT_PUBLIC_PING_CLIENT_ID: "5c246b05-ddfa-45f2-a8e5-61623873c1c2"
 
   # WebSocket print relay
-  # WS_RELAY_ENABLED and WS_RELAY_TOKEN are read by the app server.
   WS_RELAY_ENABLED: "true"
   WS_RELAY_TOKEN: ""
 
-  # Store relay client values (used by scripts/store-relay.js)
-  RELAY_WS_URL: "wss://http://136.113.73.16/ws/print-relay"
-  RELAY_TOKEN: ""
-  STORE_ID: "51"
+  # Signs batch & OAuth API (server-side only — NEVER prefix with NEXT_PUBLIC_)
+  SIGNS_OAUTH_TOKEN_URL: "#{SIGNS_OAUTH_TOKEN_URL}"
+  SIGNS_APIGEE_CLIENT_ID: "#{SIGNS_APIGEE_CLIENT_ID}"
+  SIGNS_APIGEE_CLIENT_SECRET: "#{SIGNS_APIGEE_CLIENT_SECRET}"
+  SIGNS_API_BASE_URL: "#{SIGNS_API_BASE_URL}"
 
-  # ECS batch & OAuth API (server-side only — NEVER prefix with NEXT_PUBLIC_)
-  # OAuth token endpoint
-  ECS_OAUTH_TOKEN_URL: "https://adt.np.api.cc-costco.com/oauth/token"
-  # OAuth client credentials (rotate immediately if leaked)
-  ECS_CLIENT_ID: "#{ECS_CLIENT_ID}"
-  ECS_CLIENT_SECRET: "#{ECS_CLIENT_SECRET}"
-  # ECS external batch API base URL
-  ECS_API_BASE_URL: "https://adt.np.api.cc-costco.com/whs-sol/costco/signs/v1/ecs"
-
-  # ECS Print Details API (server-side only)
+  # ECS Print Server (server-side only)
   ECS_WEB_USERNAME: "CostcoWS"
   ECS_WEB_PASSWORD: "dlm429t"
   ECS_WEB_API_TOKEN: "57e1bc49ff598e7495f8b35739848ad2"
   ECS_PRINT_USERNAME: "ECS"
-  ECS_PRINT_SERVER_URL: "https://localhost.ecsglobalinc.com:8083"
-  ECS_WEB_SERVER_URL: "https://costcotest.ecsglobalinc.com:443"
-
-  NEXT_PUBLIC_API_BASE_URL: "https://adt.erp.np.cc-costco.com"
+  ECS_PRINT_SERVER_URL: "#{ECS_PRINT_SERVER_URL}"
+  ECS_PRINT_WS_URL: "#{ECS_PRINT_WS_URL}"
+  ECS_PRINT_LOCAL_SERVER_URL: "#{ECS_PRINT_LOCAL_SERVER_URL}"
+  ECS_WEB_SERVER_URL: "#{ECS_WEB_SERVER_URL}"

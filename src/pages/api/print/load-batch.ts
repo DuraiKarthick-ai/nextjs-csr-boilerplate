@@ -11,7 +11,7 @@ import { HTTP_STATUS } from "../../../lib/constants";
 import { ecsWsCall } from "../../../lib/ecsWebSocket";
 import { ECS_PRINT_WS_URL } from "../../../services/config";
 
-const DEFAULT_SELL_UNIT_ID = "51";
+const DEFAULT_SELL_UNIT_ID = "106";
 
 interface LoadBatchRequestBody {
   sessionID?: string;

@@ -14,7 +14,7 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import type { ApiResponse } from "../../../types/common.types";
 import type { BatchDetailRequest, BatchDetailResponse, BatchDetailItem } from "../../../types/batch.types";
 import { HTTP_STATUS, ECS_BATCH_API_PATHS } from "../../../lib/constants";
-import { ECS_API_BASE_URL } from "../../../services/config";
+import { SIGNS_API_BASE_URL } from "../../../services/config";
 import { getAccessToken } from "../../../services/oauthTokenService";
 import { fetchWithTimeout } from "../../../lib/fetchWithTimeout";
 
@@ -160,7 +160,7 @@ export default async function handler(
     const token = await getAccessToken();
 
     const upstreamRes = await fetchWithTimeout(
-      `${ECS_API_BASE_URL}${ECS_BATCH_API_PATHS.GET_BATCH_DETAIL}`,
+      `${SIGNS_API_BASE_URL}${ECS_BATCH_API_PATHS.GET_BATCH_DETAIL}`,
       {
         method: "POST",
         headers: {

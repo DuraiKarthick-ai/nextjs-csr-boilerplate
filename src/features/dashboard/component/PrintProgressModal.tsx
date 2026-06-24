@@ -13,44 +13,29 @@ interface PrintProgressModalProps {
   isDone: boolean;
   successInfo?: PrintSuccessInfo | null;
   onClose: () => void;
+
+  /** When provided, renders a printer/tray selection row before the print starts. */
+  printers?: string[];
+  trays?: string[];
+  selectedPrinter?: string;
+  selectedTray?: string;
+  isLoadingPrinters?: boolean;
+  onPrinterChange?: (printer: string) => void;
+  onTrayChange?: (tray: string) => void;
+  /** When provided, shows a "Start Print" button and hides it once printing starts. */
+  onStartPrint?: () => void;
+  /** When provided, shows a "Download as PDF" button alongside Start Print. */
+  onStartDownload?: () => void;
+  isPrintStarted?: boolean;
 }
 
-/**
- * Renders an SVG icon representing the current step status.
- * @param {{ status: PrintStep["status"] }} props - The step status value.
- * @returns {JSX.Element} A checkmark (done), cross (error), dot (active), or empty fragment (pending).
- */
-const StatusIcon = ({ status }: { status: PrintStep["status"] }): JSX.Element => {
-  switch (status) {
-    case "done":
-      return (
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-          <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-      );
-    case "error":
-      return (
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-          <path d="M2 2l8 8M10 2l-8 8" stroke="#fff" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-      );
-    case "active":
-      return (
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" aria-hidden="true">
-          <circle cx="5" cy="5" r="3" fill="#fff" />
-        </svg>
-      );
-    default:
-      return <></>;
-  }
-};
 
 /**
  * Modal dialog that displays real-time progress for print and PDF download flows.
- * Shows step-by-step status, a progress bar, error messaging, and a success summary
- * including printer name, tray, and page count on successful print completion.
+ * When onStartPrint is provided, renders a printer/tray selection row before
+ * the flow starts so the user can confirm the target printer and tray.
  *
- * @param {PrintProgressModalProps} props - Modal state and callbacks from useDashboardPrint.
+ * @param {PrintProgressModalProps} props - Modal state and callbacks.
  * @returns {JSX.Element | null} The modal element, or null when not open.
  */
 function PrintProgressModal({
@@ -62,16 +47,31 @@ function PrintProgressModal({
   isDone,
   successInfo,
   onClose,
+  printers,
+  trays,
+  selectedPrinter,
+  selectedTray,
+  isLoadingPrinters,
+  onPrinterChange,
+  onTrayChange,
+  onStartPrint,
+  onStartDownload,
+  isPrintStarted,
 }: PrintProgressModalProps): JSX.Element | null {
   if (!isOpen) return null;
 
   const doneCount = steps.filter((s) => s.status === "done").length;
   const progressPct = steps.length > 0 ? (doneCount / steps.length) * 100 : 0;
 
+  const hasSelection = !!onStartPrint;
+  const showSelection = hasSelection && !isPrintStarted;
+
   const title = isDone
     ? mode === "print" ? "Print Complete" : "Download Complete"
     : error
     ? mode === "print" ? "Print Failed" : "Download Failed"
+    : showSelection
+    ? "Print"
     : mode === "print" ? "Printing…" : "Generating PDF…";
 
   const successMessage = mode === "print" && successInfo
@@ -88,43 +88,71 @@ function PrintProgressModal({
           <h3>{title}<span>{batchName}</span></h3>
         </div>
 
-        <div className={styles.dialogContent}>
+        {/* ── Printer / Tray selection (worklist pre-print phase) ── */}
+        {hasSelection && (
+          <div className={styles.printerSelection}>
+            <div className={styles.printerSelectionRow}>
+              <div className={styles.printerSelectionField}>
+                <label htmlFor="print-modal-printer">Printer</label>
+                {isLoadingPrinters ? (
+                  <div className="shimmer md" />
+                ) : (
+                  <select
+                    id="print-modal-printer"
+                    value={selectedPrinter ?? ""}
+                    onChange={(e) => onPrinterChange?.(e.target.value)}
+                    disabled={isPrintStarted}
+                  >
+                    {printers?.map((p) => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                )}
+              </div>
 
-          <div className={styles.progressBar}>
-
-            <div className={styles.progressTitle}>
-              <h5>PROGRESS</h5>
-              <h5 className={styles.progressPct}>{Math.round(progressPct)}%</h5>
-            </div>
-
-            <div className={styles.progressRow}>
-              <div
-                className={styles.progressTrack}
-                role="progressbar"
-                aria-valuenow={progressPct}
-                aria-valuemin={0}
-                aria-valuemax={100}
-              >
-                <div className={styles.progressFill} style={{ width: `${progressPct}%` }} />
+              <div className={styles.printerSelectionField}>
+                <label htmlFor="print-modal-tray">Tray</label>
+                {isLoadingPrinters ? (
+                  <div className="shimmer sm" />
+                ) : (
+                  <select
+                    id="print-modal-tray"
+                    value={selectedTray ?? ""}
+                    onChange={(e) => onTrayChange?.(e.target.value)}
+                    disabled={isPrintStarted}
+                  >
+                    {trays?.map((t) => (
+                      <option key={t} value={t}>{t}</option>
+                    ))}
+                  </select>
+                )}
               </div>
             </div>
-
           </div>
+        )}
 
-          <ul className={styles.stepList}>
-            {steps.map((step) => (
-              <li key={step.label}>
-                <p className={`${styles.stepLabel} ${styles[`stepLabel--${step.status}`]}`}>
-                  <i>
-                    <StatusIcon status={step.status} />
-                  </i>
-                  <span>{step.label}</span>
-                </p>
-              </li>
-            ))}
-          </ul>
-
-        </div>
+        {/* ── Progress bar (visible once print starts or in dashboard flow) ── */}
+        {(isPrintStarted || !hasSelection) && (
+          <div className={styles.dialogContent}>
+            <div className={styles.progressBar}>
+              <div className={styles.progressTitle}>
+                <h5>PROGRESS</h5>
+                <h5 className={styles.progressPct}>{Math.round(progressPct)}%</h5>
+              </div>
+              <div className={styles.progressRow}>
+                <div
+                  className={styles.progressTrack}
+                  role="progressbar"
+                  aria-valuenow={progressPct}
+                  aria-valuemin={0}
+                  aria-valuemax={100}
+                >
+                  <div className={styles.progressFill} style={{ width: `${progressPct}%` }} />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         {error && (
           <div className={styles.errorBox} role="alert">
@@ -142,13 +170,38 @@ function PrintProgressModal({
         )}
 
         <div className={styles.dialogFooter}>
+          {/* Download as PDF button — pushed to the left */}
+          {showSelection && !error && onStartDownload && (
+            <button
+              className="primaryButtonOutline"
+              onClick={onStartDownload}
+              disabled={isLoadingPrinters ?? false}
+              aria-label="Download as PDF"
+              style={{ marginRight: "auto" }}
+            >
+              Download as PDF
+            </button>
+          )}
+
+          {/* Start Print button — only for worklist selection phase */}
+          {showSelection && !error && (
+            <button
+              className="primaryButton"
+              onClick={onStartPrint}
+              disabled={isLoadingPrinters ?? false}
+              aria-label="Start print job"
+            >
+              {isLoadingPrinters ? "Loading printers…" : "Start Print"}
+            </button>
+          )}
+
           <button
-            className={isDone || error ? 'primaryButton' : 'primaryButtonOutline'}
+            className={isDone || !!error ? "primaryButton" : "primaryButtonOutline"}
             onClick={onClose}
-            disabled={!isDone && !error}
+            disabled={!isDone && !error && isPrintStarted}
             aria-label="Close print progress dialog"
           >
-            {isDone ? "Done" : error ? "Close" : "Processing…"}
+            {isDone ? "Done" : error ? "Close" : isPrintStarted ? "Processing…" : "Cancel"}
           </button>
         </div>
 

@@ -14,6 +14,7 @@ const ALLOWED_ORIGINS = [
   "https://localhost:3000",
   "https://localhost:3001",
   "https://localhost:3002",
+  "https://qat-signs.erp.np.cc-costco.com"
 ];
 
 const CORS_HEADERS: Record<string, string> = {

@@ -167,6 +167,48 @@
 .dialogFooter {
   @include flex();
   @include justify-content(flex-end);
+  gap: 10px;
+}
+
+/* ── Printer / Tray selection row (worklist pre-print phase) ──────────── */
+.printerSelection {
+  margin-bottom: 16px;
+}
+
+.printerSelectionRow {
+  @include flex();
+  gap: 16px;
+}
+
+.printerSelectionField {
+  flex: 1;
+  @include flex();
+  flex-direction: column;
+  gap: 6px;
+
+  label {
+    @include font-size(12px);
+    font-weight: 600;
+    color: $light-black-color;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  select {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid $medium-gray;
+    border-radius: 6px;
+    @include font-size(14px);
+    background-color: $white-color;
+    color: $black-color;
+    cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
 }
 
 /* ── Animations ─────────────────────────────────────────────────────── */

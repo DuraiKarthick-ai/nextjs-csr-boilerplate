@@ -79,10 +79,15 @@ function connect() {
       const msg = JSON.parse(data.toString());
 
       if (msg.action === "http-request") {
-        console.log(`[Relay] Request ${msg.id}: ${msg.method} ${msg.url}`);
+        console.log(`[Relay] HTTP ${msg.id}: ${msg.method} ${msg.url}`);
         const response = await forwardRequest(msg);
         ws.send(JSON.stringify(response));
-        console.log(`[Relay] Response ${msg.id}: ${response.statusCode}`);
+        console.log(`[Relay] HTTP ${msg.id}: ${response.statusCode}`);
+      } else if (msg.action === "ws-request") {
+        console.log(`[Relay] WS ${msg.id}: ${msg.url} method=${msg.payload && msg.payload.method}`);
+        const response = await forwardWsRequest(msg);
+        ws.send(JSON.stringify(response));
+        console.log(`[Relay] WS ${msg.id}: ${response.success ? "ok" : "error"}`);
       }
     } catch (err) {
       console.error("[Relay] Error processing message:", err.message);
@@ -184,6 +189,118 @@ function forwardRequest(msg) {
 
     req.write(payload);
     req.end();
+  });
+}
+
+// ─── WebSocket Forwarding ───────────────────────────────────────────────────
+
+/**
+ * Forward a single WebSocket request to a local ECS WSS endpoint.
+ *
+ * Opens a fresh WSS connection, sends the JSON payload, waits for the first
+ * non-progress response, then closes. Binary frames (preview PNGs) are
+ * returned as { data: "<base64>" } so the GKE-side helper sees the same
+ * shape it would from a direct ecsWsCall.
+ */
+function forwardWsRequest(msg) {
+  return new Promise((resolve) => {
+    const timeoutMs = Number(msg.timeoutMs) > 0 ? Number(msg.timeoutMs) : 30000;
+    const url = msg.url;
+    const payload = msg.payload || {};
+    let settled = false;
+
+    const settle = (value) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      try { wsClient.close(); } catch { /* ignore */ }
+      resolve(value);
+    };
+
+    const wsClient = new WebSocket(url, { rejectUnauthorized: false });
+
+    const timer = setTimeout(() => {
+      try { wsClient.terminate(); } catch { /* ignore */ }
+      settle({
+        id: msg.id,
+        action: "ws-response",
+        success: false,
+        error: `ECS WS timeout after ${timeoutMs}ms`,
+      });
+    }, timeoutMs);
+
+    wsClient.on("open", () => {
+      try { wsClient.send(JSON.stringify(payload)); }
+      catch (err) {
+        settle({
+          id: msg.id,
+          action: "ws-response",
+          success: false,
+          error: `ECS WS send failed: ${err.message}`,
+        });
+      }
+    });
+
+    wsClient.on("message", (data) => {
+      // Binary frame: PNG image → return as { data: "<base64>" }
+      if (Buffer.isBuffer(data)) {
+        const isPng = data.length > 4 && data[0] === 0x89 && data[1] === 0x50;
+        if (isPng) {
+          settle({
+            id: msg.id,
+            action: "ws-response",
+            success: true,
+            statusCode: 200,
+            body: JSON.stringify({ data: data.toString("base64") }),
+          });
+          return;
+        }
+        const asText = data.toString("utf8");
+        if (asText.startsWith("PROGRESS_UPDATE:")) return; // skip progress frames
+        return resolveText(asText);
+      }
+
+      const text = typeof data === "string" ? data : data.toString();
+      if (text === "CLOSE") {
+        settle({
+          id: msg.id,
+          action: "ws-response",
+          success: false,
+          error: "ECS WS: server requested close",
+        });
+        return;
+      }
+      if (text.startsWith("PROGRESS_UPDATE:")) return; // skip progress frames
+      resolveText(text);
+    });
+
+    wsClient.on("error", (err) => {
+      settle({
+        id: msg.id,
+        action: "ws-response",
+        success: false,
+        error: `ECS WS error: ${err.message}`,
+      });
+    });
+
+    function resolveText(text) {
+      if (text.startsWith("{bad") || text.startsWith("{error")) {
+        settle({
+          id: msg.id,
+          action: "ws-response",
+          success: false,
+          error: `ECS rejected request: ${text}`,
+        });
+        return;
+      }
+      settle({
+        id: msg.id,
+        action: "ws-response",
+        success: true,
+        statusCode: 200,
+        body: text,
+      });
+    }
   });
 }
 
